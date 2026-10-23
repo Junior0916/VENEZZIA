@@ -20,6 +20,9 @@ backend/pb_data/
 frontend/.env
 backend/.env
 
+# Archives
+*.zip
+
 # Scratch / Temp files
 canva_*.html
 __pycache__/
