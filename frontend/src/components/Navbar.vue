@@ -80,29 +80,20 @@
     <!-- Main Navigation Bar -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
       <div class="flex items-center justify-between gap-4">
-        <!-- Left: Brand Logo — Texto izquierda, Isotipo derecha -->
-        <a href="#" class="flex items-center gap-3 group shrink-0" title="Venezzia Detalles">
-          <!-- Wordmark: VENEZZIA grande + DETALLES pequeño -->
-          <div class="flex flex-col items-end leading-none select-none">
-            <span
-              class="font-bold tracking-[0.18em] uppercase text-[#caa35f] drop-shadow-xs group-hover:tracking-[0.22em] transition-all duration-500"
-              style="font-size: clamp(1.15rem, 2.5vw, 1.6rem); font-family: 'Century Gothic','CenturyGothic','AppleGothic',Verdana,sans-serif;"
-            >VENEZZIA</span>
-            <span
-              class="tracking-[0.35em] uppercase text-[#965e9b] font-normal"
-              style="font-size: clamp(0.48rem, 0.9vw, 0.6rem); margin-top: 0.15em; font-family: 'Century Gothic','CenturyGothic','AppleGothic',Verdana,sans-serif;"
-            >• DETALLES •</span>
-          </div>
-
-          <!-- Isotipo: flor + arco (solo PNG cortado al isotipo) -->
-          <div class="h-10 sm:h-13 w-auto flex items-center shrink-0">
-            <img
-              src="/logo.png"
-              alt="Venezzia Isotipo"
-              class="h-full w-auto object-contain object-top group-hover:scale-105 transition-transform duration-300 drop-shadow-sm"
-              style="object-position: 50% 0%; max-width: 2.8rem;"
-            />
-          </div>
+        <!-- Left: Brand Logo — Nombre izquierda, Isotipo derecha -->
+        <a href="#" class="flex items-center gap-2.5 group shrink-0" title="Venezzia Detalles">
+          <!-- Nombre de marca (VENEZZIA • DETALLES •) -->
+          <img
+            src="/marca.png"
+            alt="Venezzia Detalles"
+            class="h-10 sm:h-13 w-auto object-contain group-hover:opacity-90 transition-opacity duration-300 drop-shadow-xs"
+          />
+          <!-- Isotipo (flor + arco dorado) -->
+          <img
+            src="/isotipo.png"
+            alt="Venezzia Isotipo"
+            class="h-9 sm:h-11 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+          />
         </a>
 
         <!-- Center: Special Campaign Dates Navigation Menu -->

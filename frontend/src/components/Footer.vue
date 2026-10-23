@@ -4,23 +4,17 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 mb-12">
         <!-- Col 1: Brand & Bio (Cols 1-4) -->
         <div class="lg:col-span-4">
-          <div class="mb-5 flex items-center gap-3">
-            <!-- Wordmark footer: texto + isotipo -->
-            <div class="flex flex-col leading-none">
-              <span
-                class="font-bold tracking-[0.18em] uppercase text-[#caa35f]"
-                style="font-size: 1.35rem; font-family: 'Century Gothic','CenturyGothic','AppleGothic',Verdana,sans-serif;"
-              >VENEZZIA</span>
-              <span
-                class="tracking-[0.32em] uppercase text-[#965e9b] font-normal"
-                style="font-size: 0.52rem; margin-top: 0.12em; font-family: 'Century Gothic','CenturyGothic','AppleGothic',Verdana,sans-serif;"
-              >• DETALLES •</span>
-            </div>
+          <!-- Logo footer: nombre + isotipo -->
+          <div class="mb-5 flex items-center gap-2.5">
             <img
-              src="/logo.png"
+              src="/marca.png"
+              alt="Venezzia Detalles"
+              class="h-11 w-auto object-contain drop-shadow-xs"
+            />
+            <img
+              src="/isotipo.png"
               alt="Venezzia Isotipo"
-              class="h-12 w-auto object-contain object-top drop-shadow-xs"
-              style="object-position: 50% 0%; max-width: 2.4rem;"
+              class="h-9 w-auto object-contain"
             />
           </div>
           <p class="text-xs text-gray-600 leading-relaxed mb-6 pr-4">
