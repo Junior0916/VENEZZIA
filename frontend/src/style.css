@@ -3,19 +3,22 @@
 @layer base {
   body {
     @apply bg-[#faf7fb] text-[#27172b] antialiased selection:bg-[#b07eb4] selection:text-white;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* Century Gothic con fallback a Verdana — ambas geométricas y elegantes */
+    font-family: 'Century Gothic', 'CenturyGothic', 'AppleGothic', Verdana, 'Trebuchet MS', sans-serif;
+    letter-spacing: 0.01em;
   }
 
   .font-serif {
+    /* Mantenemos Cormorant Garamond para títulos editoriales de alto impacto */
     font-family: 'Cormorant Garamond', Georgia, Cambria, serif;
   }
 
   .font-display {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
   }
 
   .font-sans {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Century Gothic', 'CenturyGothic', 'AppleGothic', Verdana, sans-serif;
   }
 }
 
