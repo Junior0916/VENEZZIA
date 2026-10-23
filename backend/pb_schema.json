@@ -1,0 +1,155 @@
+[
+  {
+    "id": "pbc_products_01",
+    "name": "products",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "presentable": true
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "name": "price",
+        "type": "number",
+        "required": true,
+        "min": 0,
+        "presentable": false
+      },
+      {
+        "name": "compare_at_price",
+        "type": "number",
+        "required": false,
+        "min": 0,
+        "presentable": false
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "name": "image",
+        "type": "file",
+        "required": false,
+        "presentable": false,
+        "options": {
+          "maxSelect": 1,
+          "maxSize": 5242880,
+          "mimeTypes": [
+            "image/jpeg",
+            "image/png",
+            "image/svg+xml",
+            "image/gif",
+            "image/webp"
+          ]
+        }
+      },
+      {
+        "name": "featured",
+        "type": "bool",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "name": "in_stock",
+        "type": "bool",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "name": "items_included",
+        "type": "json",
+        "required": false,
+        "presentable": false
+      }
+    ],
+    "indexes": [],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "id": "pbc_orders_001",
+    "name": "orders",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "name": "customer_name",
+        "type": "text",
+        "required": false,
+        "presentable": true
+      },
+      {
+        "name": "customer_email",
+        "type": "email",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "name": "customer_phone",
+        "type": "text",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "name": "customer_address",
+        "type": "text",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "name": "items",
+        "type": "json",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "name": "total",
+        "type": "number",
+        "required": true,
+        "presentable": false
+      },
+      {
+        "name": "currency",
+        "type": "text",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "name": "culqi_charge_id",
+        "type": "text",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "name": "status",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "options": {
+          "values": ["pending", "paid", "shipped", "cancelled"],
+          "maxSelect": 1
+        }
+      }
+    ],
+    "indexes": [],
+    "listRule": null,
+    "viewRule": null,
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null
+  }
+]
