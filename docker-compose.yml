@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # Servicio 1: Frontend (Vue 3 + Nginx)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_POCKETBASE_URL=${VITE_POCKETBASE_URL:-http://127.0.0.1:8090}
+        - VITE_CULQI_PUBLIC_KEY=${VITE_CULQI_PUBLIC_KEY:-pk_test_sample_key_here}
+    container_name: venezzia-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+
+  # Servicio 2: Backend (PocketBase Linux)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: venezzia-backend
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    volumes:
+      - pb_data:/pb/pb_data
+    environment:
+      - CULQI_SECRET_KEY=${CULQI_SECRET_KEY:-sk_test_sample_key_here}
+
+volumes:
+  pb_data:
