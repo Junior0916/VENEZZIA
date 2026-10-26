@@ -11,8 +11,9 @@ RUN apk add --no-cache \
 ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip /tmp/pb.zip
 RUN unzip /tmp/pb.zip -d /pb/ && rm /tmp/pb.zip
 
-# Copia hooks de Culqi y esquema
+# Copia hooks de Culqi, esquema y migraciones automáticas
 COPY ./pb_hooks /pb/pb_hooks
+COPY ./pb_migrations /pb/pb_migrations
 COPY ./pb_schema.json /pb/pb_schema.json
 
 VOLUME /pb/pb_data
