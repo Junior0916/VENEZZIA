@@ -82,15 +82,15 @@
       <div class="flex items-center justify-between gap-4">
         <!-- Left: Brand Logo — Nombre izquierda, Isotipo derecha -->
         <a href="#" class="flex items-center gap-2.5 group shrink-0" title="Venezzia Detalles">
-          <!-- Nombre de marca (VENEZZIA • DETALLES •) -->
+          <!-- Nombre de marca en lila sin fondo -->
           <img
-            src="/marca.png"
+            src="/marca_lila.png"
             alt="Venezzia Detalles"
-            class="h-10 sm:h-13 w-auto object-contain group-hover:opacity-90 transition-opacity duration-300 drop-shadow-xs"
+            class="h-10 sm:h-13 w-auto object-contain group-hover:opacity-85 transition-opacity duration-300"
           />
-          <!-- Isotipo (flor + arco dorado) -->
+          <!-- Isotipo en lila sin fondo -->
           <img
-            src="/isotipo.png"
+            src="/isotipo_lila.png"
             alt="Venezzia Isotipo"
             class="h-9 sm:h-11 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
           />

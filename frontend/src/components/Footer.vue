@@ -4,15 +4,15 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 mb-12">
         <!-- Col 1: Brand & Bio (Cols 1-4) -->
         <div class="lg:col-span-4">
-          <!-- Logo footer: nombre + isotipo -->
+          <!-- Logo footer: nombre + isotipo en lila sin fondo -->
           <div class="mb-5 flex items-center gap-2.5">
             <img
-              src="/marca.png"
+              src="/marca_lila.png"
               alt="Venezzia Detalles"
-              class="h-11 w-auto object-contain drop-shadow-xs"
+              class="h-11 w-auto object-contain"
             />
             <img
-              src="/isotipo.png"
+              src="/isotipo_lila.png"
               alt="Venezzia Isotipo"
               class="h-9 w-auto object-contain"
             />
