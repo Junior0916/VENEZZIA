@@ -17,11 +17,11 @@ services:
       - NODE_ENV=production
 
   # Servicio 2: Backend (PocketBase Linux)
-  backend:
+  pocketbase:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: venezzia-backend
+    container_name: venezzia-pocketbase
     restart: unless-stopped
     ports:
       - "8090:8090"
