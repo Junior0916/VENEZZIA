@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import Hero from '../components/Hero.vue'
 import Occasions from '../components/Occasions.vue'
 import CatalogSection from '../components/CatalogSection.vue'
@@ -100,4 +100,16 @@ function handleCategorySelect(filter) {
   const el = document.getElementById('catalogo')
   if (el) el.scrollIntoView({ behavior: 'smooth' })
 }
+
+onMounted(() => {
+  if (window.location.hash) {
+    const targetId = window.location.hash.replace('#', '')
+    setTimeout(() => {
+      const el = document.getElementById(targetId)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' })
+      }
+    }, 150)
+  }
+})
 </script>

@@ -91,8 +91,22 @@
                 <span>Día Hot Wheels</span>
               </button>
             </li>
-            <li><a href="#envios" class="hover:text-[#965e9b] transition-colors">Tarifas de Envíos</a></li>
-            <li><a href="#inicio" class="hover:text-[#965e9b] transition-colors">Volver al Inicio</a></li>
+            <li>
+              <button
+                @click="navigateToSection('envios')"
+                class="hover:text-[#965e9b] transition-colors text-left cursor-pointer"
+              >
+                Tarifas de Envíos
+              </button>
+            </li>
+            <li>
+              <button
+                @click="navigateToSection('inicio')"
+                class="hover:text-[#965e9b] transition-colors text-left cursor-pointer"
+              >
+                Volver al Inicio
+              </button>
+            </li>
           </ul>
         </div>
 
@@ -118,9 +132,12 @@
               </router-link>
             </li>
             <li>
-              <a href="/#envios" class="hover:text-[#965e9b] transition-colors">
+              <button
+                @click="navigateToSection('envios')"
+                class="hover:text-[#965e9b] transition-colors text-left cursor-pointer"
+              >
                 Tarifas de Envíos
-              </a>
+              </button>
             </li>
           </ul>
         </div>
@@ -230,7 +247,7 @@ import {
   Mail,
   BookOpen
 } from 'lucide-vue-next'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import IconInstagram from './icons/IconInstagram.vue'
 import IconTikTok from './icons/IconTikTok.vue'
@@ -238,7 +255,22 @@ import IconFacebook from './icons/IconFacebook.vue'
 import { useCampaignStore } from '../stores/campaign'
 
 const router = useRouter()
+const route = useRoute()
 const campaignStore = useCampaignStore()
+
+function navigateToSection(sectionId) {
+  if (route && route.path !== '/') {
+    router.push('/').then(() => {
+      setTimeout(() => {
+        const el = document.getElementById(sectionId)
+        if (el) el.scrollIntoView({ behavior: 'smooth' })
+      }, 150)
+    })
+  } else {
+    const el = document.getElementById(sectionId)
+    if (el) el.scrollIntoView({ behavior: 'smooth' })
+  }
+}
 
 function selectCampaign(id) {
   campaignStore.setCampaign(id)

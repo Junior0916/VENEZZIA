@@ -42,7 +42,16 @@ const router = createRouter({
       return savedPosition
     }
     if (to.hash) {
-      return { el: to.hash, behavior: 'smooth' }
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const el = document.querySelector(to.hash)
+          if (el) {
+            resolve({ el: to.hash, behavior: 'smooth' })
+          } else {
+            resolve({ top: 0, behavior: 'smooth' })
+          }
+        }, 150)
+      })
     }
     return { top: 0, behavior: 'smooth' }
   }

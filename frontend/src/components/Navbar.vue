@@ -162,9 +162,12 @@
             </div>
           </div>
 
-          <a href="#envios" class="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-[#965e9b] transition-colors">
+          <button
+            @click="navigateToSection('envios')"
+            class="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-[#965e9b] transition-colors cursor-pointer"
+          >
             Envíos
-          </a>
+          </button>
         </nav>
 
         <!-- Right: Active Search Input, Official WhatsApp Button & Shopping Bag -->
@@ -358,12 +361,12 @@
             <span>Día Hot Wheels</span>
           </button>
 
-          <a
-            href="#envios"
-            class="px-3 py-1.5 rounded-full text-xs font-medium text-gray-600 bg-white border border-[#eedee9] shrink-0"
+          <button
+            @click="navigateToSection('envios')"
+            class="px-3 py-1.5 rounded-full text-xs font-medium text-gray-600 bg-white border border-[#eedee9] shrink-0 hover:text-[#965e9b] transition-colors cursor-pointer"
           >
             Envíos
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -379,7 +382,7 @@ import IconTikTok from './icons/IconTikTok.vue'
 import { useCartStore } from '../stores/cart'
 import { useCampaignStore } from '../stores/campaign'
 import { useSearchStore } from '../stores/search'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const props = defineProps({
   products: {
@@ -451,6 +454,26 @@ function clearSearch() {
 }
 
 const router = useRouter()
+const route = useRoute()
+
+function navigateToSection(sectionId) {
+  searchStore.closeDropdown()
+  if (route && route.path !== '/') {
+    router.push('/').then(() => {
+      setTimeout(() => {
+        const el = document.getElementById(sectionId)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 150)
+    })
+  } else {
+    const el = document.getElementById(sectionId)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+}
 
 function selectCampaign(campaignId) {
   campaignStore.setCampaign(campaignId)
