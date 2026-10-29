@@ -100,15 +100,15 @@
             </h3>
 
             <!-- Price Breakdown -->
-            <div class="flex items-baseline gap-2 mb-3">
+            <div class="flex items-baseline gap-2 mb-3 flex-wrap sm:flex-nowrap">
               <span
                 v-if="product.original_price && selectedAddon === 'none'"
-                class="text-sm text-gray-400 line-through"
+                class="text-sm text-gray-400 line-through whitespace-nowrap"
               >
-                S/ {{ Number(product.original_price).toFixed(2) }}
+                S/&nbsp;{{ Number(product.original_price).toFixed(2) }}
               </span>
-              <div class="text-2xl sm:text-3xl font-bold text-[#27172b]">
-                S/ {{ computedFinalPrice.toFixed(2) }}
+              <div class="text-2xl sm:text-3xl font-bold text-[#27172b] whitespace-nowrap">
+                S/&nbsp;{{ computedFinalPrice.toFixed(2) }}
               </div>
               <span v-if="selectedAddon !== 'none'" class="text-[11px] text-gray-500 font-medium">
                 (incluye auto adicional)
@@ -180,7 +180,7 @@
                 class="flex-1 py-3.5 rounded-full text-white font-semibold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs active:scale-98"
                 :class="product.campaign === 'hotwheels' ? 'bg-[#c22b38] hover:bg-[#991b1b]' : 'bg-[#27172b] hover:bg-[#caa35f] hover:text-[#27172b] border border-[#caa35f]/40'"
               >
-                Añadir a la Bolsa • S/ {{ computedFinalPrice.toFixed(2) }}
+                <span>Añadir a la Bolsa • </span><span class="whitespace-nowrap">S/&nbsp;{{ computedFinalPrice.toFixed(2) }}</span>
               </button>
 
               <!-- Structured WhatsApp Consultation / Order Button -->

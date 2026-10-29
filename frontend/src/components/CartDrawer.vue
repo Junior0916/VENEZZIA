@@ -68,8 +68,8 @@
                   <h4 class="text-xs sm:text-sm font-semibold text-[#27172b] line-clamp-2 leading-snug">
                     {{ item.product.name }}
                   </h4>
-                  <p class="text-xs text-[#965e9b] font-bold mt-1">
-                    S/ {{ Number(item.product.price).toFixed(2) }}
+                  <p class="text-xs text-[#965e9b] font-bold mt-1 whitespace-nowrap">
+                    S/&nbsp;{{ Number(item.product.price).toFixed(2) }}
                   </p>
 
                   <!-- Stepper & Delete -->

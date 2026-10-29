@@ -43,18 +43,18 @@
         </h3>
       </div>
 
-      <div class="mt-2 pt-3 border-t border-[#f4eaf6] flex items-center justify-between gap-3">
-        <div>
-          <span class="text-xs text-gray-400 block -mb-0.5 font-light">Precio</span>
-          <div class="flex items-baseline gap-1.5">
+      <div class="mt-2 pt-3 border-t border-[#f4eaf6] flex items-center justify-between gap-2">
+        <div class="min-w-0 shrink">
+          <span class="text-[11px] sm:text-xs text-gray-400 block -mb-0.5 font-light">Precio</span>
+          <div class="flex items-baseline gap-1.5 flex-wrap sm:flex-nowrap whitespace-nowrap">
             <span
               v-if="product.original_price"
-              class="text-xs text-gray-400 line-through font-normal"
+              class="text-xs text-gray-400 line-through font-normal whitespace-nowrap shrink-0"
             >
-              S/ {{ Number(product.original_price).toFixed(2) }}
+              S/&nbsp;{{ Number(product.original_price).toFixed(2) }}
             </span>
-            <span class="text-lg sm:text-xl font-bold text-[#27172b]">
-              S/ {{ Number(product.price).toFixed(2) }}
+            <span class="text-base sm:text-xl font-bold text-[#27172b] whitespace-nowrap shrink-0">
+              S/&nbsp;{{ Number(product.price).toFixed(2) }}
             </span>
           </div>
         </div>
@@ -62,7 +62,7 @@
         <!-- Add to Cart Action -->
         <button
           @click="addToCart"
-          class="px-4 py-2 rounded-full text-white text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer shadow-xs active:scale-95 shrink-0"
+          class="px-3.5 sm:px-4 py-2 rounded-full text-white text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer shadow-xs active:scale-95 shrink-0"
           :class="product.campaign === 'hotwheels' ? 'bg-[#c22b38] hover:bg-[#991b1b]' : 'bg-[#27172b] hover:bg-[#caa35f] hover:text-[#27172b] border border-[#caa35f]/40'"
         >
           Añadir

@@ -114,9 +114,9 @@
             <p class="text-xs text-gray-500 mb-3">
               {{ campaignStore.activeCampaignId === 'hotwheels' ? 'Peluche importado, 2 autos Hot Wheels y rosas eternas.' : 'Peluche original, 3 rosas eternas y maquillaje.' }}
             </p>
-            <div class="text-xl font-bold text-[#27172b] mb-4">
+            <div class="text-xl font-bold text-[#27172b] mb-4 whitespace-nowrap">
               <span class="text-xs text-[#caa35f] font-semibold uppercase tracking-wider mr-1">Precio</span>
-              <span>S/ {{ Number(campaignStore.activeCampaign.heroSidePrice).toFixed(2) }}</span>
+              <span class="whitespace-nowrap">S/&nbsp;{{ Number(campaignStore.activeCampaign.heroSidePrice).toFixed(2) }}</span>
             </div>
           </div>
 

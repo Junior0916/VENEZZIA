@@ -235,8 +235,8 @@
                       {{ item.name }}
                     </div>
                   </div>
-                  <div class="text-xs font-bold text-[#27172b] shrink-0">
-                    S/ {{ Number(item.price).toFixed(2) }}
+                  <div class="text-xs font-bold text-[#27172b] shrink-0 whitespace-nowrap">
+                    S/&nbsp;{{ Number(item.price).toFixed(2) }}
                   </div>
                 </div>
               </div>
@@ -325,7 +325,7 @@
                 <img :src="item.image" :alt="item.name" class="w-9 h-9 rounded-lg object-contain bg-[#fbf7fc] p-1 shrink-0" />
                 <div class="flex-1 min-w-0">
                   <div class="text-xs font-semibold text-gray-900 truncate">{{ item.name }}</div>
-                  <div class="text-[10px] text-gray-400">{{ item.campaign === 'hotwheels' ? 'Hot Wheels' : 'Maquillaje' }} • S/ {{ Number(item.price).toFixed(2) }}</div>
+                  <div class="text-[10px] text-gray-400">{{ item.campaign === 'hotwheels' ? 'Hot Wheels' : 'Maquillaje' }} • <span class="whitespace-nowrap">S/&nbsp;{{ Number(item.price).toFixed(2) }}</span></div>
                 </div>
               </div>
             </div>
