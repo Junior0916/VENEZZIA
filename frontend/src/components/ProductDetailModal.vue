@@ -21,12 +21,22 @@
         <!-- Image & Gallery Showcase (Cols 1-5) -->
         <div class="md:col-span-5 flex flex-col items-center">
           <!-- Main Selected Image Container (4:5 Luxury Ratio - 600x750 Framing) -->
-          <div class="w-full aspect-[4/5] rounded-2xl overflow-hidden bg-[#faf6f5] border border-[#eedee9] p-2.5 sm:p-3 flex items-center justify-center shadow-xs">
+          <div
+            @click="openLightbox"
+            class="group relative w-full aspect-[4/5] rounded-2xl overflow-hidden bg-[#faf6f5] border border-[#eedee9] p-2.5 sm:p-3 flex items-center justify-center shadow-xs cursor-zoom-in"
+            title="Clic para ampliar en alta definición"
+          >
             <img
               :src="currentDisplayImage"
               :alt="product.name"
-              class="w-full h-full object-cover object-center rounded-xl transition-all duration-300"
+              class="w-full h-full object-cover object-center rounded-xl transition-all duration-300 group-hover:scale-[1.03]"
             />
+
+            <!-- Visual Magnifier Hint Pill -->
+            <div class="absolute bottom-4 right-4 bg-black/60 group-hover:bg-black/85 backdrop-blur-md text-white text-[11px] font-medium py-1.5 px-3 rounded-full flex items-center gap-1.5 shadow-lg opacity-90 group-hover:opacity-100 transition-all pointer-events-none">
+              <ZoomIn class="w-3.5 h-3.5 text-[#caa35f]" />
+              <span>Ampliar foto</span>
+            </div>
           </div>
 
           <!-- Gallery Toggle (When Official Catalog Card Exists) -->
@@ -194,12 +204,146 @@
         </div>
       </div>
     </div>
+
+    <!-- Teleported Lightbox / Fullscreen High-Resolution Zoom Modal -->
+    <teleport to="body">
+      <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="isLightboxOpen"
+          class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col justify-between select-none"
+          @mousemove="handleMouseMove"
+          @mouseup="handleMouseUp"
+          @wheel.prevent="handleWheel"
+        >
+          <!-- Top Lightbox Header -->
+          <div class="flex items-center justify-between px-4 sm:px-6 py-3.5 bg-gradient-to-b from-black/80 to-transparent z-10 gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#caa35f]/20 text-[#caa35f] border border-[#caa35f]/40 shrink-0">
+                Alta Definición
+              </span>
+              <div class="min-w-0">
+                <h4 class="text-white text-sm sm:text-base font-serif font-bold truncate">
+                  {{ product.name }}
+                </h4>
+                <p class="text-[11px] sm:text-xs text-gray-400 truncate">
+                  {{ activeImageView === 'card' ? 'Ficha oficial de catálogo' : 'Detalle fotográfico original (600 × 750 px)' }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Controls (Zoom - / % / + / Reset / Close) -->
+            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <button
+                @click="zoomOut"
+                :disabled="zoomLevel <= 1"
+                class="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+                title="Alejar (-)"
+              >
+                <ZoomOut class="w-5 h-5" />
+              </button>
+
+              <button
+                @click="resetZoom"
+                class="px-2.5 py-1 rounded-full text-xs font-semibold text-white/90 bg-white/10 hover:bg-white/20 transition cursor-pointer min-w-[54px] text-center"
+                title="Restablecer tamaño (100%)"
+              >
+                {{ Math.round(zoomLevel * 100) }}%
+              </button>
+
+              <button
+                @click="zoomIn"
+                :disabled="zoomLevel >= 3"
+                class="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+                title="Acercar (+)"
+              >
+                <ZoomIn class="w-5 h-5" />
+              </button>
+
+              <div class="w-px h-5 bg-white/20 mx-1"></div>
+
+              <button
+                @click="closeLightbox"
+                class="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/15 transition cursor-pointer"
+                aria-label="Cerrar ampliación"
+                title="Cerrar (Esc)"
+              >
+                <X class="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Main Zoomable Viewport -->
+          <div
+            class="flex-1 w-full h-full relative overflow-hidden flex items-center justify-center p-3 sm:p-6"
+            @click.self="closeLightbox"
+          >
+            <img
+              :src="currentDisplayImage"
+              :alt="product.name"
+              class="max-h-[82vh] max-w-[92vw] md:max-w-[85vw] object-contain select-none pointer-events-auto drop-shadow-2xl rounded-xl"
+              :style="{
+                transform: `translate(${panPosition.x}px, ${panPosition.y}px) scale(${zoomLevel})`,
+                cursor: zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in',
+                transition: isDragging ? 'none' : 'transform 0.18s cubic-bezier(0.2, 0, 0, 1)'
+              }"
+              @mousedown="handleMouseDown"
+              @touchstart="handleTouchStart"
+              @touchmove="handleTouchMove"
+              @touchend="handleTouchEnd"
+              @dblclick="toggleZoom"
+              draggable="false"
+            />
+          </div>
+
+          <!-- Bottom Bar: Instructions & Quick Switching -->
+          <div class="px-4 py-3 bg-gradient-to-t from-black/80 to-transparent flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-gray-400 z-10">
+            <div class="flex items-center gap-2">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#caa35f]"></span>
+              <span>Doble clic o rueda para zoom &bull; Arrastra para mover &bull; Esc para salir</span>
+            </div>
+
+            <!-- Optional catalog card switcher if product has one -->
+            <div v-if="product.catalog_card" class="flex items-center gap-1.5">
+              <button
+                @click="activeImageView = 'product'; resetZoom()"
+                :class="[
+                  'py-1 px-2.5 rounded-lg text-[10px] font-semibold transition cursor-pointer',
+                  activeImageView === 'product'
+                    ? 'bg-[#caa35f] text-black font-bold'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                ]"
+              >
+                Foto Detalle
+              </button>
+              <button
+                @click="activeImageView = 'card'; resetZoom()"
+                :class="[
+                  'py-1 px-2.5 rounded-lg text-[10px] font-semibold transition cursor-pointer',
+                  activeImageView === 'card'
+                    ? 'bg-[#c22b38] text-white font-bold'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                ]"
+              >
+                Ficha Catálogo
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { X, Link as LinkIcon } from 'lucide-vue-next'
+import { ref, computed, watch, reactive, onMounted, onUnmounted } from 'vue'
+import { X, Link as LinkIcon, ZoomIn, ZoomOut } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import { useCartStore } from '../stores/cart'
 
@@ -216,6 +360,120 @@ const cartStore = useCartStore()
 const activeImageView = ref('product')
 const selectedAddon = ref('none')
 const copiedLink = ref(false)
+
+// Lightbox & High-Resolution Zoom State
+const isLightboxOpen = ref(false)
+const zoomLevel = ref(1)
+const panPosition = reactive({ x: 0, y: 0 })
+const isDragging = ref(false)
+const dragStart = reactive({ x: 0, y: 0 })
+let touchStartDistance = 0
+
+function openLightbox() {
+  zoomLevel.value = 1
+  panPosition.x = 0
+  panPosition.y = 0
+  isLightboxOpen.value = true
+}
+
+function closeLightbox() {
+  isLightboxOpen.value = false
+  zoomLevel.value = 1
+  panPosition.x = 0
+  panPosition.y = 0
+  isDragging.value = false
+}
+
+function zoomIn() {
+  zoomLevel.value = Math.min(3, +(zoomLevel.value + 0.5).toFixed(1))
+}
+
+function zoomOut() {
+  zoomLevel.value = Math.max(1, +(zoomLevel.value - 0.5).toFixed(1))
+  if (zoomLevel.value === 1) {
+    panPosition.x = 0
+    panPosition.y = 0
+  }
+}
+
+function resetZoom() {
+  zoomLevel.value = 1
+  panPosition.x = 0
+  panPosition.y = 0
+}
+
+function toggleZoom() {
+  if (zoomLevel.value > 1) {
+    resetZoom()
+  } else {
+    zoomLevel.value = 2
+  }
+}
+
+function handleWheel(e) {
+  if (!isLightboxOpen.value) return
+  if (e.deltaY < 0) {
+    zoomLevel.value = Math.min(3, +(zoomLevel.value + 0.25).toFixed(2))
+  } else {
+    zoomLevel.value = Math.max(1, +(zoomLevel.value - 0.25).toFixed(2))
+    if (zoomLevel.value === 1) {
+      panPosition.x = 0
+      panPosition.y = 0
+    }
+  }
+}
+
+function handleMouseDown(e) {
+  if (zoomLevel.value <= 1) return
+  isDragging.value = true
+  dragStart.x = e.clientX - panPosition.x
+  dragStart.y = e.clientY - panPosition.y
+}
+
+function handleMouseMove(e) {
+  if (!isDragging.value || zoomLevel.value <= 1) return
+  panPosition.x = e.clientX - dragStart.x
+  panPosition.y = e.clientY - dragStart.y
+}
+
+function handleMouseUp() {
+  isDragging.value = false
+}
+
+function handleTouchStart(e) {
+  if (e.touches.length === 1 && zoomLevel.value > 1) {
+    isDragging.value = true
+    dragStart.x = e.touches[0].clientX - panPosition.x
+    dragStart.y = e.touches[0].clientY - panPosition.y
+  } else if (e.touches.length === 2) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX
+    const dy = e.touches[0].clientY - e.touches[1].clientY
+    touchStartDistance = Math.hypot(dx, dy)
+  }
+}
+
+function handleTouchMove(e) {
+  if (e.touches.length === 1 && isDragging.value && zoomLevel.value > 1) {
+    panPosition.x = e.touches[0].clientX - dragStart.x
+    panPosition.y = e.touches[0].clientY - dragStart.y
+  } else if (e.touches.length === 2 && touchStartDistance > 0) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX
+    const dy = e.touches[0].clientY - e.touches[1].clientY
+    const dist = Math.hypot(dx, dy)
+    const factor = dist / touchStartDistance
+    zoomLevel.value = Math.min(3, Math.max(1, +(zoomLevel.value * factor).toFixed(2)))
+    touchStartDistance = dist
+  }
+}
+
+function handleTouchEnd() {
+  isDragging.value = false
+  touchStartDistance = 0
+  if (zoomLevel.value <= 1) {
+    panPosition.x = 0
+    panPosition.y = 0
+  }
+}
 
 const currentDisplayImage = computed(() => {
   if (activeImageView.value === 'card' && props.product?.catalog_card) {
@@ -320,12 +578,17 @@ watch(
   () => {
     selectedAddon.value = 'none'
     activeImageView.value = 'product'
+    closeLightbox()
   }
 )
 
 function handleKeydown(e) {
   if (e.key === 'Escape') {
-    emit('close')
+    if (isLightboxOpen.value) {
+      closeLightbox()
+    } else {
+      emit('close')
+    }
   }
 }
 
