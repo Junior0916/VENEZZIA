@@ -1,15 +1,15 @@
 <template>
   <div class="group bg-white rounded-2xl border border-[#eedee9] shadow-[0_2px_12px_-4px_rgba(39,23,43,0.04)] hover:shadow-[0_16px_36px_-8px_rgba(154,104,155,0.18)] hover:border-[#caa35f]/60 transition-all duration-300 flex flex-col justify-between overflow-hidden">
-    <!-- Centered Product Image Container (4:5 Luxury Ratio) -->
+    <!-- Centered Product Image Container (4:5 Luxury Ratio - 600x750 Framing) -->
     <div
       @click="$emit('select-product', product)"
-      class="relative aspect-[4/5] w-full overflow-hidden bg-[#fbf7fc] cursor-pointer flex items-center justify-center p-3"
+      class="relative aspect-[4/5] w-full overflow-hidden bg-[#faf6f5] cursor-pointer flex items-center justify-center p-2.5 sm:p-3"
       title="Clic para ver detalles completos y contenido exacto"
     >
       <img
         :src="product.image"
         :alt="product.name"
-        class="w-full h-full object-contain group-hover:scale-104 transition-transform duration-500 ease-out"
+        class="w-full h-full object-cover object-center rounded-xl group-hover:scale-104 transition-transform duration-500 ease-out"
         loading="lazy"
       />
 

@@ -20,12 +20,12 @@
       <div class="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-start">
         <!-- Image & Gallery Showcase (Cols 1-5) -->
         <div class="md:col-span-5 flex flex-col items-center">
-          <!-- Main Selected Image Container -->
-          <div class="w-full aspect-[4/5] rounded-2xl overflow-hidden bg-[#fbf7fc] border border-[#eedee9] p-3 flex items-center justify-center shadow-xs">
+          <!-- Main Selected Image Container (4:5 Luxury Ratio - 600x750 Framing) -->
+          <div class="w-full aspect-[4/5] rounded-2xl overflow-hidden bg-[#faf6f5] border border-[#eedee9] p-2.5 sm:p-3 flex items-center justify-center shadow-xs">
             <img
               :src="currentDisplayImage"
               :alt="product.name"
-              class="w-full h-full object-contain transition-all duration-300"
+              class="w-full h-full object-cover object-center rounded-xl transition-all duration-300"
             />
           </div>
 

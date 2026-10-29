@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import TerminosCondiciones from '../views/TerminosCondiciones.vue'
 import PoliticasCambioDevolucion from '../views/PoliticasCambioDevolucion.vue'
 import LibroReclamaciones from '../views/LibroReclamaciones.vue'
+import ImageOptimizerView from '../views/ImageOptimizerView.vue'
 
 const routes = [
   {
@@ -27,6 +28,12 @@ const routes = [
     name: 'libro-reclamaciones',
     component: LibroReclamaciones,
     alias: ['/reclamaciones', '/reclamos']
+  },
+  {
+    path: '/optimizador-imagenes',
+    name: 'optimizador-imagenes',
+    component: ImageOptimizerView,
+    alias: ['/recortador', '/herramientas/recortador', '/optimizador']
   },
   {
     path: '/:pathMatch(.*)*',

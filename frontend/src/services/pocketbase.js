@@ -568,7 +568,7 @@ export async function fetchProducts() {
       original_price: record.original_price,
       category: record.category || 'General',
       image: record.image 
-        ? pb.files.getURL(record, record.image) 
+        ? pb.files.getURL(record, record.image, { thumb: '600x750' }) 
         : '/products/box_basico_centered.jpg',
       catalog_card: record.catalog_card,
       in_stock: record.in_stock,
