@@ -50,7 +50,12 @@
                 <img
                   :src="campaignStore.activeCampaign.heroPrimaryImage"
                   :alt="campaignStore.activeCampaign.heroPrimaryTitle"
+                  width="600"
+                  height="750"
                   class="w-full h-full object-contain transition-all duration-500"
+                  fetchpriority="high"
+                  loading="eager"
+                  decoding="async"
                 />
               </div>
             </div>
@@ -120,7 +125,12 @@
             <img
               :src="campaignStore.activeCampaign.heroSideImage"
               :alt="campaignStore.activeCampaign.heroSideTitle"
+              width="600"
+              height="750"
               class="w-full h-full object-contain transition-all duration-500"
+              fetchpriority="high"
+              loading="eager"
+              decoding="async"
             />
           </div>
 

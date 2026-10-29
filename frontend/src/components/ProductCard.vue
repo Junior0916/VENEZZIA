@@ -9,8 +9,11 @@
       <img
         :src="product.image"
         :alt="product.name"
+        width="600"
+        height="750"
         class="w-full h-full object-cover object-center rounded-xl group-hover:scale-104 transition-transform duration-500 ease-out"
         loading="lazy"
+        decoding="async"
       />
 
       <!-- Promo Badge if original_price exists (Refined Gold or Red for Hot Wheels) -->
