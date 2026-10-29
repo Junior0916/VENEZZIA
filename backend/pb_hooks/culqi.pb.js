@@ -1,11 +1,25 @@
 /**
  * Culqi Payment Hook for PocketBase
- * Handles POST /api/culqi/charge
+ * Handles GET & POST /api/culqi/charge
  */
+
+routerAdd("GET", "/api/culqi/charge", (e) => {
+    return e.json(200, {
+        status: "online",
+        message: "Endpoint de pagos Culqi activo y listo para solicitudes POST"
+    });
+});
 
 routerAdd("POST", "/api/culqi/charge", (e) => {
     try {
-        const body = $apis.requestInfo(e).data;
+        let body = {};
+        if (typeof e.requestInfo === "function") {
+            const reqInfo = e.requestInfo();
+            body = reqInfo.body || {};
+        } else if (typeof $apis !== "undefined" && typeof $apis.requestInfo === "function") {
+            body = $apis.requestInfo(e).data || {};
+        }
+
         const token = body.token;
         const email = body.email;
         const amount = body.amount; // En céntimos (ej: 10.00 PEN -> 1000)

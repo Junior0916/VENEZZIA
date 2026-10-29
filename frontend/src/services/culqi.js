@@ -2,8 +2,30 @@
  * Culqi Checkout v4 Integration Service
  */
 
-const CULQI_PUBLIC_KEY = import.meta.env.VITE_CULQI_PUBLIC_KEY || 'pk_test_placeholder'
-const POCKETBASE_URL = import.meta.env.VITE_POCKETBASE_URL || 'http://127.0.0.1:8090'
+function getPocketBaseUrl() {
+  const envUrl = import.meta.env.VITE_POCKETBASE_URL
+  const isBrowser = typeof window !== 'undefined'
+  const isLocalHost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+
+  if (isBrowser && !isLocalHost) {
+    return 'https://admin.venezzia.shop'
+  }
+
+  if (envUrl && (!envUrl.includes('127.0.0.1') || isLocalHost)) {
+    return envUrl
+  }
+
+  return 'http://127.0.0.1:8090'
+}
+
+export function getCulqiPublicKey() {
+  if (typeof window !== 'undefined') {
+    if (window.CULQI_PUBLIC_KEY) return window.CULQI_PUBLIC_KEY
+    const stored = localStorage.getItem('culqi_public_key')
+    if (stored) return stored
+  }
+  return import.meta.env.VITE_CULQI_PUBLIC_KEY || 'pk_test_sample_key_here'
+}
 
 let culqiScriptLoaded = false
 
@@ -51,7 +73,7 @@ export async function openCulqiCheckout({
       throw new Error('Culqi no está disponible en la ventana global.')
     }
 
-    window.Culqi.publicKey = CULQI_PUBLIC_KEY
+    window.Culqi.publicKey = getCulqiPublicKey()
 
     window.Culqi.settings({
       title: title,
@@ -109,7 +131,8 @@ export async function openCulqiCheckout({
  * Send the generated token to our PocketBase backend to finalize the charge
  */
 export async function sendChargeToBackend({ token, email, amount, orderInfo }) {
-  const response = await fetch(`${POCKETBASE_URL}/api/culqi/charge`, {
+  const backendUrl = getPocketBaseUrl()
+  const response = await fetch(`${backendUrl}/api/culqi/charge`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -122,9 +145,15 @@ export async function sendChargeToBackend({ token, email, amount, orderInfo }) {
     })
   })
 
-  const result = await response.json()
+  let result = {}
+  try {
+    result = await response.json()
+  } catch (e) {
+    throw new Error('Respuesta no válida del servidor de pagos.')
+  }
+
   if (!response.ok) {
-    throw new Error(result.error || 'Error al procesar el pago con el servidor.')
+    throw new Error(result.error || result.message || 'Error al procesar el pago con el servidor.')
   }
 
   return result
