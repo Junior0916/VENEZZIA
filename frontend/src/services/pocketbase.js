@@ -16,7 +16,7 @@ export const MOCK_PRODUCTS = [
     description: 'Caja temática con luces LED cálidas, mascarilla facial, vincha para skincare, beauty blenders y maquillaje Jarusa.',
     price: 40.00,
     category: 'Boxes de Maquillaje',
-    image: '/products/box_basico_centered.jpg',
+    image: '/products/box_basico_centered.webp',
     in_stock: true,
     items_included: [
       'Caja personalizada con tu personaje favorito',
@@ -40,7 +40,7 @@ export const MOCK_PRODUCTS = [
     description: 'Caja especial con peluche Lotso dormilón, paleta de 18 tonos Jarusa, rubor en crema, sombras y labial de larga duración.',
     price: 80.00,
     category: 'Boxes de Maquillaje',
-    image: '/products/box_osita_dormilona_centered.jpg',
+    image: '/products/box_osita_dormilona_centered.webp',
     in_stock: true,
     items_included: [
       'Caja personalizada "Tú eres especial para mí"',
@@ -65,7 +65,7 @@ export const MOCK_PRODUCTS = [
     description: 'El set más completo de Hello Kitty con peluche importado, paleta de 18 colores, polvos compactos, gloss llavero y 16 cosméticos.',
     price: 135.00,
     category: 'Boxes de Maquillaje',
-    image: '/products/box_kitty_premium_centered.jpg',
+    image: '/products/box_kitty_premium_centered.webp',
     in_stock: true,
     items_included: [
       'Caja personalizada "Un regalo Especialmente Para ti"',
@@ -94,7 +94,7 @@ export const MOCK_PRODUCTS = [
     description: 'Bouquet con 2 rosas eternas hechas a mano, luces LED, labial mate Jarusa, rubor Reve\'l, perfilador y llavero con gloss.',
     price: 40.00,
     category: 'Ramos con Rosas',
-    image: '/products/ramo_basico_centered.jpg',
+    image: '/products/ramo_basico_centered.webp',
     in_stock: true,
     items_included: [
       '2 Rosas eternas artesanales',
@@ -115,7 +115,7 @@ export const MOCK_PRODUCTS = [
     description: 'Ramo con peluche tierno La Chanchita, 3 rosas eternas, iluminador en polvo, polvo compacto, labial mate y delineador.',
     price: 90.00,
     category: 'Ramos con Rosas',
-    image: '/products/ramo_1_chanchita_centered.jpg',
+    image: '/products/ramo_1_chanchita_centered.webp',
     in_stock: true,
     items_included: [
       '3 Rosas eternas artesanales',
@@ -139,7 +139,7 @@ export const MOCK_PRODUCTS = [
     description: 'Ramo bouquet con peluche La Ovejita, 3 rosas eternas, kit beauty blender, corrector Ready de Jarusa y rubor líquido.',
     price: 100.00,
     category: 'Ramos con Rosas',
-    image: '/products/ramo_2_ovejita_centered.jpg',
+    image: '/products/ramo_2_ovejita_centered.webp',
     in_stock: true,
     items_included: [
       '3 Rosas eternas artesanales',
@@ -166,7 +166,7 @@ export const MOCK_PRODUCTS = [
     description: 'Bouquet exclusivo de Hello Kitty con 3 rosas eternas, vincha para skincare, lip combo Reve\'l, polvo suelto y sombras.',
     price: 110.00,
     category: 'Ramos con Rosas',
-    image: '/products/ramo_3_kitty_centered.jpg',
+    image: '/products/ramo_3_kitty_centered.webp',
     in_stock: true,
     items_included: [
       '3 Rosas eternas artesanales',
@@ -193,7 +193,7 @@ export const MOCK_PRODUCTS = [
     description: 'El arreglo más completo y solicitado: Peluche Lotso, 3 rosas eternas, brocha profesional, fijador y más de 18 cosméticos.',
     price: 160.00,
     category: 'Ramos con Rosas',
-    image: '/products/ramo_premium_lotso_centered.jpg',
+    image: '/products/ramo_premium_lotso_centered.webp',
     in_stock: true,
     items_included: [
       '3 Rosas eternas artesanales',
@@ -229,8 +229,8 @@ export const MOCK_PRODUCTS = [
     description: 'Empaque blister original Hot Wheels 100% personalizado con foto de pareja, escudo del club o diseño temático.',
     price: 25.00,
     category: 'Autos Personalizados',
-    image: '/products/hotwheels-personalizado_centered.jpg',
-    catalog_card: '/products/hotwheels-personalizado_card.jpg',
+    image: '/products/hotwheels-personalizado_centered.webp',
+    catalog_card: '/products/hotwheels-personalizado_card.webp',
     in_stock: true,
     items_included: [
       '1 Auto Hot Wheels original sellado en empaque blister',
@@ -247,8 +247,8 @@ export const MOCK_PRODUCTS = [
     price: 25.00,
     original_price: 35.00,
     category: 'Ramos Hot Wheels',
-    image: '/products/ramo-hotwheels-1_centered.jpg',
-    catalog_card: '/products/ramo-hotwheels-1_card.jpg',
+    image: '/products/ramo-hotwheels-1_centered.webp',
+    catalog_card: '/products/ramo-hotwheels-1_card.webp',
     in_stock: true,
     items_included: [
       '1 Auto Hot Wheels básico a elección',
@@ -267,8 +267,8 @@ export const MOCK_PRODUCTS = [
     price: 50.00,
     original_price: 55.00,
     category: 'Ramos Hot Wheels',
-    image: '/products/ramo-hotwheels-2_centered.jpg',
-    catalog_card: '/products/ramo-hotwheels-2_card.jpg',
+    image: '/products/ramo-hotwheels-2_centered.webp',
+    catalog_card: '/products/ramo-hotwheels-2_card.webp',
     in_stock: true,
     items_included: [
       '2 Autos Hot Wheels básicos a elección',
@@ -286,8 +286,8 @@ export const MOCK_PRODUCTS = [
     description: 'Arreglo deluxe con 3 Hot Wheels a elección, 5 rosas eternas, collar plateado waterproof 316L y polaroids.',
     price: 70.00,
     category: 'Ramos Hot Wheels',
-    image: '/products/ramo-hotwheels-3_centered.jpg',
-    catalog_card: '/products/ramo-hotwheels-3_card.jpg',
+    image: '/products/ramo-hotwheels-3_centered.webp',
+    catalog_card: '/products/ramo-hotwheels-3_card.webp',
     in_stock: true,
     items_included: [
       '3 Autos Hot Wheels básicos a elección',
@@ -307,8 +307,8 @@ export const MOCK_PRODUCTS = [
     description: 'Caja personalizada "Para el mejor novio del mundo", 1 Hot Wheels a elección, collar plateado original 316L waterproof y Bon o Bon.',
     price: 50.00,
     category: 'Gift Boxes & Cuadros',
-    image: '/products/box-basico-hotwheels_centered.jpg',
-    catalog_card: '/products/box-basico-hotwheels_card.jpg',
+    image: '/products/box-basico-hotwheels_centered.webp',
+    catalog_card: '/products/box-basico-hotwheels_card.webp',
     in_stock: true,
     items_included: [
       '1 Auto Hot Wheels básico a elección',
@@ -328,8 +328,8 @@ export const MOCK_PRODUCTS = [
     description: 'Box completo con cuadro personalizado en blanco o negro, 1 Hot Wheels, collar 316L con dije, luces LED y chocolates.',
     price: 70.00,
     category: 'Gift Boxes & Cuadros',
-    image: '/products/box-cuadro-hotwheels_centered.jpg',
-    catalog_card: '/products/box-cuadro-hotwheels_card.jpg',
+    image: '/products/box-cuadro-hotwheels_centered.webp',
+    catalog_card: '/products/box-cuadro-hotwheels_card.webp',
     in_stock: true,
     items_included: [
       '1 Auto Hot Wheels básico a elección',
@@ -351,8 +351,8 @@ export const MOCK_PRODUCTS = [
     description: 'Caja temática con 1 Hot Wheels personalizado, collar con dije 316L, bolsa de Inka Chips, chocolate Vizzio, Bon o Bon y luces LED.',
     price: 70.00,
     category: 'Gift Boxes & Cuadros',
-    image: '/products/box-personalizado-snacks_centered.jpg',
-    catalog_card: '/products/box-personalizado-snacks_card.jpg',
+    image: '/products/box-personalizado-snacks_centered.webp',
+    catalog_card: '/products/box-personalizado-snacks_card.webp',
     in_stock: true,
     items_included: [
       '1 Auto Hot Wheels básico personalizado a elección',
@@ -374,8 +374,8 @@ export const MOCK_PRODUCTS = [
     description: 'Edición especial para hinchas: temática Alianza Lima, Universitario de Deportes o Cristal con Hot Wheels personalizado, collar 316L y snacks.',
     price: 70.00,
     category: 'Gift Boxes & Cuadros',
-    image: '/products/box-personalizado-club_centered.jpg',
-    catalog_card: '/products/box-personalizado-club_card.jpg',
+    image: '/products/box-personalizado-club_centered.webp',
+    catalog_card: '/products/box-personalizado-club_card.webp',
     in_stock: true,
     items_included: [
       '1 Auto Hot Wheels personalizado con escudo del club elegido',
@@ -396,8 +396,8 @@ export const MOCK_PRODUCTS = [
     description: 'Inspirado en Rápidos y Furiosos: auto Hot Wheels Dodge Charger, collar con la cruz de Toretto en acero 316L, snacks y caja negra temática.',
     price: 48.00,
     category: 'Gift Boxes & Cuadros',
-    image: '/products/box-toretto-fast-furious_centered.jpg',
-    catalog_card: '/products/box-toretto-fast-furious_card.jpg',
+    image: '/products/box-toretto-fast-furious_centered.webp',
+    catalog_card: '/products/box-toretto-fast-furious_card.webp',
     in_stock: true,
     items_included: [
       '1 Auto Hot Wheels Dodge Charger Fast & Furious',
@@ -419,8 +419,8 @@ export const MOCK_PRODUCTS = [
     description: 'El detalle de mayor categoría: collar de acero quirúrgico 316L con inicial personalizada y enchape en oro de 18K, Hot Wheels personalizado y dulces surtidos.',
     price: 90.00,
     category: 'Gift Boxes & Cuadros',
-    image: '/products/box-premium-oro-18k_centered.jpg',
-    catalog_card: '/products/box-premium-oro-18k_card.jpg',
+    image: '/products/box-premium-oro-18k_centered.webp',
+    catalog_card: '/products/box-premium-oro-18k_card.webp',
     in_stock: true,
     items_included: [
       'Collar de acero quirúrgico 316L con dije de inicial y enchape en oro de 18K',
@@ -444,8 +444,8 @@ export const MOCK_PRODUCTS = [
     price: 80.00,
     original_price: 90.00,
     category: 'Ramos Hot Wheels',
-    image: '/products/ramo-stitch-hotwheels_centered.jpg',
-    catalog_card: '/products/ramo-stitch-hotwheels_card.jpg',
+    image: '/products/ramo-stitch-hotwheels_centered.webp',
+    catalog_card: '/products/ramo-stitch-hotwheels_card.webp',
     in_stock: true,
     items_included: [
       '2 Autos Hot Wheels básicos a elección',
@@ -465,8 +465,8 @@ export const MOCK_PRODUCTS = [
     price: 68.00,
     original_price: 80.00,
     category: 'Ramos Hot Wheels',
-    image: '/products/ramo-clubes-futbol_centered.jpg',
-    catalog_card: '/products/ramo-clubes-futbol_card.jpg',
+    image: '/products/ramo-clubes-futbol_centered.webp',
+    catalog_card: '/products/ramo-clubes-futbol_card.webp',
     in_stock: true,
     items_included: [
       '2 Autos Hot Wheels básicos a elección',
@@ -486,8 +486,8 @@ export const MOCK_PRODUCTS = [
     price: 70.00,
     original_price: 85.00,
     category: 'Ramos Hot Wheels',
-    image: '/products/ramo-spiderman-hotwheels_centered.jpg',
-    catalog_card: '/products/ramo-spiderman-hotwheels_card.jpg',
+    image: '/products/ramo-spiderman-hotwheels_centered.webp',
+    catalog_card: '/products/ramo-spiderman-hotwheels_card.webp',
     in_stock: true,
     items_included: [
       '2 Autos Hot Wheels básicos a elección',
@@ -506,8 +506,8 @@ export const MOCK_PRODUCTS = [
     description: 'Box completo para celebrar a lo grande: lata helada de Pilsen Callao o gaseosa, peluche temático (Goku o Spiderman), Hot Wheels y chocolates.',
     price: 70.00,
     category: 'Gift Boxes & Cuadros',
-    image: '/products/box-superheroes-pilsen_centered.jpg',
-    catalog_card: '/products/box-superheroes-pilsen_card.jpg',
+    image: '/products/box-superheroes-pilsen_centered.webp',
+    catalog_card: '/products/box-superheroes-pilsen_card.webp',
     in_stock: true,
     items_included: [
       '1 Auto Hot Wheels básico a elección',
@@ -530,8 +530,8 @@ export const MOCK_PRODUCTS = [
     price: 75.00,
     original_price: 85.00,
     category: 'Gift Boxes & Cuadros',
-    image: '/products/box-pinguino-lucifer_centered.jpg',
-    catalog_card: '/products/box-pinguino-lucifer_card.jpg',
+    image: '/products/box-pinguino-lucifer_centered.webp',
+    catalog_card: '/products/box-pinguino-lucifer_card.webp',
     in_stock: true,
     items_included: [
       '1 Auto Hot Wheels básico a elección',
@@ -569,7 +569,7 @@ export async function fetchProducts() {
       category: record.category || 'General',
       image: record.image 
         ? pb.files.getURL(record, record.image, { thumb: '600x750' }) 
-        : '/products/box_basico_centered.jpg',
+        : '/products/box_basico_centered.webp',
       catalog_card: record.catalog_card,
       in_stock: record.in_stock,
       items_included: record.items_included || []

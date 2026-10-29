@@ -84,13 +84,13 @@
         <router-link to="/" class="flex items-center gap-2.5 group shrink-0" title="Venezzia Detalles">
           <!-- Nombre de marca en lila sin fondo -->
           <img
-            src="/marca_lila.png"
+            src="/marca_lila.webp"
             alt="Venezzia Detalles"
             class="h-10 sm:h-13 w-auto object-contain group-hover:opacity-85 transition-opacity duration-300"
           />
           <!-- Isotipo en lila sin fondo -->
           <img
-            src="/isotipo_lila.png"
+            src="/isotipo_lila.webp"
             alt="Venezzia Isotipo"
             class="h-9 sm:h-11 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
           />

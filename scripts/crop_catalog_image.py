@@ -14,7 +14,7 @@ TARGET_HEIGHT = 750
 TARGET_ASPECT = TARGET_WIDTH / TARGET_HEIGHT # 0.8 (4:5)
 DEFAULT_BG = (250, 246, 245) # #faf6f5 (Tono boutique suave Venezzia)
 
-def process_image(input_path, output_path=None, mode='smart', bg_color=DEFAULT_BG, quality=95):
+def process_image(input_path, output_path=None, mode='smart', bg_color=DEFAULT_BG, quality=85, fmt='webp'):
     if not os.path.exists(input_path):
         print(f"Error: El archivo '{input_path}' no existe.")
         return False
@@ -69,20 +69,34 @@ def process_image(input_path, output_path=None, mode='smart', bg_color=DEFAULT_B
             
         final_img = cropped.resize((TARGET_WIDTH, TARGET_HEIGHT), Image.Resampling.LANCZOS)
 
-    if not output_path:
-        base, ext = os.path.splitext(input_path)
-        output_path = f"{base}_centered.jpg"
+    ext = '.webp' if fmt.lower() == 'webp' else '.jpg'
+    save_format = 'WEBP' if fmt.lower() == 'webp' else 'JPEG'
 
-    final_img.save(output_path, "JPEG", quality=quality, optimize=True)
-    print(f"[OK] Guardado: '{output_path}' -> {final_img.size[0]}x{final_img.size[1]} px (Ratio 4:5)")
+    if not output_path:
+        base, _ = os.path.splitext(input_path)
+        output_path = f"{base}_centered{ext}"
+
+    if save_format == 'WEBP':
+        final_img.save(output_path, "WEBP", quality=quality, method=6)
+    else:
+        final_img.save(output_path, "JPEG", quality=quality, optimize=True)
+
+    size_kb = os.path.getsize(output_path) / 1024
+    print(f"[OK] Guardado: '{output_path}' -> {final_img.size[0]}x{final_img.size[1]} px ({size_kb:.1f} KB, Ratio 4:5, Formato: {save_format})")
     return True
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Redimensiona y centra imagenes para el catalogo de Venezzia Detalles (600x750 px)"
+        description="Redimensiona y centra imagenes para el catalogo de Venezzia Detalles (600x750 px en formato WebP/JPG)"
     )
     parser.add_argument("path", help="Ruta de la imagen o carpeta a procesar")
     parser.add_argument("-o", "--out", help="Ruta de salida (archivo o carpeta)", default=None)
+    parser.add_argument(
+        "-f", "--format",
+        choices=['webp', 'jpg', 'jpeg'],
+        default='webp',
+        help="Formato de salida: 'webp' (recomendado, ultra ligero) o 'jpg'"
+    )
     parser.add_argument(
         "-m", "--mode",
         choices=['smart', 'crop'],
@@ -93,17 +107,18 @@ def main():
     args = parser.parse_args()
 
     if os.path.isfile(args.path):
-        process_image(args.path, args.out, mode=args.mode)
+        process_image(args.path, args.out, mode=args.mode, fmt=args.format)
     elif os.path.isdir(args.path):
         out_dir = args.out or args.path
         os.makedirs(out_dir, exist_ok=True)
         valid_exts = ('.jpg', '.jpeg', '.png', '.webp')
         count = 0
+        ext = '.webp' if args.format == 'webp' else '.jpg'
         for f in os.listdir(args.path):
-            if f.lower().endswith(valid_exts) and not f.endswith('_centered.jpg'):
+            if f.lower().endswith(valid_exts) and not f.endswith('_centered.jpg') and not f.endswith('_centered.webp'):
                 in_file = os.path.join(args.path, f)
-                out_file = os.path.join(out_dir, f"{os.path.splitext(f)[0]}_centered.jpg")
-                if process_image(in_file, out_file, mode=args.mode):
+                out_file = os.path.join(out_dir, f"{os.path.splitext(f)[0]}_centered{ext}")
+                if process_image(in_file, out_file, mode=args.mode, fmt=args.format):
                     count += 1
         print(f"\nSe procesaron exitosamente {count} imagen(es).")
     else:

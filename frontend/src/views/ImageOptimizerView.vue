@@ -225,6 +225,19 @@
 
           <!-- Download Action -->
           <div class="mt-6 w-full max-w-sm space-y-3">
+            <!-- Format selector -->
+            <div class="flex items-center justify-center gap-4 text-xs text-gray-700 pb-1">
+              <span class="font-semibold text-gray-600">Formato:</span>
+              <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" value="webp" v-model="outputFormat" class="accent-[#caa35f]" />
+                <span class="font-semibold text-[#965e9b]">WebP (Recomendado, 65% más ligero)</span>
+              </label>
+              <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" value="jpeg" v-model="outputFormat" class="accent-[#caa35f]" />
+                <span>JPG</span>
+              </label>
+            </div>
+
             <button
               type="button"
               :disabled="!loadedImage"
@@ -256,6 +269,7 @@ const originalFileName = ref('')
 const loadedImage = ref(null)
 
 const mode = ref('smart') // 'smart' (padded fit like ovejita) or 'cover' (fill 4:5)
+const outputFormat = ref('webp')
 const scale = ref(1.0)
 const offsetX = ref(0)
 const offsetY = ref(0)
@@ -351,9 +365,13 @@ function updateCanvas() {
 function downloadOptimized() {
   if (!canvas.value) return
   const baseName = originalFileName.value.replace(/\.[^/.]+$/, '') || 'producto'
+  const isWebp = outputFormat.value === 'webp'
+  const mime = isWebp ? 'image/webp' : 'image/jpeg'
+  const ext = isWebp ? 'webp' : 'jpg'
+  const quality = isWebp ? 0.85 : 0.95
   const link = document.createElement('a')
-  link.download = `${baseName}_centered_600x750.jpg`
-  link.href = canvas.value.toDataURL('image/jpeg', 0.95)
+  link.download = `${baseName}_centered_600x750.${ext}`
+  link.href = canvas.value.toDataURL(mime, quality)
   link.click()
 }
 

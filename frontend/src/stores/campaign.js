@@ -13,9 +13,9 @@ export const CAMPAIGNS = [
     description: 'Arreglos boutique con rosas eternas hechas a mano, peluches originales de Hello Kitty y Lotso, y cosméticos premium Jarusa y Reve\'l.',
     heroTitle: 'Ramos y boxes de maquillaje que enamoran',
     heroSubtitle: 'Diseños que cautivan: combinamos cosmética premium Jarusa & Reve\'l, peluches importados y rosas eternas preservadas.',
-    heroPrimaryImage: '/products/box_osita_dormilona_centered.jpg',
+    heroPrimaryImage: '/products/box_osita_dormilona_centered.webp',
     heroPrimaryTitle: 'Box Osita Dormilona Lotso',
-    heroSideImage: '/products/ramo_3_kitty_centered.jpg',
+    heroSideImage: '/products/ramo_3_kitty_centered.webp',
     heroSideTitle: 'Ramo 3 Hello Kitty',
     heroSidePrice: 110.00,
     accentColor: '#965e9b',
@@ -29,27 +29,27 @@ export const CAMPAIGNS = [
       {
         name: 'Boxes de Maquillaje',
         filter: 'Boxes de Maquillaje',
-        image: '/products/box_kitty_premium_centered.jpg'
+        image: '/products/box_kitty_premium_centered.webp'
       },
       {
         name: 'Ramos con Rosas',
         filter: 'Ramos con Rosas',
-        image: '/products/ramo_premium_lotso_centered.jpg'
+        image: '/products/ramo_premium_lotso_centered.webp'
       },
       {
         name: 'Hello Kitty',
         filter: 'Hello Kitty',
-        image: '/products/ramo_3_kitty_centered.jpg'
+        image: '/products/ramo_3_kitty_centered.webp'
       },
       {
         name: 'Colección Lotso',
         filter: 'Lotso',
-        image: '/products/box_osita_dormilona_centered.jpg'
+        image: '/products/box_osita_dormilona_centered.webp'
       },
       {
         name: 'Peluches Tiernos',
         filter: 'Chanchita',
-        image: '/products/ramo_1_chanchita_centered.jpg'
+        image: '/products/ramo_1_chanchita_centered.webp'
       }
     ]
   },
@@ -64,9 +64,9 @@ export const CAMPAIGNS = [
     description: 'Modelos de autos clásicos y premium a elección, empaques blister personalizados con foto, cervezas Pilsen, chocolates y collares de acero quirúrgico waterproof.',
     heroTitle: 'El regalo de Hot Wheels que siempre soñó',
     heroSubtitle: 'Ramos con rosas eternas azules y negras, cajas temáticas con joyería 316L, snacks premium y empaques blister 100% personalizados.',
-    heroPrimaryImage: '/products/box-toretto-fast-furious_centered.jpg',
+    heroPrimaryImage: '/products/box-toretto-fast-furious_centered.webp',
     heroPrimaryTitle: 'Box Fast & Furious Toretto',
-    heroSideImage: '/products/ramo-spiderman-hotwheels_centered.jpg',
+    heroSideImage: '/products/ramo-spiderman-hotwheels_centered.webp',
     heroSideTitle: 'Ramo Spiderman Hot Wheels',
     heroSidePrice: 70.00,
     accentColor: '#c22b38',
@@ -81,27 +81,27 @@ export const CAMPAIGNS = [
       {
         name: 'Ramos Hot Wheels',
         filter: 'Ramos Hot Wheels',
-        image: '/products/ramo-hotwheels-2_centered.jpg'
+        image: '/products/ramo-hotwheels-2_centered.webp'
       },
       {
         name: 'Boxes & Cuadros',
         filter: 'Gift Boxes & Cuadros',
-        image: '/products/box-cuadro-hotwheels_centered.jpg'
+        image: '/products/box-cuadro-hotwheels_centered.webp'
       },
       {
         name: 'Edición Spiderman',
         filter: 'Spiderman',
-        image: '/products/ramo-spiderman-hotwheels_centered.jpg'
+        image: '/products/ramo-spiderman-hotwheels_centered.webp'
       },
       {
         name: 'Clubes de Fútbol',
         filter: 'Clubes',
-        image: '/products/ramo-clubes-futbol_centered.jpg'
+        image: '/products/ramo-clubes-futbol_centered.webp'
       },
       {
         name: 'Joyería Oro 18K',
         filter: 'Oro',
-        image: '/products/box-premium-oro-18k_centered.jpg'
+        image: '/products/box-premium-oro-18k_centered.webp'
       }
     ]
   }

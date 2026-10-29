@@ -7,12 +7,12 @@
           <!-- Logo footer: nombre + isotipo en lila sin fondo -->
           <div class="mb-5 flex items-center gap-2.5">
             <img
-              src="/marca_lila.png"
+              src="/marca_lila.webp"
               alt="Venezzia Detalles"
               class="h-11 w-auto object-contain"
             />
             <img
-              src="/isotipo_lila.png"
+              src="/isotipo_lila.webp"
               alt="Venezzia Isotipo"
               class="h-9 w-auto object-contain"
             />
