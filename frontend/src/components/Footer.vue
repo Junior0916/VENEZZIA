@@ -96,16 +96,32 @@
           </ul>
         </div>
 
-        <!-- Col 3: Atención al Cliente (Cols 7-8) -->
+        <!-- Col 3: Legal & Atención (Cols 7-8) -->
         <div class="lg:col-span-2">
           <h4 class="text-xs font-serif font-bold uppercase tracking-widest text-[#27172b] mb-4">
-            Atención
+            Legal & Atención
           </h4>
           <ul class="space-y-2.5 text-xs text-gray-600">
-            <li><a href="#" class="hover:text-[#965e9b] transition-colors">Términos y condiciones</a></li>
-            <li><a href="#" class="hover:text-[#965e9b] transition-colors">Políticas de entrega</a></li>
-            <li><a href="#" class="hover:text-[#965e9b] transition-colors">Cuidados de flores</a></li>
-            <li><a href="#" class="hover:text-[#965e9b] transition-colors">Preguntas frecuentes</a></li>
+            <li>
+              <router-link to="/terminos-y-condiciones" class="hover:text-[#965e9b] transition-colors">
+                Términos y condiciones
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/politicas-de-cambio" class="hover:text-[#965e9b] transition-colors">
+                Políticas de cambios y devoluciones
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/libro-de-reclamaciones" class="hover:text-[#965e9b] transition-colors">
+                Libro de Reclamaciones
+              </router-link>
+            </li>
+            <li>
+              <a href="/#envios" class="hover:text-[#965e9b] transition-colors">
+                Tarifas de Envíos
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -127,7 +143,7 @@
                 <span>+51 932 449 996</span>
               </a>
             </li>
-            <li class="flex items-center gap-1.5"><Mail class="w-3.5 h-3.5 text-[#caa35f] shrink-0" /> pedidos@venezziadetalles.pe</li>
+            <li class="flex items-center gap-1.5"><Mail class="w-3.5 h-3.5 text-[#caa35f] shrink-0" /> contacto@venezzia.shop</li>
             <li class="text-[11px] text-gray-500 pt-1">Atención personalizada y dedicatorias por WhatsApp.</li>
           </ul>
         </div>
@@ -184,10 +200,21 @@
       <!-- Bottom bar: Libro de Reclamaciones & Copyright -->
       <div class="pt-6 border-t border-[#ebd8e8] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
         <div class="flex items-center gap-3">
-          <div class="px-3 py-1.5 rounded-lg bg-white border border-[#eedee9] flex items-center gap-2 shadow-2xs">
-            <BookOpen class="w-4 h-4 text-[#caa35f]" />
-            <span class="text-[10px] font-bold text-[#27172b] uppercase tracking-wider">Libro de Reclamaciones</span>
-          </div>
+          <router-link
+            to="/libro-de-reclamaciones"
+            class="px-3.5 py-2 rounded-xl bg-white border border-[#eedee9] hover:border-[#caa35f] flex items-center gap-2.5 shadow-2xs group transition-all cursor-pointer"
+            title="Libro de Reclamaciones Virtual - Conforme a la directiva de INDECOPI"
+          >
+            <BookOpen class="w-4 h-4 text-[#caa35f] group-hover:scale-110 transition-transform" />
+            <div class="text-left">
+              <span class="block text-[10px] font-bold text-[#27172b] uppercase tracking-wider group-hover:text-[#965e9b] transition-colors">
+                Libro de Reclamaciones
+              </span>
+              <span class="block text-[9px] text-gray-400">
+                Conforme al D.S. 011-2011-PCM / INDECOPI
+              </span>
+            </div>
+          </router-link>
         </div>
         <div>
           <span>VENEZZIA DETALLES - Todos los Derechos Reservados {{ new Date().getFullYear() }}</span>
@@ -203,17 +230,28 @@ import {
   Mail,
   BookOpen
 } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import IconInstagram from './icons/IconInstagram.vue'
 import IconTikTok from './icons/IconTikTok.vue'
 import IconFacebook from './icons/IconFacebook.vue'
 import { useCampaignStore } from '../stores/campaign'
 
+const router = useRouter()
 const campaignStore = useCampaignStore()
 
 function selectCampaign(id) {
   campaignStore.setCampaign(id)
-  const el = document.getElementById('catalogo')
-  if (el) el.scrollIntoView({ behavior: 'smooth' })
+  if (router) {
+    router.push('/').then(() => {
+      setTimeout(() => {
+        const el = document.getElementById('catalogo')
+        if (el) el.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    })
+  } else {
+    const el = document.getElementById('catalogo')
+    if (el) el.scrollIntoView({ behavior: 'smooth' })
+  }
 }
 </script>

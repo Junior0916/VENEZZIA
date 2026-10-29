@@ -6,32 +6,15 @@
       @select-product="openProductModal"
     />
 
-    <!-- Main Content -->
+    <!-- Main Content Routed (Home, Términos, Políticas, Libro de Reclamaciones) -->
     <main class="flex-1">
-      <!-- 1. Dynamic Hero Showcase (Spotlight matching active campaign) -->
-      <Hero />
-
-      <!-- 2. Dynamic Categories Row -->
-      <Occasions @select-category="handleCategorySelect" />
-
-      <!-- 3. Unified Product Catalog (Adaptive Grid, Clean 4:5 Photos, Filter Tabs & Search) -->
-      <CatalogSection
-        id="catalogo"
-        :products="filteredProducts"
-        :active-category="activeCategory"
-        @select-category="handleCategorySelect"
-        @clear-category="activeCategory = null"
+      <router-view
+        :all-products="allProducts"
         @select-product="openProductModal"
       />
-
-      <!-- 4. Official Shipping & Ordering Guide -->
-      <ShippingGuide />
-
-      <!-- 5. Minimalist Newsletter -->
-      <Newsletter />
     </main>
 
-    <!-- Footer with Official Social & Payment Logos -->
+    <!-- Footer with Official Social & Payment Logos & INDECOPI Claims Badge -->
     <Footer />
 
     <!-- Product Detail Modal (With Catalog Card toggle, Add-on car support & Complete WhatsApp Structure) -->
@@ -50,80 +33,19 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import Navbar from './components/Navbar.vue'
-import Hero from './components/Hero.vue'
-import Occasions from './components/Occasions.vue'
-import CatalogSection from './components/CatalogSection.vue'
-import ShippingGuide from './components/ShippingGuide.vue'
-import Newsletter from './components/Newsletter.vue'
 import Footer from './components/Footer.vue'
 import CartDrawer from './components/CartDrawer.vue'
 import FloatingChat from './components/FloatingChat.vue'
 import ProductDetailModal from './components/ProductDetailModal.vue'
 import { fetchProducts } from './services/pocketbase'
 import { useCampaignStore } from './stores/campaign'
-import { useSearchStore } from './stores/search'
 
 const campaignStore = useCampaignStore()
-const searchStore = useSearchStore()
 
 const allProducts = ref([])
-const activeCategory = ref(null)
 const selectedProductModal = ref(null)
-
-// Reset subcategory filter when switching campaigns
-watch(
-  () => campaignStore.activeCampaignId,
-  () => {
-    activeCategory.value = null
-  }
-)
-
-const filteredProducts = computed(() => {
-  const query = searchStore.searchQuery.trim().toLowerCase()
-
-  // 1. If user is actively searching, search across all products from all campaigns
-  if (query.length > 0) {
-    return allProducts.value.filter(p => {
-      const matchName = p.name?.toLowerCase().includes(query)
-      const matchCategory = p.category?.toLowerCase().includes(query)
-      const matchDesc = p.description?.toLowerCase().includes(query)
-      const matchItems = p.items_included?.some(item => item.toLowerCase().includes(query))
-      return matchName || matchCategory || matchDesc || matchItems
-    })
-  }
-
-  // 2. Otherwise filter by active campaign (maquillaje vs hotwheels)
-  let list = allProducts.value.filter(p => {
-    return (p.campaign || 'maquillaje') === campaignStore.activeCampaignId
-  })
-
-  // 3. Filter by category if one was selected in Occasions row
-  if (activeCategory.value) {
-    const term = activeCategory.value.toLowerCase()
-    list = list.filter(p => {
-      return (
-        p.category?.toLowerCase().includes(term) ||
-        p.name?.toLowerCase().includes(term) ||
-        p.description?.toLowerCase().includes(term)
-      )
-    })
-  }
-
-  return list
-})
-
-function handleCategorySelect(filter) {
-  searchStore.clearQuery()
-  if (activeCategory.value === filter) {
-    activeCategory.value = null
-  } else {
-    activeCategory.value = filter
-  }
-  const el = document.getElementById('catalogo')
-  if (el) el.scrollIntoView({ behavior: 'smooth' })
-}
 
 function openProductModal(product) {
   selectedProductModal.value = product

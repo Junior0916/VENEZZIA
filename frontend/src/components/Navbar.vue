@@ -81,7 +81,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
       <div class="flex items-center justify-between gap-4">
         <!-- Left: Brand Logo — Nombre izquierda, Isotipo derecha -->
-        <a href="#" class="flex items-center gap-2.5 group shrink-0" title="Venezzia Detalles">
+        <router-link to="/" class="flex items-center gap-2.5 group shrink-0" title="Venezzia Detalles">
           <!-- Nombre de marca en lila sin fondo -->
           <img
             src="/marca_lila.png"
@@ -94,7 +94,7 @@
             alt="Venezzia Isotipo"
             class="h-9 sm:h-11 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
           />
-        </a>
+        </router-link>
 
         <!-- Center: Special Campaign Dates Navigation Menu -->
         <nav class="hidden lg:flex items-center gap-1.5 xl:gap-2">
@@ -379,6 +379,7 @@ import IconTikTok from './icons/IconTikTok.vue'
 import { useCartStore } from '../stores/cart'
 import { useCampaignStore } from '../stores/campaign'
 import { useSearchStore } from '../stores/search'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   products: {
@@ -449,12 +450,25 @@ function clearSearch() {
   searchStore.clearQuery()
 }
 
+const router = useRouter()
+
 function selectCampaign(campaignId) {
   campaignStore.setCampaign(campaignId)
   searchStore.clearQuery()
-  const el = document.getElementById('catalogo')
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth' })
+  if (router) {
+    router.push('/').then(() => {
+      setTimeout(() => {
+        const el = document.getElementById('catalogo')
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
+    })
+  } else {
+    const el = document.getElementById('catalogo')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    }
   }
 }
 
