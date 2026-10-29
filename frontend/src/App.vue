@@ -96,6 +96,7 @@ function checkDeepLink() {
 
 onMounted(async () => {
   allProducts.value = await fetchProducts()
+  campaignStore.setProducts(allProducts.value)
   checkDeepLink()
 
   // Handle browser back/forward buttons

@@ -25,6 +25,7 @@ backend/.env
 
 # Scratch / Temp files
 canva_*.html
+scripts/downloaded_pb_images/
 __pycache__/
 *.py[cod]
 

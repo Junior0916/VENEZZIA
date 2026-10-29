@@ -1,7 +1,22 @@
 import PocketBase from 'pocketbase'
 
-const POCKETBASE_URL = import.meta.env.VITE_POCKETBASE_URL || 'http://127.0.0.1:8090'
+function getPocketBaseUrl() {
+  const envUrl = import.meta.env.VITE_POCKETBASE_URL
+  const isBrowser = typeof window !== 'undefined'
+  const isLocalHost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
 
+  if (isBrowser && !isLocalHost) {
+    return 'https://admin.venezzia.shop'
+  }
+
+  if (envUrl && (!envUrl.includes('127.0.0.1') || isLocalHost)) {
+    return envUrl
+  }
+
+  return 'http://127.0.0.1:8090'
+}
+
+export const POCKETBASE_URL = getPocketBaseUrl()
 export const pb = new PocketBase(POCKETBASE_URL)
 
 // Catálogo Oficial de Venezzia Detalles organizado por Campañas Especiales
@@ -549,32 +564,48 @@ export const MOCK_PRODUCTS = [
 ]
 
 export async function fetchProducts() {
+  const mapRecord = (record, client) => ({
+    id: record.id,
+    campaign: record.campaign || 'maquillaje',
+    name: record.name,
+    description: record.description,
+    price: record.price,
+    original_price: record.compare_at_price || record.original_price,
+    category: record.category || 'General',
+    image: record.image 
+      ? client.files.getURL(record, record.image, { thumb: '600x750' }) 
+      : '/products/box_basico_centered.webp',
+    catalog_card: record.catalog_card,
+    in_stock: record.in_stock,
+    items_included: record.items_included || []
+  })
+
   try {
     const records = await pb.collection('products').getFullList({
       sort: '-created',
       filter: 'in_stock = true'
     })
 
-    if (records.length === 0) {
-      return MOCK_PRODUCTS
+    if (records && records.length > 0) {
+      return records.map(r => mapRecord(r, pb))
     }
-
-    return records.map(record => ({
-      id: record.id,
-      campaign: record.campaign || 'maquillaje',
-      name: record.name,
-      description: record.description,
-      price: record.price,
-      original_price: record.original_price,
-      category: record.category || 'General',
-      image: record.image 
-        ? pb.files.getURL(record, record.image, { thumb: '600x750' }) 
-        : '/products/box_basico_centered.webp',
-      catalog_card: record.catalog_card,
-      in_stock: record.in_stock,
-      items_included: record.items_included || []
-    }))
   } catch (err) {
-    return MOCK_PRODUCTS
+    // continue to fallback check
   }
+
+  // If local pb had 0 records or failed, try live remote PocketBase
+  try {
+    const remotePb = new PocketBase('https://admin.venezzia.shop')
+    const remoteRecords = await remotePb.collection('products').getFullList({
+      sort: '-created',
+      filter: 'in_stock = true'
+    })
+    if (remoteRecords && remoteRecords.length > 0) {
+      return remoteRecords.map(r => mapRecord(r, remotePb))
+    }
+  } catch (remoteErr) {
+    // continue to mock fallback
+  }
+
+  return MOCK_PRODUCTS
 }

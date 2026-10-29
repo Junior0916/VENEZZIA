@@ -109,9 +109,81 @@ export const CAMPAIGNS = [
 
 export const useCampaignStore = defineStore('campaign', () => {
   const activeCampaignId = ref('maquillaje')
+  const products = ref([])
+
+  function setProducts(newProducts) {
+    if (Array.isArray(newProducts)) {
+      products.value = newProducts
+    }
+  }
 
   const activeCampaign = computed(() => {
-    return CAMPAIGNS.find(c => c.id === activeCampaignId.value) || CAMPAIGNS[0]
+    const base = CAMPAIGNS.find(c => c.id === activeCampaignId.value) || CAMPAIGNS[0]
+    const campProducts = products.value.filter(p => (p.campaign || 'maquillaje') === base.id)
+
+    // Helper to find image by product name or id
+    const findProductImage = (searchStr, fallback) => {
+      if (!campProducts.length) return fallback
+      const match = campProducts.find(p => 
+        p.id === searchStr || 
+        (p.name && p.name.toLowerCase().includes(searchStr.toLowerCase()))
+      )
+      return match?.image || fallback
+    }
+
+    const findProductPrice = (searchStr, fallback) => {
+      if (!campProducts.length) return fallback
+      const match = campProducts.find(p => 
+        p.id === searchStr || 
+        (p.name && p.name.toLowerCase().includes(searchStr.toLowerCase()))
+      )
+      return match ? Number(match.price) : fallback
+    }
+
+    // Dynamic Hero Primary (e.g. Box Osita Dormilona Lotso in Maquillaje, Box Toretto in Hot Wheels)
+    let dynamicHeroPrimaryImage = base.heroPrimaryImage
+    if (base.id === 'maquillaje') {
+      dynamicHeroPrimaryImage = findProductImage('Osita Dormilona', base.heroPrimaryImage)
+    } else {
+      dynamicHeroPrimaryImage = findProductImage('Toretto', base.heroPrimaryImage)
+    }
+
+    // Dynamic Hero Side (e.g. Ramo 3 Hello Kitty in Maquillaje, Ramo Spiderman in Hot Wheels)
+    let dynamicHeroSideImage = base.heroSideImage
+    let dynamicHeroSidePrice = base.heroSidePrice
+    if (base.id === 'maquillaje') {
+      dynamicHeroSideImage = findProductImage('Hello Kitty', base.heroSideImage)
+      dynamicHeroSidePrice = findProductPrice('Hello Kitty', base.heroSidePrice)
+    } else {
+      dynamicHeroSideImage = findProductImage('Spiderman', base.heroSideImage)
+      dynamicHeroSidePrice = findProductPrice('Spiderman', base.heroSidePrice)
+    }
+
+    // Dynamic categories images from live products
+    const dynamicCategories = base.categories.map(cat => {
+      let catImage = cat.image
+      if (campProducts.length > 0) {
+        const catMatch = campProducts.find(p => 
+          (p.category && p.category.toLowerCase().includes(cat.filter.toLowerCase())) ||
+          (p.name && p.name.toLowerCase().includes(cat.filter.toLowerCase()))
+        )
+        if (catMatch?.image) {
+          catImage = catMatch.image
+        }
+      }
+      return {
+        ...cat,
+        image: catImage
+      }
+    })
+
+    return {
+      ...base,
+      heroPrimaryImage: dynamicHeroPrimaryImage,
+      heroSideImage: dynamicHeroSideImage,
+      heroSidePrice: dynamicHeroSidePrice,
+      categories: dynamicCategories
+    }
   })
 
   function setCampaign(id) {
@@ -124,6 +196,8 @@ export const useCampaignStore = defineStore('campaign', () => {
     campaigns: CAMPAIGNS,
     activeCampaignId,
     activeCampaign,
+    products,
+    setProducts,
     setCampaign
   }
 })
