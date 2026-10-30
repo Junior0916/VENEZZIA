@@ -171,13 +171,53 @@
               </div>
 
               <div>
-                <label class="block text-[11px] font-semibold text-gray-700 mb-1">Dirección de Entrega</label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-[11px] font-semibold text-gray-700">Dirección de Entrega</label>
+                  <button
+                    type="button"
+                    @click="openMapModal"
+                    class="text-[11px] font-semibold text-[#b0873b] hover:text-[#994c58] flex items-center gap-1 transition-colors cursor-pointer active:scale-95"
+                  >
+                    <MapPin class="w-3.5 h-3.5 text-[#caa35f]" />
+                    <span>{{ customer.mapUrl ? 'Cambiar punto GPS' : 'Fijar en Mapa / GPS' }}</span>
+                  </button>
+                </div>
                 <input
                   v-model="customer.address"
                   type="text"
                   placeholder="Av. Pardo 123, Dpto 502"
                   class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
                 />
+
+                <!-- GPS Link Badge if selected -->
+                <div
+                  v-if="customer.mapUrl"
+                  class="mt-2 p-2 px-3 rounded-xl bg-[#f0fbf5] border border-emerald-200/80 flex items-center justify-between gap-2 text-[11px] text-emerald-800 animate-in fade-in"
+                >
+                  <div class="flex items-center gap-1.5 truncate">
+                    <span class="text-xs leading-none">📍</span>
+                    <span class="font-medium truncate">Ubicación GPS fijada para delivery</span>
+                  </div>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <a
+                      :href="customer.mapUrl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-emerald-700 hover:text-emerald-900 underline font-semibold text-[10px] flex items-center gap-0.5"
+                    >
+                      <span>Ver mapa</span>
+                      <ExternalLink class="w-3 h-3" />
+                    </a>
+                    <button
+                      type="button"
+                      @click="removeMapLocation"
+                      class="text-gray-400 hover:text-rose-600 transition-colors cursor-pointer p-0.5"
+                      title="Quitar ubicación GPS"
+                    >
+                      <X class="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -300,6 +340,14 @@
         </button>
       </div>
     </div>
+
+    <!-- Location / GPS Map Picker Modal -->
+    <LocationPickerModal
+      :is-open="isMapModalOpen"
+      :initial-coords="customer.mapCoords"
+      @close="isMapModalOpen = false"
+      @select="handleLocationSelected"
+    />
   </div>
 </template>
 
@@ -312,9 +360,12 @@ import {
   Lock,
   ShieldCheck,
   CheckCircle2,
-  Loader2
+  Loader2,
+  MapPin,
+  ExternalLink
 } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
+import LocationPickerModal from './LocationPickerModal.vue'
 import { useCartStore } from '../stores/cart'
 import { openCulqiCheckout, sendChargeToBackend } from '../services/culqi'
 
@@ -326,6 +377,8 @@ const customer = reactive({
   phone: '',
   city: '',
   address: '',
+  mapUrl: '',
+  mapCoords: null,
   notes: ''
 })
 
@@ -333,8 +386,26 @@ const processing = ref(false)
 const errorMessage = ref('')
 const phoneError = ref('')
 const phoneInputRef = ref(null)
+const isMapModalOpen = ref(false)
 const orderCompleted = ref(false)
 const lastChargeId = ref('')
+
+function openMapModal() {
+  isMapModalOpen.value = true
+}
+
+function handleLocationSelected({ lat, lng, mapUrl, addressText }) {
+  customer.mapUrl = mapUrl
+  customer.mapCoords = { lat, lng }
+  if (!customer.address.trim() && addressText) {
+    customer.address = addressText
+  }
+}
+
+function removeMapLocation() {
+  customer.mapUrl = ''
+  customer.mapCoords = null
+}
 
 const whatsappCartUrl = computed(() => {
   if (cartStore.items.length === 0) return '#'
@@ -355,13 +426,14 @@ const whatsappCartUrl = computed(() => {
   lines.push(``)
   lines.push(`*Total a pagar:* ${cartStore.formattedTotal}`)
 
-  if (customer.name.trim() || customer.phone.trim() || customer.city.trim()) {
+  if (customer.name.trim() || customer.phone.trim() || customer.city.trim() || customer.address.trim() || customer.mapUrl) {
     lines.push(``)
     lines.push(`*Datos para la entrega:*`)
     if (customer.name.trim()) lines.push(`- Cliente: ${customer.name.trim()}`)
     if (customer.phone.trim()) lines.push(`- Teléfono: ${customer.phone.trim()}`)
     if (customer.city.trim()) lines.push(`- Distrito / Ciudad: ${customer.city.trim()}`)
     if (customer.address.trim()) lines.push(`- Dirección: ${customer.address.trim()}`)
+    if (customer.mapUrl) lines.push(`- 📍 Ubicación GPS (Google Maps): ${customer.mapUrl}`)
   }
 
   if (customer.notes.trim()) {
@@ -509,8 +581,9 @@ async function handleCheckout() {
             orderInfo: {
               customer_name: customer.name,
               customer_phone: customer.phone,
-              customer_address: `${customer.address} (${customer.city})`,
+              customer_address: `${customer.address || ''} (${customer.city})${customer.mapUrl ? ' | 📍 GPS: ' + customer.mapUrl : ''}`,
               customer_notes: customer.notes,
+              location_url: customer.mapUrl || '',
               currency: 'PEN',
               items: cartStore.items.map(item => ({
                 id: item.product.id,
