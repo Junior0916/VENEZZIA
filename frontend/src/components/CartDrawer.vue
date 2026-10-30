@@ -141,13 +141,23 @@
                 <div>
                   <label class="block text-[11px] font-semibold text-gray-700 mb-1">Teléfono / Celular *</label>
                   <input
+                    ref="phoneInputRef"
                     :value="customer.phone"
                     @input="handlePhoneInput"
+                    @blur="handlePhoneBlur"
                     type="tel"
                     maxlength="16"
                     placeholder="984 165 198"
-                    class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
+                    :class="[
+                      'w-full text-xs px-3.5 py-2.5 rounded-xl border bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 transition-all',
+                      phoneError
+                        ? 'border-rose-400 focus:ring-rose-200 text-rose-900 bg-rose-50/20'
+                        : 'border-[#eedee9] focus:ring-[#caa35f]/20 focus:border-[#caa35f]'
+                    ]"
                   />
+                  <span v-if="phoneError" class="text-[10px] text-rose-600 font-medium block mt-1 leading-tight">
+                    {{ phoneError }}
+                  </span>
                 </div>
                 <div>
                   <label class="block text-[11px] font-semibold text-gray-700 mb-1">Distrito / Ciudad *</label>
@@ -207,16 +217,15 @@
               </div>
             </div>
 
-            <!-- Order via WhatsApp (Direct & Structured) -->
-            <a
-              :href="whatsappCartUrl"
-              target="_blank"
-              rel="noopener noreferrer"
+            <!-- Order via WhatsApp (Direct & Structured with validation) -->
+            <button
+              type="button"
+              @click="handleWhatsAppOrder"
               class="w-full py-3.5 px-4 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs uppercase tracking-wider active:scale-[0.99] transition-all shadow-md shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer"
             >
               <IconWhatsApp customClass="w-4 h-4 text-white" />
               <span>Coordinar Pedido por WhatsApp</span>
-            </a>
+            </button>
 
             <!-- Or Pay with Card/Culqi -->
             <button
@@ -322,6 +331,8 @@ const customer = reactive({
 
 const processing = ref(false)
 const errorMessage = ref('')
+const phoneError = ref('')
+const phoneInputRef = ref(null)
 const orderCompleted = ref(false)
 const lastChargeId = ref('')
 
@@ -386,48 +397,97 @@ function handlePhoneInput(e) {
   if (e.target.value !== formatted) {
     e.target.value = formatted
   }
+
+  // Despejar error si ya tiene la longitud requerida
+  if (digitsOnly.startsWith('9')) {
+    if (digitsOnly.length === 9) {
+      phoneError.value = ''
+      if (errorMessage.value.includes('dígitos') || errorMessage.value.includes('celular') || errorMessage.value.includes('teléfono')) {
+        errorMessage.value = ''
+      }
+    }
+  } else if (!digitsOnly.startsWith('9') && digitsOnly.length >= 6) {
+    phoneError.value = ''
+    if (errorMessage.value.includes('dígitos') || errorMessage.value.includes('celular') || errorMessage.value.includes('teléfono')) {
+      errorMessage.value = ''
+    }
+  }
 }
 
-function validateForm() {
+function validatePhone() {
+  const cleanPhone = (customer.phone || '').replace(/\D/g, '')
+  if (!cleanPhone) {
+    phoneError.value = 'Por favor ingresa tu número de celular o WhatsApp.'
+    return false
+  }
+
+  // Validación estricta: si empieza con 9, DEBE tener exactamente 9 dígitos
+  if (cleanPhone.startsWith('9')) {
+    if (cleanPhone.length !== 9) {
+      phoneError.value = `El celular debe tener estrictamente 9 dígitos (ingresaste ${cleanPhone.length}).`
+      return false
+    }
+  } else {
+    // Si empieza por otro número (ej. extranjero), se comprueba longitud mínima
+    if (cleanPhone.length < 6) {
+      phoneError.value = 'Por favor ingresa un número de teléfono válido.'
+      return false
+    }
+  }
+
+  phoneError.value = ''
+  return true
+}
+
+function handlePhoneBlur() {
+  if (customer.phone && customer.phone.trim()) {
+    validatePhone()
+  } else {
+    phoneError.value = ''
+  }
+}
+
+function validateForm({ requireEmail = true } = {}) {
+  errorMessage.value = ''
+
   if (!customer.name.trim()) {
     errorMessage.value = 'Por favor ingresa tu nombre completo.'
     return false
   }
-  if (!customer.email.trim() || !customer.email.includes('@')) {
-    errorMessage.value = 'Por favor ingresa un correo electrónico válido para tu comprobante.'
-    return false
-  }
   
-  const cleanPhone = (customer.phone || '').replace(/\D/g, '')
-  if (!cleanPhone) {
-    errorMessage.value = 'Por favor ingresa tu número de teléfono o WhatsApp.'
-    return false
+  if (requireEmail) {
+    if (!customer.email.trim() || !customer.email.includes('@')) {
+      errorMessage.value = 'Por favor ingresa un correo electrónico válido para tu comprobante de pago.'
+      return false
+    }
   }
 
-  // Validación interna: si empieza con 9, debe tener obligatoriamente 9 dígitos
-  if (cleanPhone.startsWith('9')) {
-    if (cleanPhone.length !== 9) {
-      errorMessage.value = `El número de celular debe tener exactamente 9 dígitos (ingresaste ${cleanPhone.length}).`
-      return false
-    }
-  } else {
-    // Si empieza por otro número (ej. extranjero), solo se comprueba una longitud mínima válida
-    if (cleanPhone.length < 6) {
-      errorMessage.value = 'Por favor ingresa un número de teléfono válido.'
-      return false
-    }
+  if (!validatePhone()) {
+    errorMessage.value = phoneError.value
+    phoneInputRef.value?.focus()
+    return false
   }
 
   if (!customer.city.trim()) {
     errorMessage.value = 'Por favor indica tu distrito o ciudad de entrega.'
     return false
   }
+
   errorMessage.value = ''
   return true
 }
 
+function handleWhatsAppOrder() {
+  if (!validateForm({ requireEmail: false })) {
+    return
+  }
+
+  // Abrir WhatsApp con el pedido y los datos validados
+  window.open(whatsappCartUrl.value, '_blank')
+}
+
 async function handleCheckout() {
-  if (!validateForm()) return
+  if (!validateForm({ requireEmail: true })) return
 
   processing.value = true
   errorMessage.value = ''

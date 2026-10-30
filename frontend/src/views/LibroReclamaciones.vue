@@ -98,12 +98,21 @@
                 <input
                   :value="form.phone"
                   @input="handleLibroPhoneInput"
+                  @blur="handleLibroPhoneBlur"
                   type="tel"
                   maxlength="16"
                   required
                   placeholder="Ej. 932449996"
-                  class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
+                  :class="[
+                    'w-full text-xs px-3.5 py-2.5 rounded-xl border bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 transition-all',
+                    libroPhoneError
+                      ? 'border-rose-400 focus:ring-rose-200 text-rose-900 bg-rose-50/20'
+                      : 'border-[#eedee9] focus:ring-[#caa35f]/20 focus:border-[#caa35f]'
+                  ]"
                 />
+                <span v-if="libroPhoneError" class="text-[10px] text-rose-600 font-medium block mt-1 leading-tight">
+                  {{ libroPhoneError }}
+                </span>
               </div>
 
               <div>
@@ -501,6 +510,7 @@ import IconWhatsApp from '../components/icons/IconWhatsApp.vue'
 
 const submitted = ref(false)
 const submitting = ref(false)
+const libroPhoneError = ref('')
 const claimCodePreview = ref('')
 const currentDateString = ref('')
 
@@ -582,29 +592,54 @@ function handleLibroPhoneInput(e) {
   if (e.target.value !== formatted) {
     e.target.value = formatted
   }
+
+  if (digitsOnly.startsWith('9')) {
+    if (digitsOnly.length === 9) {
+      libroPhoneError.value = ''
+    }
+  } else if (!digitsOnly.startsWith('9') && digitsOnly.length >= 6) {
+    libroPhoneError.value = ''
+  }
+}
+
+function handleLibroPhoneBlur() {
+  const cleanPhone = (form.phone || '').replace(/\D/g, '')
+  if (cleanPhone.startsWith('9') && cleanPhone.length !== 9) {
+    libroPhoneError.value = `El número de celular debe tener estrictamente 9 dígitos (ingresaste ${cleanPhone.length}).`
+  } else if (!cleanPhone.startsWith('9') && cleanPhone && cleanPhone.length < 6) {
+    libroPhoneError.value = 'Por favor ingresa un número de teléfono válido.'
+  } else {
+    libroPhoneError.value = ''
+  }
 }
 
 function handleSubmit() {
   const cleanPhone = (form.phone || '').replace(/\D/g, '')
   if (!cleanPhone) {
+    libroPhoneError.value = 'Por favor ingresa tu número de celular o WhatsApp.'
     alert('Por favor ingresa tu número de celular o WhatsApp.')
     return
   }
 
-  // Validación interna: si empieza con 9, debe tener exactamente 9 dígitos
+  // Validación interna estricta: si empieza con 9, debe tener estrictamente 9 dígitos
   if (cleanPhone.startsWith('9')) {
     if (cleanPhone.length !== 9) {
-      alert(`El número de celular debe tener exactamente 9 dígitos (ingresaste ${cleanPhone.length}).`)
+      const msg = `El número de celular debe tener estrictamente 9 dígitos (ingresaste ${cleanPhone.length}). Revisa tu número para poder contactarte.`
+      libroPhoneError.value = msg
+      alert(msg)
       return
     }
   } else {
     // Si empieza por otro número (ej. extranjero), se valida una longitud mínima
     if (cleanPhone.length < 6) {
-      alert('Por favor ingresa un número de teléfono válido.')
+      const msg = 'Por favor ingresa un número de teléfono válido.'
+      libroPhoneError.value = msg
+      alert(msg)
       return
     }
   }
 
+  libroPhoneError.value = ''
   submitting.value = true
   const now = new Date()
   const dateStr = now.toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' })
