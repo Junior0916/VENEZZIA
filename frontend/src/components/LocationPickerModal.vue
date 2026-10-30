@@ -89,11 +89,14 @@
 
       <!-- Interactive Map Area with Central Floating Pin -->
       <div class="relative w-full bg-[#f4ecef] overflow-hidden" style="height: 380px; min-height: 320px;">
-        <!-- Leaflet Map Mount Container -->
-        <div ref="mapContainer" class="w-full h-full" style="height: 380px; width: 100%;"></div>
+        <!-- Leaflet Map Mount Container (Trapped at z-index: 1) -->
+        <div ref="mapContainer" class="relative w-full h-full" style="height: 380px; width: 100%; z-index: 1;"></div>
 
         <!-- Layer Switcher (Calles vs Satélite) -->
-        <div class="absolute top-3 right-3 z-30 flex items-center bg-white/95 backdrop-blur-xs rounded-xl shadow-md border border-gray-200 p-0.5 text-[10px] font-semibold text-gray-700">
+        <div
+          class="absolute top-3 right-3 flex items-center bg-white/95 backdrop-blur-xs rounded-xl shadow-lg border border-gray-200 p-0.5 text-[10px] font-semibold text-gray-700"
+          style="z-index: 1000;"
+        >
           <button
             type="button"
             @click="setMapType('streets')"
@@ -112,24 +115,36 @@
           </button>
         </div>
 
-        <!-- Central Pin Overlay (Uber/Rappi style) -->
-        <div class="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-          <div class="relative -translate-y-1/2 flex flex-col items-center">
-            <!-- Pulsing Target Ring -->
-            <div class="w-3.5 h-1.5 bg-black/40 rounded-full blur-[1px] translate-y-3.5"></div>
-            <!-- Pin Icon -->
-            <div class="animate-bounce -translate-y-1">
-              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#994c58] to-[#caa35f] text-white flex items-center justify-center shadow-xl border-2 border-white">
-                <MapPin class="w-5 h-5 fill-white text-[#994c58]" />
-              </div>
-            </div>
+        <!-- Floating Hint Pill -->
+        <div
+          class="absolute top-3 left-1/2 -translate-x-1/2 pointer-events-none"
+          style="z-index: 1000;"
+        >
+          <div class="px-3.5 py-1 rounded-full bg-black/80 backdrop-blur-xs text-white text-[10px] font-medium shadow-lg flex items-center gap-1.5 whitespace-nowrap border border-white/20">
+            <span>📍 Mueve el mapa hasta tu puerta</span>
           </div>
         </div>
 
-        <!-- Floating Hint Pill -->
-        <div class="absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-          <div class="px-3 py-1 rounded-full bg-black/75 backdrop-blur-xs text-white text-[10px] font-medium shadow-md flex items-center gap-1.5 whitespace-nowrap">
-            <span>Mueve el mapa para centrar el pin en tu puerta</span>
+        <!-- Central Pin Overlay (Always visible in exact center) -->
+        <div
+          class="absolute inset-0 pointer-events-none flex items-center justify-center"
+          style="z-index: 999;"
+        >
+          <div class="relative -translate-y-1/2 flex flex-col items-center">
+            <!-- Pin Body with Bouncing Animation -->
+            <div class="animate-bounce -translate-y-2 flex flex-col items-center drop-shadow-2xl">
+              <!-- Pin Head -->
+              <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-[#994c58] via-[#caa35f] to-[#e6c987] text-white flex items-center justify-center shadow-2xl border-[3px] border-white ring-2 ring-black/25">
+                <MapPin class="w-6 h-6 fill-white text-[#994c58]" />
+              </div>
+              <!-- Pin Pointer Needle -->
+              <div class="w-2 h-3.5 bg-gradient-to-b from-[#caa35f] to-[#994c58] rounded-b-full shadow-md -mt-1 border-x border-white"></div>
+            </div>
+            <!-- Target Radar Ground Dot -->
+            <div class="relative -mt-2 flex items-center justify-center">
+              <div class="w-4 h-2 bg-black/60 rounded-full blur-[0.5px]"></div>
+              <div class="absolute w-2 h-1 bg-[#caa35f] rounded-full"></div>
+            </div>
           </div>
         </div>
       </div>
