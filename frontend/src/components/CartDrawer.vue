@@ -139,25 +139,15 @@
 
               <div class="grid grid-cols-2 gap-2">
                 <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <label class="block text-[11px] font-semibold text-gray-700">Teléfono / Celular *</label>
-                    <span
-                      class="text-[10px] font-mono transition-colors"
-                      :class="customer.phone.length === 9 ? 'text-emerald-600 font-bold' : customer.phone.length > 0 ? 'text-[#caa35f]' : 'text-gray-400'"
-                    >
-                      {{ customer.phone.length }}/9
-                    </span>
-                  </div>
+                  <label class="block text-[11px] font-semibold text-gray-700 mb-1">Teléfono / Celular *</label>
                   <input
                     :value="customer.phone"
                     @input="handlePhoneInput"
                     type="tel"
-                    inputmode="numeric"
-                    maxlength="9"
+                    maxlength="16"
                     placeholder="984 165 198"
                     class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
                   />
-                  <span class="text-[10px] text-gray-400 mt-0.5 block">9 dígitos para Perú (empieza con 9)</span>
                 </div>
                 <div>
                   <label class="block text-[11px] font-semibold text-gray-700 mb-1">Distrito / Ciudad *</label>
@@ -375,13 +365,26 @@ const whatsappCartUrl = computed(() => {
 })
 
 function handlePhoneInput(e) {
-  let val = (e.target.value || '').replace(/\D/g, '')
-  if (val.length > 9) {
-    val = val.slice(0, 9)
+  let raw = e.target.value || ''
+  let hasLeadingPlus = raw.trim().startsWith('+')
+  let digitsOnly = raw.replace(/\D/g, '')
+
+  // Si empieza con 9 (número celular estándar de Perú)
+  if (digitsOnly.startsWith('9')) {
+    if (digitsOnly.length > 9) {
+      digitsOnly = digitsOnly.slice(0, 9)
+    }
+  } else {
+    // Si empieza por otro número (extranjero u otro formato), hasta 15 dígitos internacionales
+    if (digitsOnly.length > 15) {
+      digitsOnly = digitsOnly.slice(0, 15)
+    }
   }
-  customer.phone = val
-  if (e.target.value !== val) {
-    e.target.value = val
+
+  let formatted = (hasLeadingPlus ? '+' : '') + digitsOnly
+  customer.phone = formatted
+  if (e.target.value !== formatted) {
+    e.target.value = formatted
   }
 }
 
@@ -397,17 +400,22 @@ function validateForm() {
   
   const cleanPhone = (customer.phone || '').replace(/\D/g, '')
   if (!cleanPhone) {
-    errorMessage.value = 'Por favor ingresa tu número de celular o WhatsApp.'
+    errorMessage.value = 'Por favor ingresa tu número de teléfono o WhatsApp.'
     return false
   }
+
+  // Validación interna: si empieza con 9, debe tener obligatoriamente 9 dígitos
   if (cleanPhone.startsWith('9')) {
     if (cleanPhone.length !== 9) {
-      errorMessage.value = `El número de celular en Perú debe tener exactamente 9 dígitos (ingresaste ${cleanPhone.length}).`
+      errorMessage.value = `El número de celular debe tener exactamente 9 dígitos (ingresaste ${cleanPhone.length}).`
       return false
     }
   } else {
-    errorMessage.value = 'El número de celular en Perú debe empezar con 9 y tener 9 dígitos.'
-    return false
+    // Si empieza por otro número (ej. extranjero), solo se comprueba una longitud mínima válida
+    if (cleanPhone.length < 6) {
+      errorMessage.value = 'Por favor ingresa un número de teléfono válido.'
+      return false
+    }
   }
 
   if (!customer.city.trim()) {
