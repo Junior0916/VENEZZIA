@@ -97,9 +97,19 @@ routerAdd("POST", "/api/culqi/charge", (e) => {
                 charge: culqiRes
             });
         } else {
+            let errorMsg = (culqiRes && culqiRes.user_message) || (culqiRes && culqiRes.merchant_message) || "Error al procesar el cargo con Culqi";
+            
+            // Si Culqi solicita autenticación 3DS (reto del banco o tarjeta de prueba con challenge)
+            if (
+                (typeof errorMsg === "string" && (errorMsg.includes("autenticar") || errorMsg.includes("autenticación"))) ||
+                (culqiRes && culqiRes.action_code === "REVIEW")
+            ) {
+                errorMsg = "Esta tarjeta requiere autenticación adicional con el banco emisor (3D Secure). Para pruebas exitosas en entorno de test de Culqi, utiliza la tarjeta oficial de prueba sin reto: 4456 5300 0000 1005 (CVV 111, cualquier fecha futura ej: 12/28).";
+            }
+
             return e.json(400, {
                 success: false,
-                error: culqiRes.user_message || culqiRes.merchant_message || "Error al procesar el cargo con Culqi",
+                error: errorMsg,
                 details: culqiRes
             });
         }

@@ -139,13 +139,25 @@
 
               <div class="grid grid-cols-2 gap-2">
                 <div>
-                  <label class="block text-[11px] font-semibold text-gray-700 mb-1">Teléfono / WhatsApp *</label>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-[11px] font-semibold text-gray-700">Teléfono / Celular *</label>
+                    <span
+                      class="text-[10px] font-mono transition-colors"
+                      :class="customer.phone.length === 9 ? 'text-emerald-600 font-bold' : customer.phone.length > 0 ? 'text-[#caa35f]' : 'text-gray-400'"
+                    >
+                      {{ customer.phone.length }}/9
+                    </span>
+                  </div>
                   <input
-                    v-model="customer.phone"
+                    :value="customer.phone"
+                    @input="handlePhoneInput"
                     type="tel"
-                    placeholder="999 999 999"
+                    inputmode="numeric"
+                    maxlength="9"
+                    placeholder="984 165 198"
                     class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
                   />
+                  <span class="text-[10px] text-gray-400 mt-0.5 block">9 dígitos para Perú (empieza con 9)</span>
                 </div>
                 <div>
                   <label class="block text-[11px] font-semibold text-gray-700 mb-1">Distrito / Ciudad *</label>
@@ -198,9 +210,12 @@
             </div>
 
             <!-- Error message if any -->
-            <p v-if="errorMessage" class="text-xs text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200">
-              {{ errorMessage }}
-            </p>
+            <div v-if="errorMessage" class="text-xs text-rose-700 bg-rose-50 p-3 rounded-xl border border-rose-200 leading-relaxed space-y-1">
+              <div class="flex items-start gap-2">
+                <span class="text-rose-500 font-bold shrink-0">⚠️</span>
+                <span>{{ errorMessage }}</span>
+              </div>
+            </div>
 
             <!-- Order via WhatsApp (Direct & Structured) -->
             <a
@@ -359,19 +374,42 @@ const whatsappCartUrl = computed(() => {
   return `https://wa.me/51932449996?text=${encodeURIComponent(lines.join('\n'))}`
 })
 
+function handlePhoneInput(e) {
+  let val = (e.target.value || '').replace(/\D/g, '')
+  if (val.length > 9) {
+    val = val.slice(0, 9)
+  }
+  customer.phone = val
+  if (e.target.value !== val) {
+    e.target.value = val
+  }
+}
+
 function validateForm() {
   if (!customer.name.trim()) {
     errorMessage.value = 'Por favor ingresa tu nombre completo.'
     return false
   }
   if (!customer.email.trim() || !customer.email.includes('@')) {
-    errorMessage.value = 'Por favor ingresa un correo electrónico válido.'
+    errorMessage.value = 'Por favor ingresa un correo electrónico válido para tu comprobante.'
     return false
   }
-  if (!customer.phone.trim()) {
-    errorMessage.value = 'Por favor ingresa tu número de teléfono o WhatsApp.'
+  
+  const cleanPhone = (customer.phone || '').replace(/\D/g, '')
+  if (!cleanPhone) {
+    errorMessage.value = 'Por favor ingresa tu número de celular o WhatsApp.'
     return false
   }
+  if (cleanPhone.startsWith('9')) {
+    if (cleanPhone.length !== 9) {
+      errorMessage.value = `El número de celular en Perú debe tener exactamente 9 dígitos (ingresaste ${cleanPhone.length}).`
+      return false
+    }
+  } else {
+    errorMessage.value = 'El número de celular en Perú debe empezar con 9 y tener 9 dígitos.'
+    return false
+  }
+
   if (!customer.city.trim()) {
     errorMessage.value = 'Por favor indica tu distrito o ciudad de entrega.'
     return false

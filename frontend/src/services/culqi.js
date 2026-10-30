@@ -142,11 +142,15 @@ export async function openCulqiCheckout({
         }
       } else {
         const error = window.Culqi.error
+        let msg = error?.user_message || error?.message || 'Hubo un error con la pasarela de pagos.'
+        if (typeof msg === 'string' && (msg.includes('autenticar') || msg.includes('autenticación'))) {
+          msg = 'Esta tarjeta requiere autenticación adicional con el banco emisor (3D Secure). Para pruebas exitosas en modo test de Culqi, utiliza la tarjeta oficial sin reto: 4456 5300 0000 1005 (CVV 111, fecha futura).'
+        }
         if (onError) {
-          onError(error)
+          onError({ ...error, user_message: msg, message: msg })
         } else {
           console.error('[Culqi Error]', error)
-          alert(error?.user_message || 'Hubo un error con la pasarela de pagos.')
+          alert(msg)
         }
       }
     }
@@ -184,7 +188,11 @@ export async function sendChargeToBackend({ token, email, amount, orderInfo }) {
   }
 
   if (!response.ok) {
-    throw new Error(result.error || result.message || 'Error al procesar el pago con el servidor.')
+    let errMessage = result.error || result.message || 'Error al procesar el pago con el servidor.'
+    if (typeof errMessage === 'string' && (errMessage.includes('autenticar') || errMessage.includes('autenticación'))) {
+      errMessage = 'Esta tarjeta requiere validación 3D Secure con el banco emisor. Para pruebas directas en modo test de Culqi, usa la tarjeta oficial sin reto: 4456 5300 0000 1005 (CVV 111, cualquier fecha futura ej: 12/28).'
+    }
+    throw new Error(errMessage)
   }
 
   return result

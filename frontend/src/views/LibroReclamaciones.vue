@@ -94,14 +94,26 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-1">Teléfono / Celular (WhatsApp) *</label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-semibold text-gray-700">Teléfono / Celular (WhatsApp) *</label>
+                  <span
+                    class="text-[10px] font-mono transition-colors"
+                    :class="form.phone.length === 9 ? 'text-emerald-600 font-bold' : form.phone.length > 0 ? 'text-[#caa35f]' : 'text-gray-400'"
+                  >
+                    {{ form.phone.length }}/9
+                  </span>
+                </div>
                 <input
-                  v-model="form.phone"
+                  :value="form.phone"
+                  @input="handleLibroPhoneInput"
                   type="tel"
+                  inputmode="numeric"
+                  maxlength="9"
                   required
-                  placeholder="Ej. 932 449 996"
+                  placeholder="Ej. 932449996"
                   class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
                 />
+                <span class="text-[10px] text-gray-400 mt-0.5 block">9 dígitos para Perú (empieza con 9)</span>
               </div>
 
               <div>
@@ -558,7 +570,31 @@ const whatsappShareUrl = computed(() => {
   return `https://wa.me/51932449996?text=${encodeURIComponent(msg)}`
 })
 
+function handleLibroPhoneInput(e) {
+  let val = (e.target.value || '').replace(/\D/g, '')
+  if (val.length > 9) val = val.slice(0, 9)
+  form.phone = val
+  if (e.target.value !== val) {
+    e.target.value = val
+  }
+}
+
 function handleSubmit() {
+  const cleanPhone = (form.phone || '').replace(/\D/g, '')
+  if (!cleanPhone) {
+    alert('Por favor ingresa tu número de celular o WhatsApp.')
+    return
+  }
+  if (cleanPhone.startsWith('9')) {
+    if (cleanPhone.length !== 9) {
+      alert(`El número de celular en Perú debe tener exactamente 9 dígitos (ingresaste ${cleanPhone.length}).`)
+      return
+    }
+  } else {
+    alert('El número de celular en Perú debe empezar con 9 y tener 9 dígitos.')
+    return
+  }
+
   submitting.value = true
   const now = new Date()
   const dateStr = now.toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' })
