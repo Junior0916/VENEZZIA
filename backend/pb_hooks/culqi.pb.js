@@ -77,12 +77,35 @@ routerAdd("POST", "/api/culqi/charge", (e) => {
                     record.set("customer_name", orderInfo.customer_name || "");
                     record.set("customer_email", email);
                     record.set("customer_phone", orderInfo.customer_phone || "");
-                    record.set("customer_address", orderInfo.customer_address || "");
-                    record.set("items", JSON.stringify(orderInfo.items || []));
+
+                    // Dirección enriquecida con dedicatoria y enlace de GPS para el repartidor
+                    let fullAddress = orderInfo.customer_address || "";
+                    if (orderInfo.customer_notes && orderInfo.customer_notes.trim()) {
+                        fullAddress += " | 💌 Dedicatoria: \"" + orderInfo.customer_notes.trim() + "\"";
+                    }
+                    if (orderInfo.location_url) {
+                        fullAddress += " | 📍 GPS: " + orderInfo.location_url;
+                    }
+                    record.set("customer_address", fullAddress);
+
+                    // Formatear items con nombres en español comprensibles al 100%
+                    const formattedItems = (orderInfo.items || []).map(function(item) {
+                        const qty = Number(item.quantity || 1);
+                        const unitPrice = Number(item.price || 0);
+                        return {
+                            "producto": item.name || "Detalle Floral",
+                            "cantidad": qty,
+                            "precio_unitario": "S/ " + unitPrice.toFixed(2),
+                            "subtotal": "S/ " + (unitPrice * qty).toFixed(2)
+                        };
+                    });
+                    record.set("items", JSON.stringify(formattedItems));
+
                     record.set("total", amount / 100);
-                    record.set("currency", orderInfo.currency || "PEN");
+                    // Guardamos "Soles (S/)" para que Google Translate no traduzca "PEN" como "bolígrafo"
+                    record.set("currency", "Soles (S/)");
                     record.set("culqi_charge_id", culqiRes.id || "");
-                    record.set("status", "paid");
+                    record.set("status", "Pagado");
                     $app.save(record);
                 }
             } catch (err) {

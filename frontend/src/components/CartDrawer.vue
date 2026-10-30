@@ -313,31 +313,204 @@
       </div>
     </transition>
 
-    <!-- Success Modal -->
+    <!-- Luxury Confirmation Modal (Venezzia Brand Colors & Logo) -->
     <div
       v-if="orderCompleted"
-      class="fixed inset-0 z-60 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4"
+      class="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200"
     >
-      <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-[#eedcd8]">
-        <div class="w-14 h-14 bg-[#f8e5e8] text-[#994c58] rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle2 class="w-8 h-8" />
+      <div
+        class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-[#eedee9] text-center my-auto"
+      >
+        <!-- Header with Venezzia Brand Colors -->
+        <div class="p-6 bg-gradient-to-b from-[#27172b] via-[#351a3a] to-[#27172b] text-white relative">
+          <!-- Top decorative gold bar -->
+          <div class="h-1 w-full bg-gradient-to-r from-transparent via-[#caa35f] to-transparent absolute top-0 left-0"></div>
+
+          <!-- Brand Logo -->
+          <div class="flex items-center justify-center gap-2 mb-3">
+            <img src="/marca_lila.webp" alt="Venezzia Detalles" class="h-8 w-auto object-contain brightness-0 invert" />
+            <img src="/isotipo_lila.webp" alt="Venezzia Isotipo" class="h-7 w-auto object-contain" />
+          </div>
+
+          <!-- Success Icon with Glowing Gold Ring -->
+          <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-[#caa35f] to-[#e6c987] text-[#27172b] flex items-center justify-center mx-auto mb-3 shadow-lg ring-4 ring-[#caa35f]/30 border-2 border-white">
+            <CheckCircle2 class="w-9 h-9 stroke-[2.5]" />
+          </div>
+
+          <h3 class="text-xl sm:text-2xl font-serif font-bold text-white mb-1 tracking-tight">
+            ¡Pago Confirmado!
+          </h3>
+          <p class="text-xs text-[#eddcd9] leading-relaxed max-w-xs mx-auto">
+            Tu pedido ha sido recibido con éxito en <strong class="text-[#caa35f]">Venezzia Detalles</strong>.
+          </p>
         </div>
-        <h3 class="text-xl font-serif font-bold text-gray-900 mb-2">¡Pago Confirmado!</h3>
-        <p class="text-xs text-gray-600 mb-4 leading-relaxed">
-          Tu pedido ha sido recibido en <strong>Venezzia Detalles</strong>. Hemos enviado el comprobante a
-          <strong class="text-gray-800">{{ customer.email }}</strong>.
-        </p>
-        <div class="bg-[#faf5f6] rounded-2xl p-3 text-xs text-gray-600 mb-6 text-left space-y-1 border border-[#eedcd8]/50">
-          <div><strong class="text-gray-800">Transacción:</strong> {{ lastChargeId }}</div>
-          <div><strong class="text-gray-800">Destinatario:</strong> {{ customer.name }}</div>
-          <div><strong class="text-gray-800">Distrito:</strong> {{ customer.city }}</div>
+
+        <!-- Body / Luxury Ticket Details -->
+        <div class="p-5 sm:p-6 space-y-4 bg-[#fdfafc]">
+          <!-- Amount Paid & Transaction ID Card -->
+          <div class="bg-white rounded-2xl p-4 border border-[#eedee9] shadow-xs text-left space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-[#f3e7f0]">
+              <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Pagado</span>
+              <span class="text-xl font-bold font-serif text-[#27172b]">
+                {{ completedOrderInfo?.total || cartStore.formattedTotal }}
+              </span>
+            </div>
+
+            <!-- Detail Grid -->
+            <div class="space-y-1.5 text-xs text-gray-600">
+              <div class="flex items-start justify-between gap-2">
+                <span class="text-gray-400 shrink-0">N° Transacción:</span>
+                <span class="font-mono text-gray-800 font-semibold truncate text-[11px] bg-gray-50 px-2 py-0.5 rounded border border-gray-200/80">
+                  {{ lastChargeId }}
+                </span>
+              </div>
+              <div class="flex items-start justify-between gap-2">
+                <span class="text-gray-400 shrink-0">Comprobante a:</span>
+                <span class="text-gray-800 font-medium truncate">{{ completedOrderInfo?.customer?.email || customer.email }}</span>
+              </div>
+              <div class="flex items-start justify-between gap-2">
+                <span class="text-gray-400 shrink-0">Destinatario:</span>
+                <span class="text-gray-900 font-bold truncate">{{ completedOrderInfo?.customer?.name || customer.name }}</span>
+              </div>
+              <div class="flex items-start justify-between gap-2">
+                <span class="text-gray-400 shrink-0">Celular:</span>
+                <span class="text-gray-800 font-medium">{{ completedOrderInfo?.customer?.phone || customer.phone }}</span>
+              </div>
+              <div class="flex items-start justify-between gap-2">
+                <span class="text-gray-400 shrink-0">Entrega:</span>
+                <span class="text-gray-800 font-medium text-right">
+                  {{ completedOrderInfo?.customer?.address || customer.address }} ({{ completedOrderInfo?.customer?.city || customer.city }})
+                </span>
+              </div>
+              <div v-if="completedOrderInfo?.customer?.mapUrl || customer.mapUrl" class="flex items-center justify-between pt-1">
+                <span class="text-emerald-700 font-semibold text-[11px] flex items-center gap-1">
+                  <span>📍</span> Ubicación GPS:
+                </span>
+                <a
+                  :href="completedOrderInfo?.customer?.mapUrl || customer.mapUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-[#caa35f] hover:text-[#994c58] font-bold text-[11px] underline flex items-center gap-0.5"
+                >
+                  <span>Ver en Google Maps</span>
+                  <ExternalLink class="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+
+            <!-- Dedicatoria if present -->
+            <div
+              v-if="completedOrderInfo?.customer?.notes || customer.notes"
+              class="p-2.5 rounded-xl bg-[#faf5fb] border border-[#eedee9]/80 text-[11px] text-gray-700 italic space-y-0.5"
+            >
+              <div class="font-semibold text-gray-500 not-italic text-[10px] uppercase">Dedicatoria para tarjeta de regalo:</div>
+              <div>"{{ completedOrderInfo?.customer?.notes || customer.notes }}"</div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="space-y-2 pt-1">
+            <!-- Button WhatsApp Coordination -->
+            <a
+              :href="whatsappConfirmationUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="w-full py-3.5 px-4 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs uppercase tracking-wider active:scale-[0.99] transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <IconWhatsApp customClass="w-4 h-4 text-white" />
+              <span>Coordinar Despacho por WhatsApp</span>
+            </a>
+
+            <!-- Button Close and keep shopping -->
+            <button
+              type="button"
+              @click="closeSuccessModal"
+              class="w-full py-3 px-4 rounded-full bg-gradient-to-r from-[#27172b] to-[#401f46] hover:from-[#caa35f] hover:to-[#b0873b] hover:text-[#27172b] text-white font-bold text-xs uppercase tracking-wider active:scale-[0.99] transition-all shadow-md shadow-purple-950/20 border border-[#caa35f]/50 cursor-pointer"
+            >
+              Aceptar y Seguir Comprando
+            </button>
+          </div>
         </div>
-        <button
-          @click="closeSuccessModal"
-          class="w-full py-3 rounded-full bg-gradient-to-r from-[#b76e79] to-[#994c58] text-white font-bold text-xs uppercase tracking-wider hover:opacity-95 transition-all cursor-pointer"
-        >
-          Aceptar y Seguir Comprando
-        </button>
+      </div>
+    </div>
+
+    <!-- Rejection / Declined Payment Modal -->
+    <div
+      v-if="showRejectModal"
+      class="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border border-rose-200 text-center my-auto"
+      >
+        <!-- Header -->
+        <div class="p-6 bg-gradient-to-b from-[#2a1318] via-[#3d1a22] to-[#2a1318] text-white relative">
+          <!-- Top decorative alert bar -->
+          <div class="h-1 w-full bg-gradient-to-r from-transparent via-rose-500 to-transparent absolute top-0 left-0"></div>
+
+          <!-- Brand Logo -->
+          <div class="flex items-center justify-center gap-2 mb-3">
+            <img src="/marca_lila.webp" alt="Venezzia Detalles" class="h-7 w-auto object-contain brightness-0 invert opacity-80" />
+            <img src="/isotipo_lila.webp" alt="Venezzia Isotipo" class="h-6 w-auto object-contain opacity-80" />
+          </div>
+
+          <!-- Alert / X Icon with Rose Ring -->
+          <div class="w-14 h-14 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-3 shadow-lg ring-4 ring-rose-500/30 border-2 border-rose-400">
+            <AlertCircle class="w-8 h-8" />
+          </div>
+
+          <h3 class="text-xl font-serif font-bold text-white mb-1 tracking-tight">
+            Pago No Procesado
+          </h3>
+          <p class="text-xs text-rose-200 leading-relaxed">
+            La pasarela de pago o el banco emisor no pudo autorizar el cargo.
+          </p>
+        </div>
+
+        <!-- Body / Reason & Alternatives -->
+        <div class="p-5 space-y-3.5 bg-[#fdfafc] text-left text-xs">
+          <!-- Reason Box -->
+          <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200/80 space-y-1">
+            <div class="font-semibold text-rose-900 flex items-center gap-1.5 text-[11px] uppercase tracking-wide">
+              <span>⚠️</span> Detalle del Rechazo:
+            </div>
+            <p class="text-rose-700 leading-relaxed text-xs font-medium">
+              {{ rejectReason || 'La transacción ha sido rechazada por el banco emisor o los datos de la tarjeta no son válidos.' }}
+            </p>
+          </div>
+
+          <!-- Suggestions -->
+          <div class="p-3 rounded-2xl bg-white border border-[#eedee9] space-y-1.5 text-gray-600 text-[11px]">
+            <div class="font-semibold text-gray-700">Recomendaciones:</div>
+            <ul class="list-disc list-inside space-y-1 text-gray-500">
+              <li>Verifica que el número, fecha y CVV estén correctos.</li>
+              <li>Asegúrate de tener compras por internet activadas en tu app bancaria.</li>
+              <li>O coordina y paga directamente por <strong>Yape, Plin o Transferencia</strong> sin comisiones.</li>
+            </ul>
+          </div>
+
+          <!-- Actions -->
+          <div class="space-y-2 pt-1">
+            <!-- Button Try another card -->
+            <button
+              type="button"
+              @click="closeRejectModal"
+              class="w-full py-3 px-4 rounded-full bg-gradient-to-r from-[#27172b] to-[#401f46] hover:from-[#caa35f] hover:to-[#b0873b] hover:text-[#27172b] text-white font-bold text-xs uppercase tracking-wider active:scale-[0.99] transition-all shadow-md shadow-purple-950/20 border border-[#caa35f]/50 flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <RefreshCw class="w-3.5 h-3.5" />
+              <span>Intentar con otra Tarjeta</span>
+            </button>
+
+            <!-- Button WhatsApp Alternative -->
+            <button
+              type="button"
+              @click="closeRejectModalAndOpenWhatsApp"
+              class="w-full py-3 px-4 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs uppercase tracking-wider active:scale-[0.99] transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <IconWhatsApp customClass="w-4 h-4 text-white" />
+              <span>Pagar por Yape / Plin / WhatsApp</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -360,6 +533,8 @@ import {
   Lock,
   ShieldCheck,
   CheckCircle2,
+  AlertCircle,
+  RefreshCw,
   Loader2,
   MapPin,
   ExternalLink
@@ -389,6 +564,9 @@ const phoneInputRef = ref(null)
 const isMapModalOpen = ref(false)
 const orderCompleted = ref(false)
 const lastChargeId = ref('')
+const completedOrderInfo = ref(null)
+const showRejectModal = ref(false)
+const rejectReason = ref('')
 
 function openMapModal() {
   isMapModalOpen.value = true
@@ -444,6 +622,33 @@ const whatsappCartUrl = computed(() => {
   lines.push(``)
   lines.push(`¿Cómo coordinamos el anticipo y horario de despacho? Muchas gracias.`)
 
+  return `https://wa.me/51932449996?text=${encodeURIComponent(lines.join('\n'))}`
+})
+
+const whatsappConfirmationUrl = computed(() => {
+  const info = completedOrderInfo.value
+  const c = info?.customer || customer
+  const total = info?.total || cartStore.formattedTotal
+  const tx = info?.chargeId || lastChargeId.value
+
+  const lines = [
+    `¡Hola Venezzia Detalles! 🌸`,
+    `Acabo de realizar mi pago en línea por la página web:`,
+    ``,
+    `*N° de Transacción:* ${tx}`,
+    `*Monto Pagado:* ${total}`,
+    `*Cliente:* ${c.name || ''}`,
+    `*Teléfono:* ${c.phone || ''}`,
+    `*Destino:* ${c.address || ''} (${c.city || ''})`,
+  ]
+  if (c.mapUrl) {
+    lines.push(`*Ubicación GPS:* ${c.mapUrl}`)
+  }
+  if (c.notes) {
+    lines.push(`*Dedicatoria:* "${c.notes}"`)
+  }
+  lines.push(``)
+  lines.push(`Adjunto mi confirmación para coordinar el horario de despacho. ¡Muchas gracias!`)
   return `https://wa.me/51932449996?text=${encodeURIComponent(lines.join('\n'))}`
 })
 
@@ -594,29 +799,54 @@ async function handleCheckout() {
             }
           })
 
+          completedOrderInfo.value = {
+            chargeId: chargeResult.chargeId || token.id,
+            total: cartStore.formattedTotal,
+            totalAmount: cartStore.totalAmount,
+            customer: { ...customer }
+          }
           lastChargeId.value = chargeResult.chargeId || token.id
           orderCompleted.value = true
           cartStore.clearCart()
         } catch (err) {
-          errorMessage.value = err.message || 'Error al procesar el cobro con Culqi.'
+          const msg = err.message || 'Error al procesar el cobro con Culqi.'
+          errorMessage.value = msg
+          rejectReason.value = msg
+          showRejectModal.value = true
         } finally {
           processing.value = false
         }
       },
       onError: (err) => {
         processing.value = false
-        errorMessage.value = err?.user_message || err?.message || 'Error en la pasarela Culqi.'
+        const msg = err?.user_message || err?.message || 'Error en la pasarela Culqi.'
+        errorMessage.value = msg
+        rejectReason.value = msg
+        showRejectModal.value = true
       }
     })
   } catch (err) {
     processing.value = false
-    errorMessage.value = err.message || 'No se pudo iniciar el proceso de pago.'
+    const msg = err.message || 'No se pudo iniciar el proceso de pago.'
+    errorMessage.value = msg
+    rejectReason.value = msg
+    showRejectModal.value = true
   }
 }
 
 function closeSuccessModal() {
   orderCompleted.value = false
+  completedOrderInfo.value = null
   cartStore.closeCart()
+}
+
+function closeRejectModal() {
+  showRejectModal.value = false
+}
+
+function closeRejectModalAndOpenWhatsApp() {
+  showRejectModal.value = false
+  window.open(whatsappCartUrl.value, '_blank')
 }
 
 // Lock body scrolling when cart is open
