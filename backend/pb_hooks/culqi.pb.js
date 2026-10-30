@@ -1,12 +1,26 @@
 /**
  * Culqi Payment Hook for PocketBase
- * Handles GET & POST /api/culqi/charge
+ * Handles GET & POST /api/culqi/charge and GET /api/culqi/config
  */
+
+routerAdd("GET", "/api/culqi/config", (e) => {
+    const pubKey = $os.getenv("CULQI_PUBLIC_KEY") || "";
+    const secKey = $os.getenv("CULQI_SECRET_KEY") || "";
+    return e.json(200, {
+        status: "online",
+        publicKey: pubKey,
+        configured: Boolean(pubKey && secKey && secKey !== "sk_test_placeholder" && secKey !== "sk_test_sample_key_here")
+    });
+});
 
 routerAdd("GET", "/api/culqi/charge", (e) => {
     return e.json(200, {
-        status: "online",
-        message: "Endpoint de pagos Culqi activo y listo para solicitudes POST"
+        resultado: "EXITO_CONEXION_OK",
+        estado: "🟢 EN LINEA Y FUNCIONANDO",
+        servidor: "PocketBase Venezzia",
+        mensaje: "El motor de pagos Culqi esta activo y listo para procesar cobros de la tienda.",
+        como_probar: "Para probar un pago real, ingresa a la tienda https://venezzia.shop, agrega un producto a la bolsa y dale clic a 'Pagar con Tarjeta / Culqi'.",
+        nota: "Este mensaje NO es un error, es la confirmacion de que tu servidor responde perfectamente con codigo 200 OK."
     });
 });
 

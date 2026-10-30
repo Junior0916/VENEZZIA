@@ -18,13 +18,31 @@ function getPocketBaseUrl() {
   return 'http://127.0.0.1:8090'
 }
 
-export function getCulqiPublicKey() {
+export async function getCulqiPublicKey() {
   if (typeof window !== 'undefined') {
-    if (window.CULQI_PUBLIC_KEY) return window.CULQI_PUBLIC_KEY
+    if (window.CULQI_PUBLIC_KEY && window.CULQI_PUBLIC_KEY.startsWith('pk_')) return window.CULQI_PUBLIC_KEY
     const stored = localStorage.getItem('culqi_public_key')
-    if (stored) return stored
+    if (stored && stored.startsWith('pk_')) return stored
   }
-  return import.meta.env.VITE_CULQI_PUBLIC_KEY || 'pk_test_sample_key_here'
+
+  // Check from backend /api/culqi/config
+  try {
+    const backendUrl = getPocketBaseUrl()
+    const res = await fetch(`${backendUrl}/api/culqi/config`)
+    if (res.ok) {
+      const data = await res.json()
+      if (data.publicKey && data.publicKey.startsWith('pk_')) {
+        return data.publicKey
+      }
+    }
+  } catch (e) {}
+
+  const envKey = import.meta.env.VITE_CULQI_PUBLIC_KEY
+  if (envKey && envKey.startsWith('pk_') && envKey !== 'pk_test_sample_key_here') {
+    return envKey
+  }
+
+  return null
 }
 
 let culqiScriptLoaded = false
@@ -73,7 +91,20 @@ export async function openCulqiCheckout({
       throw new Error('Culqi no está disponible en la ventana global.')
     }
 
-    window.Culqi.publicKey = getCulqiPublicKey()
+    const pubKey = await getCulqiPublicKey()
+    if (!pubKey) {
+      const userKey = prompt(
+        'Ingresa tu Llave Pública de prueba de Culqi (ej: pk_test_...):'
+      )
+      if (userKey && userKey.trim().startsWith('pk_')) {
+        localStorage.setItem('culqi_public_key', userKey.trim())
+        window.Culqi.publicKey = userKey.trim()
+      } else {
+        throw new Error('Debes ingresar tu Llave Pública de Culqi (pk_test_...) para iniciar la pasarela de pagos.')
+      }
+    } else {
+      window.Culqi.publicKey = pubKey
+    }
 
     window.Culqi.settings({
       title: title,
