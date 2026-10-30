@@ -5,10 +5,10 @@
     @click.self="emit('close')"
   >
     <div
-      class="bg-white rounded-3xl w-full max-w-xl shadow-2xl border border-[#eedcd8] overflow-hidden flex flex-col max-h-[92vh] text-gray-800"
+      class="bg-white rounded-3xl w-full max-w-xl shadow-2xl border border-[#eedcd8] overflow-hidden flex flex-col max-h-[94vh] text-gray-800"
     >
       <!-- Modal Header -->
-      <div class="px-5 py-4 border-b border-[#eedee9] bg-gradient-to-r from-[#faf5fb] to-[#fff] flex items-center justify-between">
+      <div class="px-5 py-3.5 border-b border-[#eedee9] bg-gradient-to-r from-[#faf5fb] to-[#fff] flex items-center justify-between shrink-0">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-full bg-[#fbf2e5] text-[#b0873b] flex items-center justify-center shadow-xs">
             <MapPin class="w-4 h-4 text-[#caa35f]" />
@@ -28,7 +28,7 @@
       </div>
 
       <!-- Search & GPS Controls -->
-      <div class="p-3 bg-[#fdfafc] border-b border-[#eedee9] space-y-2">
+      <div class="p-3 bg-[#fdfafc] border-b border-[#eedee9] space-y-2 shrink-0">
         <div class="flex items-center gap-2">
           <!-- Search input -->
           <div class="relative flex-1">
@@ -88,18 +88,39 @@
       </div>
 
       <!-- Interactive Map Area with Central Floating Pin -->
-      <div class="relative flex-1 min-h-[280px] sm:min-h-[340px] bg-gray-100 overflow-hidden">
-        <div ref="mapContainer" class="w-full h-full z-10"></div>
+      <div class="relative w-full bg-[#f4ecef] overflow-hidden" style="height: 380px; min-height: 320px;">
+        <!-- Leaflet Map Mount Container -->
+        <div ref="mapContainer" class="w-full h-full" style="height: 380px; width: 100%;"></div>
+
+        <!-- Layer Switcher (Calles vs Satélite) -->
+        <div class="absolute top-3 right-3 z-30 flex items-center bg-white/95 backdrop-blur-xs rounded-xl shadow-md border border-gray-200 p-0.5 text-[10px] font-semibold text-gray-700">
+          <button
+            type="button"
+            @click="setMapType('streets')"
+            :class="mapType === 'streets' ? 'bg-[#27172b] text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'"
+            class="px-2.5 py-1 rounded-lg transition-all cursor-pointer"
+          >
+            Calles
+          </button>
+          <button
+            type="button"
+            @click="setMapType('satellite')"
+            :class="mapType === 'satellite' ? 'bg-[#27172b] text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'"
+            class="px-2.5 py-1 rounded-lg transition-all cursor-pointer"
+          >
+            Satélite
+          </button>
+        </div>
 
         <!-- Central Pin Overlay (Uber/Rappi style) -->
         <div class="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
           <div class="relative -translate-y-1/2 flex flex-col items-center">
             <!-- Pulsing Target Ring -->
-            <div class="w-3 h-1 bg-black/40 rounded-full blur-[1px] translate-y-3"></div>
+            <div class="w-3.5 h-1.5 bg-black/40 rounded-full blur-[1px] translate-y-3.5"></div>
             <!-- Pin Icon -->
             <div class="animate-bounce -translate-y-1">
-              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#994c58] to-[#caa35f] text-white flex items-center justify-center shadow-lg border-2 border-white">
-                <MapPin class="w-4 h-4 fill-white text-[#994c58]" />
+              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#994c58] to-[#caa35f] text-white flex items-center justify-center shadow-xl border-2 border-white">
+                <MapPin class="w-5 h-5 fill-white text-[#994c58]" />
               </div>
             </div>
           </div>
@@ -107,14 +128,14 @@
 
         <!-- Floating Hint Pill -->
         <div class="absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-          <div class="px-3 py-1 rounded-full bg-black/70 backdrop-blur-xs text-white text-[10px] font-medium shadow-md flex items-center gap-1.5 whitespace-nowrap">
+          <div class="px-3 py-1 rounded-full bg-black/75 backdrop-blur-xs text-white text-[10px] font-medium shadow-md flex items-center gap-1.5 whitespace-nowrap">
             <span>Mueve el mapa para centrar el pin en tu puerta</span>
           </div>
         </div>
       </div>
 
       <!-- Modal Footer & Confirmation -->
-      <div class="p-4 border-t border-[#eedee9] bg-[#faf5fb] space-y-3">
+      <div class="p-4 border-t border-[#eedee9] bg-[#faf5fb] space-y-3 shrink-0">
         <!-- Detected address / coordinates info -->
         <div class="p-2.5 rounded-xl bg-white border border-[#eedee9] text-xs space-y-1">
           <div class="flex items-center justify-between text-[11px] text-gray-500 font-mono">
@@ -171,6 +192,8 @@ const emit = defineEmits(['close', 'select'])
 
 const mapContainer = ref(null)
 let map = null
+let currentTileLayer = null
+let fallbackApplied = false
 
 // Default: Lima, Perú (Miraflores central coordinates)
 const defaultLat = -12.1218
@@ -179,6 +202,7 @@ const defaultLng = -77.0298
 const currentLat = ref(defaultLat)
 const currentLng = ref(defaultLng)
 const detectedAddress = ref('')
+const mapType = ref('streets')
 
 const searchQuery = ref('')
 const searchResults = ref([])
@@ -186,6 +210,52 @@ const locating = ref(false)
 const gpsError = ref('')
 
 let reverseGeocodeTimer = null
+let resizeObserver = null
+
+function getTileLayer(type) {
+  fallbackApplied = false
+  if (type === 'satellite') {
+    // Google Hybrid (satellite + streets overlay)
+    return L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+      maxZoom: 20,
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      attribution: 'Google Maps'
+    })
+  }
+
+  // Google Maps standard roadmap (official street names in Peru)
+  return L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+    maxZoom: 20,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: 'Google Maps'
+  })
+}
+
+function setMapType(type) {
+  mapType.value = type
+  if (!map) return
+  if (currentTileLayer) {
+    map.removeLayer(currentTileLayer)
+  }
+  currentTileLayer = getTileLayer(type)
+  attachTileFallback(currentTileLayer)
+  currentTileLayer.addTo(map)
+}
+
+function attachTileFallback(tileLayer) {
+  tileLayer.on('tileerror', () => {
+    if (!fallbackApplied && map) {
+      fallbackApplied = true
+      console.warn('[Map] Switching to Carto Voyager fallback tiles')
+      map.removeLayer(tileLayer)
+      currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd',
+        attribution: 'CartoDB'
+      }).addTo(map)
+    }
+  })
+}
 
 function initMap() {
   if (!mapContainer.value) return
@@ -206,17 +276,17 @@ function initMap() {
   map = L.map(mapContainer.value, {
     center: [startLat, startLng],
     zoom: props.initialCoords ? 16 : 14,
-    zoomControl: false
+    zoomControl: false,
+    preferCanvas: true
   })
 
-  // Add zoom control in top-right
-  L.control.zoom({ position: 'topright' }).addTo(map)
+  // Add zoom control in top-left
+  L.control.zoom({ position: 'topleft' }).addTo(map)
 
-  // Use clean OpenStreetMap tiles
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(map)
+  // Add tiles
+  currentTileLayer = getTileLayer(mapType.value)
+  attachTileFallback(currentTileLayer)
+  currentTileLayer.addTo(map)
 
   // Track map movement to update current center coordinates
   map.on('move', () => {
@@ -237,8 +307,16 @@ function initMap() {
     map.panTo(e.latlng)
   })
 
-  // Fetch initial reverse geocode
+  // Initial reverse geocode
   debouncedReverseGeocode(startLat, startLng)
+
+  // Setup ResizeObserver to guarantee tiles are always sized correctly
+  if (window.ResizeObserver && !resizeObserver) {
+    resizeObserver = new ResizeObserver(() => {
+      if (map) map.invalidateSize()
+    })
+    resizeObserver.observe(mapContainer.value)
+  }
 }
 
 function debouncedReverseGeocode(lat, lng) {
@@ -252,7 +330,6 @@ function debouncedReverseGeocode(lat, lng) {
       if (res.ok) {
         const data = await res.json()
         if (data && data.display_name) {
-          // Format shorter address: road, suburb, city
           const addr = data.address || {}
           const road = addr.road || addr.pedestrian || ''
           const houseNumber = addr.house_number ? ` ${addr.house_number}` : ''
@@ -264,7 +341,7 @@ function debouncedReverseGeocode(lat, lng) {
         }
       }
     } catch (e) {
-      // Quiet fail for reverse geocode
+      // Quiet fallback
     }
   }, 400)
 }
@@ -363,15 +440,21 @@ watch(
       searchResults.value = []
       gpsError.value = ''
       nextTick(() => {
-        setTimeout(() => {
-          initMap()
-          if (map) map.invalidateSize()
-        }, 150)
+        initMap()
+        // Run staggered invalidateSize to guarantee tiles render properly even during modal animations
+        setTimeout(() => map?.invalidateSize(), 50)
+        setTimeout(() => map?.invalidateSize(), 150)
+        setTimeout(() => map?.invalidateSize(), 300)
+        setTimeout(() => map?.invalidateSize(), 500)
       })
     } else {
       if (map) {
         map.remove()
         map = null
+      }
+      if (resizeObserver) {
+        resizeObserver.disconnect()
+        resizeObserver = null
       }
     }
   }
@@ -382,6 +465,67 @@ onUnmounted(() => {
     map.remove()
     map = null
   }
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
   if (reverseGeocodeTimer) clearTimeout(reverseGeocodeTimer)
 })
 </script>
+
+<style>
+/* CRITICAL FIX: Prevent Tailwind preflight / CSS reset from breaking Leaflet tiles */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+  outline: none;
+  background-color: #f4ecef !important;
+  font-family: inherit !important;
+}
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+}
+
+.leaflet-tile-container img,
+.leaflet-tile {
+  max-width: none !important;
+  max-height: none !important;
+  width: 256px !important;
+  height: 256px !important;
+  display: block !important;
+  visibility: inherit !important;
+}
+
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  margin-top: 12px !important;
+  margin-left: 12px !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border: none !important;
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+}
+</style>
