@@ -889,17 +889,23 @@ const PRODUCT_OPTIMIZED_ASSETS = {
 }
 
 function resolveProductImage(record, client) {
-  // 1. Direct ID match for optimized WebP
-  if (record?.id && PRODUCT_OPTIMIZED_ASSETS[record.id]) {
-    return PRODUCT_OPTIMIZED_ASSETS[record.id]
+  // 1. Highest Priority: PocketBase User Uploaded File
+  // When a user uploads a new image in PocketBase, record.image contains the uploaded filename (e.g. 'ramo_123.webp')
+  if (record?.image && client?.files?.getURL && !record.image.startsWith('http://') && !record.image.startsWith('https://') && !record.image.startsWith('/')) {
+    return client.files.getURL(record, record.image, { thumb: '600x750' })
   }
 
-  // 1.5. Direct full URL or local path check (e.g. Unsplash, HTTP, or /products/)
+  // 2. Direct external URL (e.g. Unsplash) or direct public path (/products/...)
   if (record?.image && (record.image.startsWith('http://') || record.image.startsWith('https://') || record.image.startsWith('/products/'))) {
     return record.image
   }
 
-  // 2. Name-based match for catalog products
+  // 3. Fallback to optimized catalog assets if user hasn't uploaded a replacement in PocketBase yet
+  if (record?.id && PRODUCT_OPTIMIZED_ASSETS[record.id]) {
+    return PRODUCT_OPTIMIZED_ASSETS[record.id]
+  }
+
+  // 4. Name-based match for catalog products
   const norm = (record?.name || '').toLowerCase()
   if (norm.includes('osita dormilona')) return '/products/box_osita_dormilona_centered.webp'
   if (norm.includes('kitty premium')) return '/products/box_kitty_premium_centered.webp'
@@ -922,28 +928,29 @@ function resolveProductImage(record, client) {
   if (norm.includes('2 carritos')) return '/products/ramo-hotwheels-2_centered.webp'
   if (norm.includes('3 carritos')) return '/products/ramo-hotwheels-3_centered.webp'
 
-  // 3. Fallback to client URL if user adds new custom records
-  if (record?.image && client?.files?.getURL) {
-    return client.files.getURL(record, record.image, { thumb: '600x750' })
-  }
-
   return '/products/box_basico_centered.webp'
 }
 
 export async function fetchProducts() {
-  const mapRecord = (record, client) => ({
-    id: record.id,
-    campaign: record.campaign || 'maquillaje',
-    name: record.name,
-    description: record.description,
-    price: record.price,
-    original_price: record.compare_at_price || record.original_price,
-    category: record.category || 'General',
-    image: resolveProductImage(record, client),
-    catalog_card: record.catalog_card,
-    in_stock: record.in_stock,
-    items_included: record.items_included || []
-  })
+  const mapRecord = (record, client) => {
+    let catalogCardUrl = record.catalog_card || ''
+    if (catalogCardUrl && client?.files?.getURL && !catalogCardUrl.startsWith('http://') && !catalogCardUrl.startsWith('https://') && !catalogCardUrl.startsWith('/')) {
+      catalogCardUrl = client.files.getURL(record, catalogCardUrl, { thumb: '600x750' })
+    }
+    return {
+      id: record.id,
+      campaign: record.campaign || 'maquillaje',
+      name: record.name,
+      description: record.description,
+      price: record.price,
+      original_price: record.compare_at_price || record.original_price,
+      category: record.category || 'General',
+      image: resolveProductImage(record, client),
+      catalog_card: catalogCardUrl,
+      in_stock: record.in_stock,
+      items_included: record.items_included || []
+    }
+  }
 
   let liveProducts = null
 
