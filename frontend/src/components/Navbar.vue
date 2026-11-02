@@ -1,18 +1,18 @@
 <template>
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#eedee9]/80 shadow-[0_4px_24px_-10px_rgba(154,104,155,0.08)]">
     <!-- Top Utility Announcement Bar (Soft Lilac Mist & Champagne Gold Accents) -->
-    <div class="border-b border-[#eedee9] bg-gradient-to-r from-[#faf5fc] via-[#fbf7fd] to-[#f8f1fa] text-[11px] text-gray-500 py-1.5 px-4 sm:px-6 lg:px-8">
+    <div class="border-b border-[#eedee9] bg-gradient-to-r from-[#faf5fc] via-[#fbf7fd] to-[#f8f1fa] text-[11px] text-gray-500 py-1 px-4 sm:px-6 lg:px-8">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
-        <!-- Social Icons with Official Brand Logos -->
+        <!-- Social Icons with Official Brand Logos & Phone Hotline -->
         <div class="flex items-center gap-3 sm:gap-4">
           <div class="flex items-center gap-3 text-gray-400">
             <!-- Official WhatsApp Logo -->
             <a
-              href="https://wa.me/51932449996?text=Hola%20Venezzia%20Detalles,%20quisiera%20hacer%20un%20pedido"
+              :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera hacer un pedido')"
               target="_blank"
               rel="noopener noreferrer"
               class="text-[#25D366] hover:scale-115 transition-transform flex items-center"
-              title="Escríbenos a WhatsApp (+51 932 449 996)"
+              :title="'Escríbenos a WhatsApp (' + siteSettingsStore.formattedPhone + ')'"
             >
               <IconWhatsApp customClass="w-3.5 h-3.5" />
             </a>
@@ -54,20 +54,20 @@
 
           <!-- Direct WhatsApp Hotline -->
           <a
-            href="https://wa.me/51932449996?text=Hola%20Venezzia%20Detalles,%20quisiera%20hacer%20un%20pedido"
+            :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera hacer un pedido')"
             target="_blank"
             rel="noopener noreferrer"
             class="hidden sm:inline-flex items-center gap-1.5 text-gray-600 hover:text-emerald-700 font-medium group transition-colors"
           >
             <IconWhatsApp customClass="w-3.5 h-3.5 text-[#25D366] group-hover:scale-110 transition-transform" />
-            <span>Atención Inmediata: <strong class="text-gray-900 font-semibold">+51 932 449 996</strong></span>
+            <span>Atención Inmediata: <strong class="text-gray-900 font-semibold">{{ siteSettingsStore.formattedPhone }}</strong></span>
           </a>
         </div>
 
-        <!-- Right: Active Campaign Indicator & Currency -->
+        <!-- Center / Right: Dynamic Announcement Text & Currency -->
         <div class="flex items-center gap-3">
-          <span class="hidden md:inline text-[11px] font-medium tracking-wide" :class="activeBadgeColor">
-            {{ campaignStore.activeCampaign.badge }}
+          <span class="hidden md:inline text-[11px] font-medium tracking-wide text-gray-600">
+            {{ siteSettingsStore.announcementText }}
           </span>
           <div class="flex items-center gap-1 font-semibold text-gray-700 bg-white/90 px-2.5 py-0.5 rounded-full border border-[#eedee9] text-[10px] shadow-2xs">
             <span class="text-[#caa35f] font-bold">PEN</span>
@@ -77,96 +77,40 @@
       </div>
     </div>
 
-    <!-- Main Navigation Bar -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
-      <div class="flex items-center justify-between gap-4">
+    <!-- Tier 1: Main Header Bar (Logo, Spacious Centered Search, WhatsApp & Shopping Bag) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
+      <div class="flex items-center justify-between gap-4 sm:gap-6">
         <!-- Left: Brand Logo — Nombre izquierda, Isotipo derecha -->
-        <router-link to="/" class="flex items-center gap-2.5 group shrink-0" title="Venezzia Detalles">
-          <!-- Nombre de marca en lila sin fondo -->
+        <router-link to="/" class="flex items-center gap-2 sm:gap-3 group shrink-0" title="Venezzia Detalles">
           <img
             src="/marca_lila.webp"
             alt="Venezzia Detalles"
-            class="h-10 sm:h-13 w-auto object-contain group-hover:opacity-85 transition-opacity duration-300"
+            class="h-9 sm:h-12 w-auto object-contain group-hover:opacity-85 transition-opacity duration-300"
           />
-          <!-- Isotipo en lila sin fondo -->
           <img
             src="/isotipo_lila.webp"
             alt="Venezzia Isotipo"
-            class="h-9 sm:h-11 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+            class="h-8 sm:h-10 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
           />
         </router-link>
 
-        <!-- Center: Special Campaign Dates Navigation Menu -->
-        <nav class="hidden lg:flex items-center gap-1 xl:gap-1.5">
-          <button
-            v-for="camp in campaignStore.campaigns"
-            :key="camp.id"
-            @click="selectCampaign(camp.id)"
-            :class="[
-              'px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer flex items-center shrink-0',
-              getCampaignBtnClasses(camp.id)
-            ]"
-          >
-            <span>{{ camp.navTitle || camp.shortName }}</span>
-          </button>
-
-          <!-- Dropdown: Todas las Fechas Especiales -->
-          <div class="relative group">
-            <button
-              class="px-2.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 transition-colors flex items-center gap-1 cursor-pointer"
-            >
-              <span>Ocasiones</span>
-              <ChevronDown class="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform duration-200" />
-            </button>
-
-            <!-- Dropdown Menu -->
-            <div class="absolute left-0 mt-1 w-64 bg-white rounded-2xl shadow-xl border border-[#eedee9] py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50">
-              <div class="px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b border-gray-100">
-                Selecciona una fecha especial
-              </div>
-              <button
-                v-for="camp in campaignStore.campaigns"
-                :key="camp.id"
-                @click="selectCampaign(camp.id)"
-                class="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 hover:bg-[#f6eef8] hover:text-[#965e9b] flex items-center justify-between transition-colors cursor-pointer"
-              >
-                <div class="flex items-center gap-2">
-                  <span class="text-sm">{{ getCampaignIcon(camp.id) }}</span>
-                  <span class="font-medium">{{ camp.name }}</span>
-                </div>
-                <span v-if="campaignStore.activeCampaignId === camp.id" class="text-[10px] font-bold text-[#caa35f]">
-                  ● Activo
-                </span>
-              </button>
-            </div>
-          </div>
-
-          <button
-            @click="navigateToSection('envios')"
-            class="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-[#965e9b] transition-colors cursor-pointer"
-          >
-            Envíos
-          </button>
-        </nav>
-
-        <!-- Right: Active Search Input, Official WhatsApp Button & Shopping Bag -->
-        <div class="flex items-center gap-2 sm:gap-3">
-          <!-- Desktop Search Input with Real-time Auto-complete -->
-          <div ref="desktopSearchContainer" class="relative hidden sm:block w-48 md:w-60 lg:w-72">
+        <!-- Center: Spacious Desktop Search Input with Real-time Auto-complete -->
+        <div class="hidden md:flex flex-1 justify-center max-w-lg mx-auto">
+          <div ref="desktopSearchContainer" class="relative w-full">
             <input
               type="text"
               v-model="searchQuery"
               @focus="onSearchFocus"
               @keydown.enter="handleSearchSubmit"
               @keydown.esc="searchStore.closeDropdown"
-              placeholder="Buscar ramos, kitty, hot wheels..."
-              class="w-full bg-[#f8f2f9] hover:bg-white focus:bg-white text-xs pl-8 pr-7 py-2 rounded-full border border-[#ecdbe8] focus:border-[#caa35f] focus:outline-none focus:ring-2 focus:ring-[#caa35f]/15 transition-all placeholder-gray-400"
+              placeholder="Buscar ramos, rosas eternas, kitty, hot wheels..."
+              class="w-full bg-[#f8f2f9] hover:bg-white focus:bg-white text-xs pl-9 pr-8 py-2.5 rounded-full border border-[#ecdbe8] focus:border-[#caa35f] focus:outline-none focus:ring-2 focus:ring-[#caa35f]/15 transition-all placeholder-gray-400 shadow-2xs"
             />
-            <Search class="w-3.5 h-3.5 text-[#caa35f] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search class="w-4 h-4 text-[#caa35f] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <button
               v-if="searchQuery"
               @click="clearSearch"
-              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 cursor-pointer"
               title="Limpiar búsqueda"
             >
               <X class="w-3.5 h-3.5" />
@@ -204,9 +148,9 @@
                     <div class="flex items-center gap-1.5">
                       <span
                         class="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded-full"
-                        :class="item.campaign === 'hotwheels' ? 'bg-red-50 text-red-600' : 'bg-[#f6eef8] text-[#753d77] border border-[#e8d5ec]'"
+                        :class="getCampaignBadgeClass(item.campaign)"
                       >
-                        {{ item.campaign === 'hotwheels' ? 'Hot Wheels' : 'Maquillaje' }}
+                        {{ getCampaignName(item.campaign) }}
                       </span>
                       <span class="text-[10px] text-gray-400 truncate">{{ item.category }}</span>
                     </div>
@@ -236,24 +180,37 @@
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Official WhatsApp Direct Link -->
+        <!-- Right: Official WhatsApp Button & Shopping Bag -->
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <!-- WhatsApp Contact Button -->
           <a
-            href="https://wa.me/51932449996?text=Hola%20Venezzia%20Detalles,%20quisiera%20consultar%20por%20sus%20catálogos"
+            :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera consultar por sus catálogos')"
             target="_blank"
             rel="noopener noreferrer"
-            class="relative p-2 text-[#25D366] hover:bg-emerald-50 rounded-full transition-all hover:scale-110 cursor-pointer flex items-center justify-center border border-emerald-100/80 shadow-2xs"
-            title="Escribir al WhatsApp (+51 932 449 996)"
+            class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-emerald-800 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/80 text-xs font-semibold transition-all hover:scale-102 cursor-pointer shadow-2xs"
+            :title="'Escribir al WhatsApp (' + siteSettingsStore.formattedPhone + ')'"
+          >
+            <IconWhatsApp customClass="w-4 h-4 text-[#25D366]" />
+            <span class="hidden lg:inline text-[11px]">Asistencia WhatsApp</span>
+          </a>
+
+          <!-- Mobile WhatsApp Icon Only -->
+          <a
+            :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera consultar por sus catálogos')"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="sm:hidden p-2 text-[#25D366] hover:bg-emerald-50 rounded-full transition-all border border-emerald-100 shadow-2xs"
             aria-label="Contactar a WhatsApp"
           >
             <IconWhatsApp customClass="w-5 h-5 text-[#25D366]" />
-            <span class="sr-only">WhatsApp</span>
           </a>
 
-          <!-- Cart Button -->
+          <!-- Cart Bag Button -->
           <button
             @click="cartStore.openCart"
-            class="relative p-2.5 rounded-full text-gray-800 hover:text-[#965e9b] hover:bg-[#f6eef8] transition-colors cursor-pointer border border-[#eedee9] shadow-2xs"
+            class="relative p-2.5 rounded-full text-gray-800 hover:text-[#965e9b] hover:bg-[#f6eef8] transition-colors cursor-pointer border border-[#eedee9] shadow-2xs flex items-center gap-1.5"
             aria-label="Abrir bolsa de compras"
           >
             <ShoppingBag class="w-5 h-5" />
@@ -267,8 +224,73 @@
         </div>
       </div>
 
+      <!-- Tier 2: Dedicated Campaign Navigation Ribbon (Guarantees zero overlap with search bar) -->
+      <div class="hidden md:flex items-center justify-between pt-2.5 mt-2 border-t border-[#eedee9]/60">
+        <!-- Left: Campaign Navigation Pills & Ocasiones Dropdown -->
+        <nav class="flex items-center gap-1.5 lg:gap-2 flex-wrap">
+          <button
+            v-for="camp in campaignStore.campaigns"
+            :key="camp.id"
+            @click="selectCampaign(camp.id)"
+            :class="[
+              'px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer flex items-center shrink-0',
+              getCampaignBtnClasses(camp.id)
+            ]"
+          >
+            <span>{{ camp.navTitle || camp.shortName }}</span>
+          </button>
+
+          <!-- Dropdown: Todas las Ocasiones (Clean Luxury Style, No AI Emojis) -->
+          <div class="relative group">
+            <button
+              class="px-3 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>Ocasiones</span>
+              <ChevronDown class="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform duration-200" />
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div class="absolute left-0 mt-1 w-64 bg-white rounded-2xl shadow-xl border border-[#eedee9] py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50">
+              <div class="px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b border-gray-100">
+                Selecciona una fecha especial
+              </div>
+              <button
+                v-for="camp in campaignStore.campaigns"
+                :key="camp.id"
+                @click="selectCampaign(camp.id)"
+                class="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 hover:bg-[#f6eef8] hover:text-[#965e9b] flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <div class="flex items-center gap-2.5">
+                  <span class="w-2.5 h-2.5 rounded-full shrink-0" :class="getCampaignDotClass(camp.id)"></span>
+                  <span class="font-medium">{{ camp.name }}</span>
+                </div>
+                <span v-if="campaignStore.activeCampaignId === camp.id" class="text-[10px] font-bold text-[#caa35f]">
+                  Activo
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <span class="text-[#e2cee0] mx-0.5">|</span>
+
+          <!-- Delivery Guide Button (Never Overlapped) -->
+          <button
+            @click="navigateToSection('envios')"
+            class="px-3 py-1.5 rounded-full text-xs font-medium text-gray-700 hover:text-[#965e9b] hover:bg-[#f6eef8] transition-colors cursor-pointer"
+          >
+            Tarifas de Envíos
+          </button>
+        </nav>
+
+        <!-- Right: Dispatch Guarantee Badge -->
+        <div class="hidden lg:flex items-center gap-2 text-[11px] text-gray-500 font-medium">
+          <Truck class="w-3.5 h-3.5 text-[#caa35f]" />
+          <span>Envíos a todo Lima y Callao</span>
+        </div>
+      </div>
+
       <!-- Mobile Search & Campaign Bar -->
-      <div class="mt-2.5 sm:hidden space-y-2">
+      <div class="mt-2.5 md:hidden space-y-2">
         <!-- Mobile Search Input -->
         <div ref="mobileSearchContainer" class="relative">
           <input
@@ -277,7 +299,7 @@
             @focus="onSearchFocus"
             @keydown.enter="handleSearchSubmit"
             @keydown.esc="searchStore.closeDropdown"
-            placeholder="Buscar ramos, kitty, hot wheels..."
+            placeholder="Buscar ramos, rosas eternas, kitty..."
             class="w-full bg-[#f8f2f9] text-xs pl-8 pr-7 py-2 rounded-full border border-[#ecdbe8] focus:outline-none focus:border-[#caa35f]"
           />
           <Search class="w-3.5 h-3.5 text-[#caa35f] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -342,13 +364,14 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { ChevronDown, Search, ShoppingBag, X } from 'lucide-vue-next'
+import { ChevronDown, Search, ShoppingBag, X, Truck } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import IconInstagram from './icons/IconInstagram.vue'
 import IconTikTok from './icons/IconTikTok.vue'
 import { useCartStore } from '../stores/cart'
 import { useCampaignStore } from '../stores/campaign'
 import { useSearchStore } from '../stores/search'
+import { useSiteSettingsStore } from '../stores/siteSettings'
 import { useRouter, useRoute } from 'vue-router'
 
 const props = defineProps({
@@ -363,6 +386,7 @@ const emit = defineEmits(['select-product'])
 const cartStore = useCartStore()
 const campaignStore = useCampaignStore()
 const searchStore = useSearchStore()
+const siteSettingsStore = useSiteSettingsStore()
 
 const desktopSearchContainer = ref(null)
 const mobileSearchContainer = ref(null)
@@ -416,24 +440,23 @@ function onSearchFocus() {
   }
 }
 
-const activeBadgeColor = computed(() => {
-  const id = campaignStore.activeCampaignId
-  if (id === 'hotwheels') return 'text-[#c22b38]'
-  if (id === 'graduacion') return 'text-[#b45309]'
-  if (id === 'cumpleanos') return 'text-[#c026d3]'
-  return 'text-[#965e9b]'
-})
-
-function getCampaignIcon(id) {
-  if (id === 'hotwheels') return '🏎️'
-  if (id === 'graduacion') return '🎓'
-  if (id === 'cumpleanos') return '🎂'
-  return '💄'
-}
-
 function getCampaignName(id) {
   const camp = campaignStore.campaigns.find(c => c.id === id)
   return camp?.shortName || camp?.navTitle || 'Venezzia'
+}
+
+function getCampaignDotClass(id) {
+  if (id === 'hotwheels') return 'bg-[#c22b38]'
+  if (id === 'graduacion') return 'bg-[#caa35f]'
+  if (id === 'cumpleanos') return 'bg-[#c026d3]'
+  return 'bg-[#965e9b]'
+}
+
+function getCampaignBadgeClass(id) {
+  if (id === 'hotwheels') return 'bg-red-50 text-red-600'
+  if (id === 'graduacion') return 'bg-amber-50 text-amber-700'
+  if (id === 'cumpleanos') return 'bg-pink-50 text-pink-700'
+  return 'bg-[#f6eef8] text-[#753d77] border border-[#e8d5ec]'
 }
 
 function getCampaignBtnClasses(campId) {

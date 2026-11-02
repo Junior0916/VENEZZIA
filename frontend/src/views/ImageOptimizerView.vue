@@ -38,15 +38,15 @@
         <!-- Dimension Specs Card -->
         <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-gray-600">
           <div class="p-3.5 rounded-2xl bg-[#faf7fb] border border-[#eedee9]">
-            <strong class="text-gray-900 block mb-1">📐 Dimensiones Exactas:</strong>
+            <strong class="text-gray-900 block mb-1">Dimensiones Exactas:</strong>
             <span><strong>600 píxeles de ancho</strong> por <strong>750 píxeles de alto</strong>. Proporción 4:5 boutique.</span>
           </div>
           <div class="p-3.5 rounded-2xl bg-[#faf7fb] border border-[#eedee9]">
-            <strong class="text-gray-900 block mb-1">🎨 Fondo Suave Oficial:</strong>
+            <strong class="text-gray-900 block mb-1">Fondo Suave Oficial:</strong>
             <span>Color <code>#faf6f5</code> (rgb: 250, 246, 245), tono crema que combina con la web.</span>
           </div>
           <div class="p-3.5 rounded-2xl bg-[#faf7fb] border border-[#eedee9]">
-            <strong class="text-gray-900 block mb-1">⚖️ Encuadre y Centrado:</strong>
+            <strong class="text-gray-900 block mb-1">Encuadre y Centrado:</strong>
             <span>El ramo o caja queda centrado con respiración de ~60px a los lados y ~20px arriba/abajo.</span>
           </div>
         </div>

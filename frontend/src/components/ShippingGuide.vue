@@ -29,11 +29,11 @@
             <div class="p-3.5 bg-white rounded-2xl border border-[#eedee9] space-y-2">
               <div class="flex items-center justify-between font-semibold text-gray-800">
                 <span>Motorizado Lima Norte y Centro:</span>
-                <span class="text-[#caa35f] font-bold text-sm">S/ 10.00</span>
+                <span class="text-[#caa35f] font-bold text-sm">S/ {{ siteSettingsStore.shippingLimaNorte.toFixed(2) }}</span>
               </div>
               <div class="flex items-center justify-between font-semibold text-gray-800">
                 <span>Motorizado Lima Sur:</span>
-                <span class="text-[#caa35f] font-bold text-sm">S/ 15.00</span>
+                <span class="text-[#caa35f] font-bold text-sm">S/ {{ siteSettingsStore.shippingLimaSur.toFixed(2) }}</span>
               </div>
             </div>
 
@@ -43,7 +43,7 @@
             </p>
             <p>
               <strong class="text-gray-900 font-semibold">• Anticipo para agendar:</strong>
-              Todo pedido en Lima se agenda con un anticipo de <strong class="text-[#27172b]">S/ 30.00</strong> y la diferencia se abona al momento de la entrega.
+              Todo pedido en Lima se agenda con un anticipo de <strong class="text-[#27172b]">S/ {{ siteSettingsStore.advancePaymentAmount.toFixed(2) }}</strong> y la diferencia se abona al momento de la entrega.
             </p>
           </div>
         </div>
@@ -65,7 +65,7 @@
             </p>
             <p>
               <strong class="text-gray-900 font-semibold">2. Embalaje protegido:</strong>
-              Caja especial para cuidar tu arreglo durante el viaje (+S/ 5.00 para Ramos / +S/ 3.00 para Boxes).
+              Caja especial para cuidar tu arreglo durante el viaje (+S/ {{ siteSettingsStore.shippingProvinciaRamo.toFixed(2) }} para Ramos / +S/ {{ siteSettingsStore.shippingProvinciaBox.toFixed(2) }} para Boxes).
             </p>
             <p>
               <strong class="text-gray-900 font-semibold">3. Pago y seguimiento:</strong>
@@ -80,4 +80,7 @@
 
 <script setup>
 import { Truck, Package } from 'lucide-vue-next'
+import { useSiteSettingsStore } from '../stores/siteSettings'
+
+const siteSettingsStore = useSiteSettingsStore()
 </script>

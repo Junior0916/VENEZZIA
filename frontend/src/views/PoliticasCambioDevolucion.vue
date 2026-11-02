@@ -34,7 +34,7 @@
           </h2>
           <p>
             En <strong>Venezzia Detalles</strong> cada arreglo, bouquet y box de regalo se elabora de manera artesanal y minuciosa,
-            utilizando rosas eternas naturales preservadas de alta duración (más de 3 años), cosméticos originales de marcas
+            utilizando rosas eternas artesanales de alta durabilidad y acabado impecable, cosméticos originales de marcas
             reconocidas como <strong>Jarusa</strong> y <strong>Reve'l</strong>, y elementos decorativos de calidad superior.
           </p>
           <p>
@@ -92,7 +92,7 @@
             <span class="text-[#caa35f]">4.</span> Exclusiones y Restricciones por Salubridad
           </h2>
           <p>
-            Por la naturaleza de nuestros productos, no se aceptan cambios ni devoluciones en los siguientes casos:
+            Por las características y exclusividad de nuestros productos, no se aceptan cambios ni devoluciones en los siguientes casos:
           </p>
           <ul class="list-disc pl-5 space-y-2 text-gray-600">
             <li>

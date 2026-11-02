@@ -52,14 +52,14 @@
           </h2>
           <p>
             <strong>Venezzia Detalles</strong> se especializa en el diseño de arreglos florales boutique con rosas eternas
-            preservadas, boxes temáticos de autor, sets de cosmética con productos oficiales de marcas autorizadas como
+            de alta duración, boxes temáticos de autor, sets de cosmética con productos oficiales de marcas autorizadas como
             <strong>Jarusa</strong> y <strong>Reve'l</strong>, peluches importados y piezas coleccionables Hot Wheels en empaques
             personalizados.
           </p>
           <p>
             Las fotografías y descripciones de nuestro catálogo representan con fidelidad el contenido de cada arreglo.
-            Por tratarse de productos elaborados artesanalmente y flores naturales preservadas, pueden presentarse leves
-            variaciones en tonalidad o disposición que no alteran la calidad ni la cantidad de elementos garantizados en la
+            Por tratarse de productos y rosas eternas elaboradas artesanalmente con dedicación exclusiva, pueden presentarse leves
+            variaciones en tonalidad o disposición que son propias del trabajo manual de autor y no alteran la calidad ni la cantidad de elementos garantizados en la
             ficha técnica del producto.
           </p>
         </section>

@@ -195,7 +195,7 @@
                   class="mt-2 p-2 px-3 rounded-xl bg-[#f0fbf5] border border-emerald-200/80 flex items-center justify-between gap-2 text-[11px] text-emerald-800 animate-in fade-in"
                 >
                   <div class="flex items-center gap-1.5 truncate">
-                    <span class="text-xs leading-none">📍</span>
+                    <MapPin class="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     <span class="font-medium truncate">Ubicación GPS fijada para delivery</span>
                   </div>
                   <div class="flex items-center gap-2 shrink-0">
@@ -252,7 +252,7 @@
             <!-- Error message if any -->
             <div v-if="errorMessage" class="text-xs text-rose-700 bg-rose-50 p-3 rounded-xl border border-rose-200 leading-relaxed space-y-1">
               <div class="flex items-start gap-2">
-                <span class="text-rose-500 font-bold shrink-0">⚠️</span>
+                <AlertCircle class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
                 <span>{{ errorMessage }}</span>
               </div>
             </div>
@@ -383,8 +383,9 @@
                 </span>
               </div>
               <div v-if="completedOrderInfo?.customer?.mapUrl || customer.mapUrl" class="flex items-center justify-between pt-1">
-                <span class="text-emerald-700 font-semibold text-[11px] flex items-center gap-1">
-                  <span>📍</span> Ubicación GPS:
+                <span class="text-emerald-700 font-semibold text-[11px] flex items-center gap-1.5">
+                  <MapPin class="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>Ubicación GPS:</span>
                 </span>
                 <a
                   :href="completedOrderInfo?.customer?.mapUrl || customer.mapUrl"
@@ -471,7 +472,8 @@
           <!-- Reason Box -->
           <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200/80 space-y-1">
             <div class="font-semibold text-rose-900 flex items-center gap-1.5 text-[11px] uppercase tracking-wide">
-              <span>⚠️</span> Detalle del Rechazo:
+              <AlertCircle class="w-3.5 h-3.5 text-rose-600 shrink-0" />
+              <span>Detalle del Rechazo:</span>
             </div>
             <p class="text-rose-700 leading-relaxed text-xs font-medium">
               {{ rejectReason || 'La transacción ha sido rechazada por el banco emisor o los datos de la tarjeta no son válidos.' }}
@@ -611,7 +613,7 @@ const whatsappCartUrl = computed(() => {
     if (customer.phone.trim()) lines.push(`- Teléfono: ${customer.phone.trim()}`)
     if (customer.city.trim()) lines.push(`- Distrito / Ciudad: ${customer.city.trim()}`)
     if (customer.address.trim()) lines.push(`- Dirección: ${customer.address.trim()}`)
-    if (customer.mapUrl) lines.push(`- 📍 Ubicación GPS (Google Maps): ${customer.mapUrl}`)
+    if (customer.mapUrl) lines.push(`- Ubicación GPS (Google Maps): ${customer.mapUrl}`)
   }
 
   if (customer.notes.trim()) {
@@ -632,7 +634,7 @@ const whatsappConfirmationUrl = computed(() => {
   const tx = info?.chargeId || lastChargeId.value
 
   const lines = [
-    `¡Hola Venezzia Detalles! 🌸`,
+    `¡Hola Venezzia Detalles!`,
     `Acabo de realizar mi pago en línea por la página web:`,
     ``,
     `*N° de Transacción:* ${tx}`,
@@ -786,7 +788,7 @@ async function handleCheckout() {
             orderInfo: {
               customer_name: customer.name,
               customer_phone: customer.phone,
-              customer_address: `${customer.address || ''} (${customer.city})${customer.mapUrl ? ' | 📍 GPS: ' + customer.mapUrl : ''}`,
+              customer_address: `${customer.address || ''} (${customer.city})${customer.mapUrl ? ' | GPS: ' + customer.mapUrl : ''}`,
               customer_notes: customer.notes,
               location_url: customer.mapUrl || '',
               currency: 'PEN',

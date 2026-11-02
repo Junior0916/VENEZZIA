@@ -16,7 +16,7 @@ routerAdd("GET", "/api/culqi/config", (e) => {
 routerAdd("GET", "/api/culqi/charge", (e) => {
     return e.json(200, {
         resultado: "EXITO_CONEXION_OK",
-        estado: "🟢 EN LINEA Y FUNCIONANDO",
+        estado: "ONLINE",
         servidor: "PocketBase Venezzia",
         mensaje: "El motor de pagos Culqi esta activo y listo para procesar cobros de la tienda.",
         como_probar: "Para probar un pago real, ingresa a la tienda https://venezzia.shop, agrega un producto a la bolsa y dale clic a 'Pagar con Tarjeta / Culqi'.",
@@ -186,10 +186,10 @@ routerAdd("POST", "/api/culqi/charge", (e) => {
 
                     let fullAddress = String(orderInfo.customer_address || "");
                     if (orderInfo.customer_notes && String(orderInfo.customer_notes).trim()) {
-                        fullAddress += " | 💌 Dedicatoria: \"" + String(orderInfo.customer_notes).trim() + "\"";
+                        fullAddress += " | Dedicatoria: \"" + String(orderInfo.customer_notes).trim() + "\"";
                     }
                     if (orderInfo.location_url) {
-                        fullAddress += " | 📍 GPS: " + String(orderInfo.location_url);
+                        fullAddress += " | GPS: " + String(orderInfo.location_url);
                     }
                     record.set("customer_address", fullAddress);
 
@@ -213,9 +213,9 @@ routerAdd("POST", "/api/culqi/charge", (e) => {
 
                     $app.save(record);
                     savedRecordId = record.id;
-                    console.log("[Culqi] ✅ Orden guardada exitosamente en PocketBase:", record.id);
+                    console.log("[Culqi] [OK] Orden guardada exitosamente en PocketBase:", record.id);
                 } catch (err1) {
-                    console.log("[Culqi] ⚠️ Intento 1 falló al guardar orden, ejecutando fallback básico:", err1);
+                    console.log("[Culqi] [WARN] Intento 1 falló al guardar orden, ejecutando fallback básico:", err1);
 
                     // Intento 2: Fallback simple idéntico a la orden 1 que sabemos 100% que funciona
                     try {
@@ -232,13 +232,13 @@ routerAdd("POST", "/api/culqi/charge", (e) => {
 
                         $app.save(fallbackRecord);
                         savedRecordId = fallbackRecord.id;
-                        console.log("[Culqi] ✅ Orden guardada con fallback básico:", fallbackRecord.id);
+                        console.log("[Culqi] [OK] Orden guardada con fallback básico:", fallbackRecord.id);
                     } catch (err2) {
-                        console.log("[Culqi] ❌ Error crítico en fallback básico:", err2);
+                        console.log("[Culqi] [ERROR] Error crítico en fallback básico:", err2);
                     }
                 }
             } else {
-                console.log("[Culqi] ❌ No se encontró colección orders ni pedidos en PocketBase");
+                console.log("[Culqi] [ERROR] No se encontró colección orders ni pedidos en PocketBase");
             }
 
             return e.json(200, {

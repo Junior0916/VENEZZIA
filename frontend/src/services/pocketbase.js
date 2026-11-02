@@ -587,18 +587,18 @@ export const MOCK_PRODUCTS = [
   {
     id: 'grad-ramo-girasoles',
     campaign: 'graduacion',
-    name: 'Ramo Triunfo de Girasoles & Rosas Eternas',
-    description: 'Bouquet radiante con girasoles frescos de exportación, 4 rosas eternas doradas, detalles con mini birrete y lazo de satén conmemorativo.',
+    name: 'Ramo Triunfo de Rosas Eternas & Girasol',
+    description: 'Bouquet de rosas eternas doradas con girasol artesanal central, detalles de gala con mini birrete y lazo de satén conmemorativo.',
     price: 85.00,
     original_price: 95.00,
     category: 'Ramos de Graduación',
     image: 'https://images.unsplash.com/photo-1538677685457-bfe8192dbdf6?auto=format&fit=crop&w=600&q=80',
     in_stock: true,
     items_included: [
-      '3 Girasoles grandes seleccionados',
+      '1 Girasol artesanal central de diseño',
       '4 Rosas eternas color oro champán',
       'Mini birrete decorativo para bouquet',
-      'Follaje fino de eucalipto baby blue',
+      'Follaje fino decorativo de gala',
       'Envoltura coreana impermeable bitono de lujo',
       'Lazo de seda satén dorado con dedicatoria'
     ]
@@ -722,16 +722,16 @@ export const MOCK_PRODUCTS = [
   {
     id: 'bday-ramo-tulipanes',
     campaign: 'cumpleanos',
-    name: 'Ramo Fiesta Radiante de Rosas & Tulipanes',
-    description: 'Explosión de color y alegría: bouquet con rosas en tonalidades pastel, flores de relleno importadas, papel coreano con mensaje "Happy Birthday" y luces.',
+    name: 'Ramo Fiesta Radiante de Rosas Eternas',
+    description: 'Bouquet con rosas eternas en delicadas tonalidades pastel, acentos decorativos, papel coreano con mensaje especial y luces LED.',
     price: 80.00,
     category: 'Ramos Festivos',
     image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=600&q=80',
     in_stock: true,
     items_included: [
       '6 Rosas eternas en degradé rosa y lila',
-      'Flores silvestres decorativas de relleno',
-      'Topper dorado "Feliz Cumpleaños"',
+      'Follaje y acentos florales decorativos',
+      'Topper dorado de felicitación',
       'Luces LED decorativas',
       'Envoltura doble en papel coreano con borde perlado',
       'Lazo de raso de alta gama'

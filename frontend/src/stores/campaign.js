@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { pb } from '../services/pocketbase'
+import PocketBase from 'pocketbase'
 
-export const CAMPAIGNS = [
+export const DEFAULT_CAMPAIGNS = [
   {
     id: 'maquillaje',
     name: 'Día de Regalar Maquillaje',
@@ -12,7 +14,7 @@ export const CAMPAIGNS = [
     tagline: 'Celebra su brillo con los exclusivos Makeup Boxes & Ramos Eternos',
     description: 'Arreglos boutique con rosas eternas hechas a mano, peluches originales de Hello Kitty y Lotso, y cosméticos premium Jarusa y Reve\'l.',
     heroTitle: 'Ramos y boxes de maquillaje que enamoran',
-    heroSubtitle: 'Diseños que cautivan: combinamos cosmética premium Jarusa & Reve\'l, peluches importados y rosas eternas preservadas.',
+    heroSubtitle: 'Diseños que cautivan: combinamos cosmética premium Jarusa & Reve\'l, peluches importados y rosas eternas artesanales.',
     heroPrimaryImage: '/products/box_osita_dormilona_centered.webp',
     heroPrimaryTitle: 'Box Osita Dormilona Lotso',
     heroSideImage: '/products/ramo_3_kitty_centered.webp',
@@ -59,7 +61,7 @@ export const CAMPAIGNS = [
     navTitle: 'Día Hot Wheels',
     shortName: 'Hot Wheels',
     slug: 'dia-de-regalar-hotwheels',
-    badge: 'Colección Oficial • Hot Wheels Venta',
+    badge: 'Colección Oficial • Hot Wheels',
     tagline: 'El regalo definitivo para él: Ramos con Rosas Eternas, Boxes Temáticos y Joyería 316L',
     description: 'Modelos de autos clásicos y premium a elección, empaques blister personalizados con foto, cervezas Pilsen, chocolates y collares de acero quirúrgico waterproof.',
     heroTitle: 'El regalo de Hot Wheels que siempre soñó',
@@ -111,15 +113,15 @@ export const CAMPAIGNS = [
     navTitle: 'Graduación',
     shortName: 'Graduación',
     slug: 'graduacion-y-exitos',
-    badge: '🎓 Colección Grados & Promociones',
+    badge: 'Colección Grados & Promociones',
     tagline: 'Celebra su gran meta con ramos de birrete, rosas eternas y detalles inolvidables',
-    description: 'Bouquets con birretes artesanales, peluches graduados importados, diplomas de rosas preservadas y copas de brindis con espumante.',
+    description: 'Bouquets con birretes artesanales, peluches graduados importados, diplomas de rosas eternas y copas de brindis con espumante.',
     heroTitle: 'Arreglos y boxes que celebran su mayor logro',
     heroSubtitle: 'Bouquets con birretes de gala, peluches graduados, rosas eternas doradas y azules, y copas grabadas para un brindis inolvidable.',
     heroPrimaryImage: 'https://images.unsplash.com/photo-1525921429624-479b6a26d84d?auto=format&fit=crop&w=600&q=80',
     heroPrimaryTitle: 'Box Éxito de Gala con Birrete',
     heroSideImage: 'https://images.unsplash.com/photo-1538677685457-bfe8192dbdf6?auto=format&fit=crop&w=600&q=80',
-    heroSideTitle: 'Ramo Triunfo de Girasoles & Rosas',
+    heroSideTitle: 'Ramo Triunfo de Rosas & Girasol',
     heroSidePrice: 85.00,
     accentColor: '#b45309',
     accentBadgeBg: 'bg-[#fefce8] text-[#854d0e] border-[#fef08a]',
@@ -136,8 +138,8 @@ export const CAMPAIGNS = [
         image: 'https://images.unsplash.com/photo-1525921429624-479b6a26d84d?auto=format&fit=crop&w=600&q=80'
       },
       {
-        name: 'Girasoles del Éxito',
-        filter: 'Girasoles',
+        name: 'Rosas & Girasol',
+        filter: 'Girasol',
         image: 'https://images.unsplash.com/photo-1538677685457-bfe8192dbdf6?auto=format&fit=crop&w=600&q=80'
       },
       {
@@ -163,11 +165,11 @@ export const CAMPAIGNS = [
     navTitle: 'Cumpleaños',
     shortName: 'Cumpleaños',
     slug: 'cumpleanos-magico',
-    badge: '🎂 Edición Cumpleaños & Sorpresas',
-    tagline: 'Haz que su día sea mágico con boxes explosivos, globos personalizados y ramos de ensueño',
-    description: 'Arreglos festivos con globos metalizados, cajas sorpresa de regalo, pasteles gourmet, flores radiantes y finos chocolates.',
+    badge: 'Edición Cumpleaños & Sorpresas',
+    tagline: 'Haz que su día sea mágico con boxes sorpresa, globos personalizados y ramos de ensueño',
+    description: 'Arreglos festivos con globos metalizados, cajas sorpresa de regalo, pasteles gourmet, flores eternas radiantes y finos chocolates.',
     heroTitle: 'Regalos de cumpleaños que hacen latir el corazón',
-    heroSubtitle: 'Sorprende en su día especial con cajas temáticas de globos, pasteles finos, chocolates premium y ramos de flores eternas vibrantes.',
+    heroSubtitle: 'Sorprende en su día especial con cajas temáticas de globos, pasteles finos, chocolates premium y ramos de flores eternas.',
     heroPrimaryImage: 'https://images.unsplash.com/photo-1602631985686-1bb0e6a8696e?auto=format&fit=crop&w=600&q=80',
     heroPrimaryTitle: 'Box Cumpleaños Feliz con Globos',
     heroSideImage: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=600&q=80',
@@ -211,7 +213,10 @@ export const CAMPAIGNS = [
   }
 ]
 
+export const CAMPAIGNS = DEFAULT_CAMPAIGNS
+
 export const useCampaignStore = defineStore('campaign', () => {
+  const campaigns = ref(DEFAULT_CAMPAIGNS)
   const activeCampaignId = ref('maquillaje')
   const products = ref([])
 
@@ -221,8 +226,73 @@ export const useCampaignStore = defineStore('campaign', () => {
     }
   }
 
+  async function loadCampaigns() {
+    // Helper to map DB record to campaign object
+    const mapCampaignRecord = (r) => {
+      let filterTabs = []
+      let categories = []
+      try {
+        filterTabs = typeof r.filter_tabs === 'string' ? JSON.parse(r.filter_tabs) : (r.filter_tabs || [])
+      } catch (_) {}
+      try {
+        categories = typeof r.categories === 'string' ? JSON.parse(r.categories) : (r.categories || [])
+      } catch (_) {}
+
+      const id = r.slug || r.id
+      const defaultMatch = DEFAULT_CAMPAIGNS.find(d => d.id === id)
+
+      return {
+        id,
+        slug: r.slug || id,
+        name: r.name || defaultMatch?.name || '',
+        navTitle: r.nav_title || r.name || defaultMatch?.navTitle || '',
+        shortName: r.short_name || r.name || defaultMatch?.shortName || '',
+        badge: r.badge || defaultMatch?.badge || '',
+        tagline: r.tagline || defaultMatch?.tagline || '',
+        description: r.description || defaultMatch?.description || '',
+        heroTitle: r.hero_title || defaultMatch?.heroTitle || '',
+        heroSubtitle: r.hero_subtitle || defaultMatch?.heroSubtitle || '',
+        heroPrimaryImage: r.hero_primary_image || defaultMatch?.heroPrimaryImage || '',
+        heroPrimaryTitle: r.hero_primary_title || defaultMatch?.heroPrimaryTitle || '',
+        heroSideImage: r.hero_side_image || defaultMatch?.heroSideImage || '',
+        heroSideTitle: r.hero_side_title || defaultMatch?.heroSideTitle || '',
+        heroSidePrice: r.hero_side_price ? Number(r.hero_side_price) : (defaultMatch?.heroSidePrice || 0),
+        accentColor: r.accent_color || defaultMatch?.accentColor || '#965e9b',
+        accentBadgeBg: defaultMatch?.accentBadgeBg || 'bg-[#f6eef8] text-[#753d77] border-[#e8d5ec]',
+        filterTabs: filterTabs.length ? filterTabs : (defaultMatch?.filterTabs || [{ label: 'Todos', value: 'all' }]),
+        categories: categories.length ? categories : (defaultMatch?.categories || [])
+      }
+    }
+
+    // 1. Try local PocketBase
+    try {
+      const records = await pb.collection('campaigns').getFullList({
+        sort: 'order',
+        filter: 'is_active = true'
+      })
+      if (records && records.length > 0) {
+        campaigns.value = records.map(mapCampaignRecord)
+        return
+      }
+    } catch (_) {}
+
+    // 2. Try remote PocketBase
+    try {
+      const remotePb = new PocketBase('https://admin.venezzia.shop')
+      const remoteRecords = await remotePb.collection('campaigns').getFullList({
+        sort: 'order',
+        filter: 'is_active = true'
+      })
+      if (remoteRecords && remoteRecords.length > 0) {
+        campaigns.value = remoteRecords.map(mapCampaignRecord)
+        return
+      }
+    } catch (_) {}
+  }
+
   const activeCampaign = computed(() => {
-    const base = CAMPAIGNS.find(c => c.id === activeCampaignId.value) || CAMPAIGNS[0]
+    const list = campaigns.value.length ? campaigns.value : DEFAULT_CAMPAIGNS
+    const base = list.find(c => c.id === activeCampaignId.value) || list[0]
     const campProducts = products.value.filter(p => (p.campaign || 'maquillaje') === base.id)
 
     // Helper to find image by product name or id
@@ -266,15 +336,15 @@ export const useCampaignStore = defineStore('campaign', () => {
       dynamicHeroSideImage = findProductImage('Spiderman', base.heroSideImage)
       dynamicHeroSidePrice = findProductPrice('Spiderman', base.heroSidePrice)
     } else if (base.id === 'graduacion') {
-      dynamicHeroSideImage = findProductImage('Girasoles', base.heroSideImage)
-      dynamicHeroSidePrice = findProductPrice('Girasoles', base.heroSidePrice)
+      dynamicHeroSideImage = findProductImage('Girasol', base.heroSideImage)
+      dynamicHeroSidePrice = findProductPrice('Girasol', base.heroSidePrice)
     } else if (base.id === 'cumpleanos') {
       dynamicHeroSideImage = findProductImage('Tulipanes', base.heroSideImage)
       dynamicHeroSidePrice = findProductPrice('Tulipanes', base.heroSidePrice)
     }
 
     // Dynamic categories images from live products
-    const dynamicCategories = base.categories.map(cat => {
+    const dynamicCategories = (base.categories || []).map(cat => {
       let catImage = cat.image
       if (campProducts.length > 0) {
         const catMatch = campProducts.find(p => 
@@ -301,17 +371,18 @@ export const useCampaignStore = defineStore('campaign', () => {
   })
 
   function setCampaign(id) {
-    if (CAMPAIGNS.some(c => c.id === id)) {
+    if (campaigns.value.some(c => c.id === id)) {
       activeCampaignId.value = id
     }
   }
 
   return {
-    campaigns: CAMPAIGNS,
+    campaigns,
     activeCampaignId,
     activeCampaign,
     products,
     setProducts,
-    setCampaign
+    setCampaign,
+    loadCampaigns
   }
 })

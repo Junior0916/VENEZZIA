@@ -161,10 +161,10 @@
                   :key="idx"
                   class="flex items-start gap-2"
                 >
-                  <span
-                    class="font-bold"
+                  <Check
+                    class="w-3.5 h-3.5 shrink-0 mt-0.5"
                     :class="checkmarkColorClass"
-                  >✓</span>
+                  />
                   <span>{{ item }}</span>
                 </li>
               </ul>
@@ -343,7 +343,7 @@
 
 <script setup>
 import { ref, computed, watch, reactive, onMounted, onUnmounted } from 'vue'
-import { X, Link as LinkIcon, ZoomIn, ZoomOut } from 'lucide-vue-next'
+import { X, Link as LinkIcon, ZoomIn, ZoomOut, Check } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import { useCartStore } from '../stores/cart'
 

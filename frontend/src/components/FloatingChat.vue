@@ -45,7 +45,7 @@
         rel="noopener noreferrer"
         class="relative w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white flex items-center justify-center shadow-lg shadow-emerald-500/35 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer group"
         aria-label="Contactar a Venezzia Detalles por WhatsApp oficial"
-        title="Escríbenos a +51 932 449 996"
+        :title="'Escríbenos a ' + siteSettingsStore.formattedPhone"
       >
         <!-- Authentic Official WhatsApp Icon -->
         <IconWhatsApp customClass="w-7 h-7 text-white drop-shadow-xs" />
@@ -55,12 +55,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { X } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
+import { useSiteSettingsStore } from '../stores/siteSettings'
 
+const siteSettingsStore = useSiteSettingsStore()
 const showTooltip = ref(true)
-const whatsappNumber = '51932449996'
-const whatsappMessage = encodeURIComponent('Hola Venezzia Detalles, quisiera consultar sobre un arreglo floral para entrega.')
-const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
+
+const whatsappUrl = computed(() => {
+  return siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera consultar sobre un arreglo de rosas eternas para entrega.')
+})
 </script>

@@ -12,6 +12,12 @@
         "presentable": true
       },
       {
+        "name": "campaign",
+        "type": "text",
+        "required": false,
+        "presentable": true
+      },
+      {
         "name": "description",
         "type": "text",
         "required": false,
@@ -151,6 +157,64 @@
     "indexes": [],
     "listRule": null,
     "viewRule": null,
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "id": "pbc_campaigns_01",
+    "name": "campaigns",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "slug", "type": "text", "required": true, "presentable": true },
+      { "name": "name", "type": "text", "required": true, "presentable": true },
+      { "name": "nav_title", "type": "text", "required": false },
+      { "name": "short_name", "type": "text", "required": false },
+      { "name": "badge", "type": "text", "required": false },
+      { "name": "tagline", "type": "text", "required": false },
+      { "name": "description", "type": "text", "required": false },
+      { "name": "hero_title", "type": "text", "required": false },
+      { "name": "hero_subtitle", "type": "text", "required": false },
+      { "name": "accent_color", "type": "text", "required": false },
+      { "name": "hero_primary_image", "type": "text", "required": false },
+      { "name": "hero_primary_title", "type": "text", "required": false },
+      { "name": "hero_side_image", "type": "text", "required": false },
+      { "name": "hero_side_title", "type": "text", "required": false },
+      { "name": "hero_side_price", "type": "number", "required": false },
+      { "name": "order", "type": "number", "required": false },
+      { "name": "is_active", "type": "bool", "required": false },
+      { "name": "filter_tabs", "type": "json", "required": false },
+      { "name": "categories", "type": "json", "required": false }
+    ],
+    "indexes": [],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "id": "pbc_settings_01",
+    "name": "site_settings",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "key", "type": "text", "required": true, "presentable": true },
+      { "name": "whatsapp_number", "type": "text", "required": false },
+      { "name": "announcement_text", "type": "text", "required": false },
+      { "name": "shipping_lima_norte", "type": "number", "required": false },
+      { "name": "shipping_lima_sur", "type": "number", "required": false },
+      { "name": "shipping_provincia_ramo", "type": "number", "required": false },
+      { "name": "shipping_provincia_box", "type": "number", "required": false },
+      { "name": "advance_payment_amount", "type": "number", "required": false },
+      { "name": "instagram_url", "type": "text", "required": false },
+      { "name": "tiktok_url", "type": "text", "required": false },
+      { "name": "facebook_url", "type": "text", "required": false }
+    ],
+    "indexes": [],
+    "listRule": "",
+    "viewRule": "",
     "createRule": null,
     "updateRule": null,
     "deleteRule": null

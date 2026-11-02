@@ -121,7 +121,8 @@
           style="z-index: 1000;"
         >
           <div class="px-3.5 py-1 rounded-full bg-black/80 backdrop-blur-xs text-white text-[10px] font-medium shadow-lg flex items-center gap-1.5 whitespace-nowrap border border-white/20">
-            <span>📍 Mueve el mapa hasta tu puerta</span>
+            <MapPin class="w-3 h-3 text-[#caa35f] shrink-0" />
+            <span>Mueve el mapa hasta tu puerta</span>
           </div>
         </div>
 
@@ -158,7 +159,7 @@
             <span>{{ currentLat.toFixed(5) }}, {{ currentLng.toFixed(5) }}</span>
           </div>
           <div v-if="detectedAddress" class="text-xs text-gray-800 font-medium line-clamp-1 flex items-center gap-1.5">
-            <span class="text-[#caa35f] shrink-0">📍</span>
+            <MapPin class="w-3.5 h-3.5 text-[#caa35f] shrink-0" />
             <span class="truncate">{{ detectedAddress }}</span>
           </div>
         </div>

@@ -25,11 +25,11 @@
           <div class="flex items-center gap-3">
             <!-- Official WhatsApp -->
             <a
-              href="https://wa.me/51932449996?text=Hola%20Venezzia%20Detalles"
+              :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles')"
               target="_blank"
               rel="noopener noreferrer"
               class="w-9 h-9 rounded-full bg-white shadow-xs border border-[#eedee9] flex items-center justify-center text-[#25D366] hover:bg-emerald-50 hover:scale-110 transition-all duration-300"
-              title="WhatsApp Oficial (+51 932 449 996)"
+              :title="'WhatsApp Oficial (' + siteSettingsStore.formattedPhone + ')'"
             >
               <IconWhatsApp customClass="w-4 h-4" />
             </a>
@@ -143,13 +143,13 @@
             <li class="flex items-center gap-1.5"><MapPin class="w-3.5 h-3.5 text-[#caa35f] shrink-0" /> Lima, Perú</li>
             <li>
               <a
-                href="https://wa.me/51932449996?text=Hola%20Venezzia%20Detalles,%20quisiera%20hacer%20un%20pedido"
+                :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera hacer un pedido')"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="inline-flex items-center gap-1.5 text-emerald-700 font-bold hover:underline"
               >
                 <IconWhatsApp customClass="w-3.5 h-3.5 text-[#25D366] shrink-0" />
-                <span>+51 932 449 996</span>
+                <span>{{ siteSettingsStore.formattedPhone }}</span>
               </a>
             </li>
             <li class="flex items-center gap-1.5"><Mail class="w-3.5 h-3.5 text-[#caa35f] shrink-0" /> contacto@venezzia.shop</li>
@@ -245,10 +245,12 @@ import IconInstagram from './icons/IconInstagram.vue'
 import IconTikTok from './icons/IconTikTok.vue'
 import IconFacebook from './icons/IconFacebook.vue'
 import { useCampaignStore } from '../stores/campaign'
+import { useSiteSettingsStore } from '../stores/siteSettings'
 
 const router = useRouter()
 const route = useRoute()
 const campaignStore = useCampaignStore()
+const siteSettingsStore = useSiteSettingsStore()
 
 function navigateToSection(sectionId) {
   if (route && route.path !== '/') {

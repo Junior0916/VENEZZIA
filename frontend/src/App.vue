@@ -41,8 +41,10 @@ import FloatingChat from './components/FloatingChat.vue'
 import ProductDetailModal from './components/ProductDetailModal.vue'
 import { fetchProducts } from './services/pocketbase'
 import { useCampaignStore } from './stores/campaign'
+import { useSiteSettingsStore } from './stores/siteSettings'
 
 const campaignStore = useCampaignStore()
+const siteSettingsStore = useSiteSettingsStore()
 
 const allProducts = ref([])
 const selectedProductModal = ref(null)
@@ -95,6 +97,12 @@ function checkDeepLink() {
 }
 
 onMounted(async () => {
+  // Load dynamic CMS settings & campaigns from PocketBase
+  await Promise.allSettled([
+    siteSettingsStore.loadSettings(),
+    campaignStore.loadCampaigns()
+  ])
+
   allProducts.value = await fetchProducts()
   campaignStore.setProducts(allProducts.value)
   checkDeepLink()

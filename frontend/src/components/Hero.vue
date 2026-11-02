@@ -138,8 +138,10 @@
 import { computed } from 'vue'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import { useCampaignStore } from '../stores/campaign'
+import { useSiteSettingsStore } from '../stores/siteSettings'
 
 const campaignStore = useCampaignStore()
+const siteSettingsStore = useSiteSettingsStore()
 
 const heroAccentBg = computed(() => {
   const id = campaignStore.activeCampaignId
@@ -206,7 +208,6 @@ function getHeroSwitcherClasses(campId) {
 
 const whatsappCtaUrl = computed(() => {
   const campaignName = campaignStore.activeCampaign.name
-  const text = encodeURIComponent(`Hola Venezzia Detalles, quisiera consultar por el catálogo de ${campaignName}.`)
-  return `https://wa.me/51932449996?text=${text}`
+  return siteSettingsStore.whatsappLink(`Hola Venezzia Detalles, quisiera consultar por el catálogo de ${campaignName}.`)
 })
 </script>
