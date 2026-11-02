@@ -66,7 +66,7 @@
 
         <!-- Right: Active Campaign Indicator & Currency -->
         <div class="flex items-center gap-3">
-          <span class="hidden md:inline text-[11px] font-medium tracking-wide" :class="campaignStore.activeCampaignId === 'hotwheels' ? 'text-[#c22b38]' : 'text-[#965e9b]'">
+          <span class="hidden md:inline text-[11px] font-medium tracking-wide" :class="activeBadgeColor">
             {{ campaignStore.activeCampaign.badge }}
           </span>
           <div class="flex items-center gap-1 font-semibold text-gray-700 bg-white/90 px-2.5 py-0.5 rounded-full border border-[#eedee9] text-[10px] shadow-2xs">
@@ -97,68 +97,47 @@
         </router-link>
 
         <!-- Center: Special Campaign Dates Navigation Menu -->
-        <nav class="hidden lg:flex items-center gap-1.5 xl:gap-2">
-          <!-- Campaign 1: Día de Regalar Maquillaje -->
+        <nav class="hidden lg:flex items-center gap-1 xl:gap-1.5">
           <button
-            @click="selectCampaign('maquillaje')"
+            v-for="camp in campaignStore.campaigns"
+            :key="camp.id"
+            @click="selectCampaign(camp.id)"
             :class="[
-              'px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer flex items-center',
-              campaignStore.activeCampaignId === 'maquillaje'
-                ? 'bg-gradient-to-r from-[#27172b] to-[#401f46] text-white shadow-xs border border-[#caa35f]/50 ring-1 ring-[#caa35f]/20'
-                : 'text-gray-700 hover:text-[#965e9b] hover:bg-[#f6eef8]'
+              'px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer flex items-center shrink-0',
+              getCampaignBtnClasses(camp.id)
             ]"
           >
-            <span>Día del Maquillaje</span>
+            <span>{{ camp.navTitle || camp.shortName }}</span>
           </button>
 
-          <!-- Campaign 2: Día de Regalar Hot Wheels -->
-          <button
-            @click="selectCampaign('hotwheels')"
-            :class="[
-              'px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer flex items-center',
-              campaignStore.activeCampaignId === 'hotwheels'
-                ? 'bg-[#c22b38] text-white shadow-xs border border-red-400/40'
-                : 'text-gray-700 hover:text-[#c22b38] hover:bg-[#fff1f2]'
-            ]"
-          >
-            <span>Día Hot Wheels</span>
-          </button>
-
-          <!-- Dropdown: Más Fechas Especiales -->
+          <!-- Dropdown: Todas las Fechas Especiales -->
           <div class="relative group">
             <button
-              class="px-3 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 transition-colors flex items-center gap-1 cursor-pointer"
+              class="px-2.5 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 transition-colors flex items-center gap-1 cursor-pointer"
             >
-              <span>Fechas Especiales</span>
+              <span>Ocasiones</span>
               <ChevronDown class="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform duration-200" />
             </button>
 
             <!-- Dropdown Menu -->
-            <div class="absolute left-0 mt-1 w-60 bg-white rounded-2xl shadow-xl border border-[#eedee9] py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50">
+            <div class="absolute left-0 mt-1 w-64 bg-white rounded-2xl shadow-xl border border-[#eedee9] py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50">
               <div class="px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b border-gray-100">
                 Selecciona una fecha especial
               </div>
               <button
-                @click="selectCampaign('maquillaje')"
+                v-for="camp in campaignStore.campaigns"
+                :key="camp.id"
+                @click="selectCampaign(camp.id)"
                 class="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 hover:bg-[#f6eef8] hover:text-[#965e9b] flex items-center justify-between transition-colors cursor-pointer"
               >
-                <span class="font-medium">Día de Regalar Maquillaje</span>
-                <span v-if="campaignStore.activeCampaignId === 'maquillaje'" class="text-[10px] font-bold text-[#caa35f]">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm">{{ getCampaignIcon(camp.id) }}</span>
+                  <span class="font-medium">{{ camp.name }}</span>
+                </div>
+                <span v-if="campaignStore.activeCampaignId === camp.id" class="text-[10px] font-bold text-[#caa35f]">
                   ● Activo
                 </span>
               </button>
-              <button
-                @click="selectCampaign('hotwheels')"
-                class="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 hover:bg-[#fff1f2] hover:text-[#c22b38] flex items-center justify-between transition-colors cursor-pointer"
-              >
-                <span class="font-medium">Día de Regalar Hot Wheels</span>
-                <span v-if="campaignStore.activeCampaignId === 'hotwheels'" class="text-[10px] font-bold text-[#c22b38]">
-                  ● Activo
-                </span>
-              </button>
-              <div class="px-3.5 py-2 text-[10px] text-gray-400 border-t border-gray-100">
-                <span>Próximamente nuevas fechas</span>
-              </div>
             </div>
           </div>
 
@@ -325,7 +304,7 @@
                 <img :src="item.image" :alt="item.name" class="w-9 h-9 rounded-lg object-contain bg-[#fbf7fc] p-1 shrink-0" />
                 <div class="flex-1 min-w-0">
                   <div class="text-xs font-semibold text-gray-900 truncate">{{ item.name }}</div>
-                  <div class="text-[10px] text-gray-400">{{ item.campaign === 'hotwheels' ? 'Hot Wheels' : 'Maquillaje' }} • <span class="whitespace-nowrap">S/&nbsp;{{ Number(item.price).toFixed(2) }}</span></div>
+                  <div class="text-[10px] text-gray-400">{{ getCampaignName(item.campaign) }} • <span class="whitespace-nowrap">S/&nbsp;{{ Number(item.price).toFixed(2) }}</span></div>
                 </div>
               </div>
             </div>
@@ -338,27 +317,15 @@
         <!-- Mobile Campaign Switcher Pills -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
           <button
-            @click="selectCampaign('maquillaje')"
+            v-for="camp in campaignStore.campaigns"
+            :key="camp.id"
+            @click="selectCampaign(camp.id)"
             :class="[
               'px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 cursor-pointer flex items-center transition-colors',
-              campaignStore.activeCampaignId === 'maquillaje'
-                ? 'bg-gradient-to-r from-[#27172b] to-[#401f46] text-white shadow-xs border border-[#caa35f]/50'
-                : 'bg-white text-gray-700 border border-[#eedee9]'
+              getMobileCampaignPillClasses(camp.id)
             ]"
           >
-            <span>Día de Maquillaje</span>
-          </button>
-
-          <button
-            @click="selectCampaign('hotwheels')"
-            :class="[
-              'px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 cursor-pointer flex items-center transition-colors',
-              campaignStore.activeCampaignId === 'hotwheels'
-                ? 'bg-[#c22b38] text-white shadow-xs'
-                : 'bg-white text-gray-700 border border-[#eedee9]'
-            ]"
-          >
-            <span>Día Hot Wheels</span>
+            <span>{{ camp.navTitle || camp.shortName }}</span>
           </button>
 
           <button
@@ -447,6 +414,72 @@ function onSearchFocus() {
   if (searchStore.searchQuery.trim().length > 0) {
     searchStore.isDropdownOpen = true
   }
+}
+
+const activeBadgeColor = computed(() => {
+  const id = campaignStore.activeCampaignId
+  if (id === 'hotwheels') return 'text-[#c22b38]'
+  if (id === 'graduacion') return 'text-[#b45309]'
+  if (id === 'cumpleanos') return 'text-[#c026d3]'
+  return 'text-[#965e9b]'
+})
+
+function getCampaignIcon(id) {
+  if (id === 'hotwheels') return '🏎️'
+  if (id === 'graduacion') return '🎓'
+  if (id === 'cumpleanos') return '🎂'
+  return '💄'
+}
+
+function getCampaignName(id) {
+  const camp = campaignStore.campaigns.find(c => c.id === id)
+  return camp?.shortName || camp?.navTitle || 'Venezzia'
+}
+
+function getCampaignBtnClasses(campId) {
+  const isActive = campaignStore.activeCampaignId === campId
+  if (campId === 'hotwheels') {
+    return isActive
+      ? 'bg-[#c22b38] text-white shadow-xs border border-red-400/40 ring-1 ring-red-400/30'
+      : 'text-gray-700 hover:text-[#c22b38] hover:bg-[#fff1f2]'
+  }
+  if (campId === 'graduacion') {
+    return isActive
+      ? 'bg-[#854d0e] text-white shadow-xs border border-amber-400/40 ring-1 ring-amber-400/30'
+      : 'text-gray-700 hover:text-[#b45309] hover:bg-[#fefce8]'
+  }
+  if (campId === 'cumpleanos') {
+    return isActive
+      ? 'bg-[#be185d] text-white shadow-xs border border-pink-400/40 ring-1 ring-pink-400/30'
+      : 'text-gray-700 hover:text-[#c026d3] hover:bg-[#fdf2f8]'
+  }
+  // Default: maquillaje
+  return isActive
+    ? 'bg-gradient-to-r from-[#27172b] to-[#401f46] text-white shadow-xs border border-[#caa35f]/50 ring-1 ring-[#caa35f]/20'
+    : 'text-gray-700 hover:text-[#965e9b] hover:bg-[#f6eef8]'
+}
+
+function getMobileCampaignPillClasses(campId) {
+  const isActive = campaignStore.activeCampaignId === campId
+  if (campId === 'hotwheels') {
+    return isActive
+      ? 'bg-[#c22b38] text-white shadow-xs'
+      : 'bg-white text-gray-700 border border-[#eedee9]'
+  }
+  if (campId === 'graduacion') {
+    return isActive
+      ? 'bg-[#854d0e] text-white shadow-xs'
+      : 'bg-white text-gray-700 border border-[#eedee9]'
+  }
+  if (campId === 'cumpleanos') {
+    return isActive
+      ? 'bg-[#be185d] text-white shadow-xs'
+      : 'bg-white text-gray-700 border border-[#eedee9]'
+  }
+  // Default: maquillaje
+  return isActive
+    ? 'bg-gradient-to-r from-[#27172b] to-[#401f46] text-white shadow-xs border border-[#caa35f]/50'
+    : 'bg-white text-gray-700 border border-[#eedee9]'
 }
 
 function clearSearch() {

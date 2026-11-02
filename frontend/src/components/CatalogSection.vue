@@ -6,7 +6,7 @@
         <div>
           <span
             class="text-xs uppercase tracking-widest font-semibold block mb-1 transition-colors"
-            :class="campaignStore.activeCampaignId === 'hotwheels' ? 'text-[#c22b38]' : 'text-[#965e9b]'"
+            :class="badgeColorClass"
           >
             {{ campaignStore.activeCampaign.badge }}
           </span>
@@ -27,7 +27,7 @@
             :class="[
               'px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all cursor-pointer whitespace-nowrap',
               selectedTab === tab.value
-                ? (campaignStore.activeCampaignId === 'hotwheels' ? 'bg-[#c22b38] text-white shadow-xs' : 'bg-gradient-to-r from-[#27172b] to-[#401f46] text-white shadow-xs border border-[#caa35f]/50')
+                ? getActiveTabClass()
                 : 'bg-white text-gray-700 hover:text-[#965e9b] hover:bg-[#f6eef8] border border-[#eedee9]'
             ]"
           >
@@ -129,6 +129,22 @@ const searchStore = useSearchStore()
 const isSearching = computed(() => {
   return searchStore.searchQuery.trim().length > 0
 })
+
+const badgeColorClass = computed(() => {
+  const id = campaignStore.activeCampaignId
+  if (id === 'hotwheels') return 'text-[#c22b38]'
+  if (id === 'graduacion') return 'text-[#b45309]'
+  if (id === 'cumpleanos') return 'text-[#c026d3]'
+  return 'text-[#965e9b]'
+})
+
+function getActiveTabClass() {
+  const id = campaignStore.activeCampaignId
+  if (id === 'hotwheels') return 'bg-[#c22b38] text-white shadow-xs'
+  if (id === 'graduacion') return 'bg-[#854d0e] text-white shadow-xs border border-amber-400/40'
+  if (id === 'cumpleanos') return 'bg-[#be185d] text-white shadow-xs border border-pink-400/40'
+  return 'bg-gradient-to-r from-[#27172b] to-[#401f46] text-white shadow-xs border border-[#caa35f]/50'
+}
 
 const currentFilterTabs = computed(() => {
   return campaignStore.activeCampaign.filterTabs || [{ label: 'Todos', value: 'all' }]

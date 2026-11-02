@@ -75,20 +75,12 @@
             Fechas Especiales
           </h4>
           <ul class="space-y-2.5 text-xs text-gray-600">
-            <li>
+            <li v-for="camp in campaignStore.campaigns" :key="camp.id">
               <button
-                @click="selectCampaign('maquillaje')"
+                @click="selectCampaign(camp.id)"
                 class="hover:text-[#965e9b] transition-colors text-left flex items-center gap-1.5 cursor-pointer"
               >
-                <span>Día del Maquillaje</span>
-              </button>
-            </li>
-            <li>
-              <button
-                @click="selectCampaign('hotwheels')"
-                class="hover:text-[#c22b38] transition-colors text-left flex items-center gap-1.5 cursor-pointer"
-              >
-                <span>Día Hot Wheels</span>
+                <span>{{ camp.name }}</span>
               </button>
             </li>
             <li>

@@ -4,7 +4,7 @@
       <div class="text-center max-w-xl mx-auto mb-8 sm:mb-10">
         <span
           class="text-xs font-semibold uppercase tracking-widest block mb-1 transition-colors"
-          :class="campaignStore.activeCampaignId === 'hotwheels' ? 'text-[#c22b38]' : 'text-[#965e9b]'"
+          :class="badgeColorClass"
         >
           {{ campaignStore.activeCampaign.name }}
         </span>
@@ -12,7 +12,7 @@
           Explora por Categoría
         </h2>
         <p class="text-xs text-gray-500 mt-1">
-          Elige el detalle ideal según el estilo, club o personaje favorito
+          Elige el detalle ideal según el estilo, ocasión o temática favorita
         </p>
       </div>
 
@@ -25,11 +25,11 @@
           class="flex flex-col items-center group shrink-0 cursor-pointer focus:outline-none"
         >
           <!-- Circular Centered Photo Frame -->
-          <div class="w-20 sm:w-24 h-20 sm:h-24 rounded-full bg-[#fbf7fc] border border-[#eedee9] group-hover:border-[#caa35f] group-hover:shadow-[0_4px_16px_rgba(202,163,95,0.22)] group-hover:ring-2 group-hover:ring-[#caa35f]/25 transition-all duration-300 p-2 flex items-center justify-center">
+          <div class="w-20 sm:w-24 h-20 sm:h-24 rounded-full bg-[#fbf7fc] border border-[#eedee9] group-hover:border-[#caa35f] group-hover:shadow-[0_4px_16px_rgba(202,163,95,0.22)] group-hover:ring-2 group-hover:ring-[#caa35f]/25 transition-all duration-300 p-1 flex items-center justify-center overflow-hidden">
             <img
               :src="item.image"
               :alt="item.name"
-              class="w-full h-full object-contain group-hover:scale-108 transition-transform duration-300"
+              class="w-full h-full object-cover rounded-full group-hover:scale-108 transition-transform duration-300"
             />
           </div>
 
@@ -49,6 +49,14 @@ import { useCampaignStore } from '../stores/campaign'
 defineEmits(['select-category'])
 
 const campaignStore = useCampaignStore()
+
+const badgeColorClass = computed(() => {
+  const id = campaignStore.activeCampaignId
+  if (id === 'hotwheels') return 'text-[#c22b38]'
+  if (id === 'graduacion') return 'text-[#b45309]'
+  if (id === 'cumpleanos') return 'text-[#c026d3]'
+  return 'text-[#965e9b]'
+})
 
 const currentCategories = computed(() => {
   return campaignStore.activeCampaign.categories || []

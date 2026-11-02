@@ -560,6 +560,275 @@ export const MOCK_PRODUCTS = [
       '2 Chocolates Princesa Nestlé',
       'Globo corazón metálico personalizado con nombre'
     ]
+  },
+
+  // -------------------------------------------------------------
+  // CAMPAÑA: GRADUACIÓN & ÉXITOS
+  // -------------------------------------------------------------
+  {
+    id: 'grad-box-gala',
+    campaign: 'graduacion',
+    name: 'Box Éxito de Gala con Birrete & Rosas',
+    description: 'Caja circular rígida con mini birrete de gala con borla dorada, 6 rosas eternas preservadas, diploma personalizado enrollado con lazo y luces LED.',
+    price: 95.00,
+    original_price: 110.00,
+    category: 'Boxes de Birrete & Gala',
+    image: 'https://images.unsplash.com/photo-1525921429624-479b6a26d84d?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      '1 Mini birrete de gala artesanal con borla dorada',
+      '6 Rosas eternas preservadas (tonos azul real y oro champán)',
+      'Diploma personalizado con nombre del graduado y dedicatoria',
+      'Guirnalda de luces LED micro-alambre cálidas',
+      'Caja rígida boutique con finos acabados en lila y oro',
+      'Tarjeta de felicitaciones de lujo'
+    ]
+  },
+  {
+    id: 'grad-ramo-girasoles',
+    campaign: 'graduacion',
+    name: 'Ramo Triunfo de Girasoles & Rosas Eternas',
+    description: 'Bouquet radiante con girasoles frescos de exportación, 4 rosas eternas doradas, detalles con mini birrete y lazo de satén conmemorativo.',
+    price: 85.00,
+    original_price: 95.00,
+    category: 'Ramos de Graduación',
+    image: 'https://images.unsplash.com/photo-1538677685457-bfe8192dbdf6?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      '3 Girasoles grandes seleccionados',
+      '4 Rosas eternas color oro champán',
+      'Mini birrete decorativo para bouquet',
+      'Follaje fino de eucalipto baby blue',
+      'Envoltura coreana impermeable bitono de lujo',
+      'Lazo de seda satén dorado con dedicatoria'
+    ]
+  },
+  {
+    id: 'grad-peluche-oso',
+    campaign: 'graduacion',
+    name: 'Arreglo Oso Graduado con Birrete & Diploma',
+    description: 'Peluche tierno con toga y birrete con borla real, sosteniendo un diploma enrollado, acompañado de 3 rosas eternas rojas y luces LED.',
+    price: 79.00,
+    category: 'Peluches Graduados',
+    image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      '1 Peluche importado de 25cm con toga y birrete',
+      'Mini diploma con medalla dorada',
+      '3 Rosas eternas preservadas de calidad premium',
+      'Luces LED decorativas integradas',
+      'Caja base cilíndrica de diseño Venezzia',
+      'Tarjeta dedicatoria especial de graduación'
+    ]
+  },
+  {
+    id: 'grad-box-brindis',
+    campaign: 'graduacion',
+    name: 'Box Brindis de Honor & Chocolates Ferrero',
+    description: 'El detalle definitivo para celebrar la titulación: mini espumante Riccadonna, copa de cristal grabada, 8 bombones Ferrero Rocher y rosas eternas.',
+    price: 120.00,
+    original_price: 135.00,
+    category: 'Boxes de Birrete & Gala',
+    image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      '1 Botella mini de espumante Riccadonna Asti 200ml',
+      '1 Copa de cristal para brindis grabada "Licenciad@ / Éxitos"',
+      '8 Bombones italianos Ferrero Rocher',
+      'Mini birrete con detalles dorados',
+      '4 Rosas eternas preservadas',
+      'Caja cofre de madera lacada o cartón rígido premium',
+      'Luces micro-LED con interruptor'
+    ]
+  },
+  {
+    id: 'grad-ramo-rosas-azules',
+    campaign: 'graduacion',
+    name: 'Ramo Magna Cum Laude de Rosas Azules',
+    description: 'Elegante bouquet de 12 rosas artesanales en azul cobalto y blanco perla con mariposa dorada 3D, birrete y mensaje personalizado.',
+    price: 90.00,
+    category: 'Ramos de Graduación',
+    image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      '12 Rosas artesanales azul rey y blanco perla',
+      'Mariposa dorada troquelada en 3D',
+      'Mini birrete de graduación',
+      'Papel coreano mate negro y filo dorado',
+      'Guirnalda de luces LED blanco cálido',
+      'Tarjeta formal con mensaje de felicitación'
+    ]
+  },
+  {
+    id: 'grad-box-diploma',
+    campaign: 'graduacion',
+    name: 'Box Floral Diploma de Oro & Fotografías',
+    description: 'Caja rectangular con porta-título decorativo, 3 fotos polaroid del camino universitario, rosas preservadas y deliciosos snacks.',
+    price: 88.00,
+    category: 'Boxes de Birrete & Gala',
+    image: 'https://images.unsplash.com/photo-1535982330050-f1c2fb79ff78?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      'Tubo porta-diploma decorativo con cinta dorada',
+      '3 Fotos polaroid personalizadas de la carrera universitaria',
+      '5 Rosas eternas preservadas color vino y oro',
+      '1 Paquete de bombones finos surtidos',
+      'Luces LED cálidas',
+      'Caja de presentación personalizada con nombre de la promoción'
+    ]
+  },
+  {
+    id: 'grad-peluche-stitch',
+    campaign: 'graduacion',
+    name: 'Ramo Stitch Graduado con Birrete & Rosas',
+    description: 'El personaje más querido en su versión graduado con toga y birrete, 4 rosas eternas, luces LED y globito de felicitación.',
+    price: 85.00,
+    original_price: 98.00,
+    category: 'Peluches Graduados',
+    image: 'https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      '1 Peluche de Stitch con birrete de graduado',
+      '4 Rosas eternas azul real artesanales',
+      'Globo metalizado miniatura "Felicidades Graduad@"',
+      'Luces LED decorativas',
+      'Papel de envoltura coreano especial para promociones',
+      'Tarjeta dedicatoria de egresados'
+    ]
+  },
+
+  // -------------------------------------------------------------
+  // CAMPAÑA: CUMPLEAÑOS MÁGICO
+  // -------------------------------------------------------------
+  {
+    id: 'bday-box-pastel-globos',
+    campaign: 'cumpleanos',
+    name: 'Box Cumpleaños Feliz con Globos Metalizados',
+    description: 'Caja de celebración con globo burbuja personalizado con nombre, 5 rosas eternas artesanales, chocolates finos y serpentinas con luces LED.',
+    price: 85.00,
+    original_price: 95.00,
+    category: 'Boxes de Cumpleaños',
+    image: 'https://images.unsplash.com/photo-1602631985686-1bb0e6a8696e?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      'Globo burbuja transparente de 40cm con frase personalizada en vinil dorado',
+      '5 Rosas eternas preservadas con aroma floral suave',
+      'Caja redonda de lujo con lazo de organza',
+      '1 Paquete de bombones Bon o Bon',
+      'Guirnalda de luces LED multicolor',
+      'Tarjeta de felicitaciones de cumpleaños caligrafiada'
+    ]
+  },
+  {
+    id: 'bday-ramo-tulipanes',
+    campaign: 'cumpleanos',
+    name: 'Ramo Fiesta Radiante de Rosas & Tulipanes',
+    description: 'Explosión de color y alegría: bouquet con rosas en tonalidades pastel, flores de relleno importadas, papel coreano con mensaje "Happy Birthday" y luces.',
+    price: 80.00,
+    category: 'Ramos Festivos',
+    image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      '6 Rosas eternas en degradé rosa y lila',
+      'Flores silvestres decorativas de relleno',
+      'Topper dorado "Feliz Cumpleaños"',
+      'Luces LED decorativas',
+      'Envoltura doble en papel coreano con borde perlado',
+      'Lazo de raso de alta gama'
+    ]
+  },
+  {
+    id: 'bday-box-torta-gourmet',
+    campaign: 'cumpleanos',
+    name: 'Box Sweet Birthday con Bento Cake & Rosas',
+    description: 'La combinación perfecta: mini torta artesanal Bento Cake con dedicatoria personalizada, 4 rosas eternas, vela chispeante mágica y espátula.',
+    price: 105.00,
+    original_price: 120.00,
+    category: 'Tortas & Dulces',
+    image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      '1 Mini Bento Cake artesanal con diseño y mensaje a elección (vainilla o chocolate)',
+      '1 Vela mágica de chispas doradas',
+      '4 Rosas eternas preservadas en tono crema y blush',
+      'Mini espátula de madera y servilletas de gala',
+      'Caja con visor transparente y lazo de satén',
+      'Tarjeta dedicatoria especial'
+    ]
+  },
+  {
+    id: 'bday-box-chocolates-deluxe',
+    campaign: 'cumpleanos',
+    name: 'Box Celebración Chocolatosa & Ferrero',
+    description: 'El regalo soñado para amantes del chocolate: selección de chocolates premium (Ferrero Rocher, Vizzio, Hershey\'s), mini globo y rosas eternas.',
+    price: 90.00,
+    category: 'Boxes de Cumpleaños',
+    image: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      '1 Caja de bombones Ferrero Rocher x 8 unidades',
+      '1 Paquete de almendras cubiertas de chocolate Vizzio',
+      '2 Barras de chocolate Hershey\'s Cookies \'n\' Creme',
+      'Mini globo metálico de corazón con número o frase',
+      '3 Rosas eternas artesanales',
+      'Luces LED integradas',
+      'Caja rígida con confeti de estrellas doradas'
+    ]
+  },
+  {
+    id: 'bday-ramo-arcoiris',
+    campaign: 'cumpleanos',
+    name: 'Ramo Arcoíris de Rosas Eternas & Globito',
+    description: 'Un bouquet súper alegre y juvenil con 7 rosas eternas en colores vibrantes, mariposas decorativas, luces y mini globo metalizado "Happy Birthday".',
+    price: 75.00,
+    category: 'Ramos Festivos',
+    image: 'https://images.unsplash.com/photo-1576426863848-c21f53c60b19?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      '7 Rosas eternas multicolores hechas a mano',
+      'Mini globo metálico "Happy Birthday"',
+      'Mariposas doradas 3D',
+      'Luces LED micro-alambre',
+      'Envoltura coreana impermeable rosa pastel',
+      'Tarjeta personalizada con dedicatoria emotiva'
+    ]
+  },
+  {
+    id: 'bday-box-sorpresa-polaroid',
+    campaign: 'cumpleanos',
+    name: 'Box Sorpresa Recuerdos & Luces Polaroid',
+    description: 'Caja sorpresa con tapa que al abrirse revela 4 fotos polaroid con los momentos más especiales del cumpleañero, rosas y deliciosos snacks.',
+    price: 82.00,
+    category: 'Boxes de Cumpleaños',
+    image: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      '4 Fotos polaroid impresas en alta resolución con broches de madera',
+      '4 Rosas eternas artesanales de larga duración',
+      '1 Bolsa de Inka Chips o snacks a elección',
+      '2 Chocolates Princesa Nestlé',
+      'Caja explosiva / sorpresa con detalles en foil dorado',
+      'Guirnalda de luces LED de tono cálido'
+    ]
+  },
+  {
+    id: 'bday-box-brindis-cumple',
+    campaign: 'cumpleanos',
+    name: 'Box Brindis & Cumpleaños de Lujo',
+    description: 'Para brindar por una vuelta más al sol: botella de espumante Riccadonna, copa de cristal personalizada, caja de bombones y flores de gala.',
+    price: 115.00,
+    original_price: 130.00,
+    category: 'Tortas & Dulces',
+    image: 'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=600&q=80',
+    in_stock: true,
+    items_included: [
+      '1 Botella de espumante Riccadonna Ruby o Asti 200ml',
+      '1 Copa flauta de cristal con grabado "Feliz Cumpleaños"',
+      '1 Caja de chocolates finos surtidos',
+      'Rosas eternas decorativas con follaje fino',
+      'Vela chispeante de cumpleaños',
+      'Caja cofre rígida con tapa de imán y lazo'
+    ]
   }
 ]
 
@@ -625,6 +894,11 @@ function resolveProductImage(record, client) {
     return PRODUCT_OPTIMIZED_ASSETS[record.id]
   }
 
+  // 1.5. Direct full URL or local path check (e.g. Unsplash, HTTP, or /products/)
+  if (record?.image && (record.image.startsWith('http://') || record.image.startsWith('https://') || record.image.startsWith('/products/'))) {
+    return record.image
+  }
+
   // 2. Name-based match for catalog products
   const norm = (record?.name || '').toLowerCase()
   if (norm.includes('osita dormilona')) return '/products/box_osita_dormilona_centered.webp'
@@ -671,6 +945,8 @@ export async function fetchProducts() {
     items_included: record.items_included || []
   })
 
+  let liveProducts = null
+
   try {
     const records = await pb.collection('products').getFullList({
       sort: '-created',
@@ -678,24 +954,33 @@ export async function fetchProducts() {
     })
 
     if (records && records.length > 0) {
-      return records.map(r => mapRecord(r, pb))
+      liveProducts = records.map(r => mapRecord(r, pb))
     }
   } catch (err) {
     // continue to remote check
   }
 
   // If local pb had 0 records or failed, try live remote PocketBase
-  try {
-    const remotePb = new PocketBase('https://admin.venezzia.shop')
-    const remoteRecords = await remotePb.collection('products').getFullList({
-      sort: '-created',
-      filter: 'in_stock = true'
-    })
-    if (remoteRecords && remoteRecords.length > 0) {
-      return remoteRecords.map(r => mapRecord(r, remotePb))
+  if (!liveProducts || liveProducts.length === 0) {
+    try {
+      const remotePb = new PocketBase('https://admin.venezzia.shop')
+      const remoteRecords = await remotePb.collection('products').getFullList({
+        sort: '-created',
+        filter: 'in_stock = true'
+      })
+      if (remoteRecords && remoteRecords.length > 0) {
+        liveProducts = remoteRecords.map(r => mapRecord(r, remotePb))
+      }
+    } catch (remoteErr) {
+      // continue to mock fallback
     }
-  } catch (remoteErr) {
-    // continue to mock fallback
+  }
+
+  if (liveProducts && liveProducts.length > 0) {
+    // Merge any campaigns that don't have records in PocketBase yet from MOCK_PRODUCTS
+    const campaignsInLive = new Set(liveProducts.map(p => p.campaign || 'maquillaje'))
+    const missingCampaignMocks = MOCK_PRODUCTS.filter(p => !campaignsInLive.has(p.campaign))
+    return [...liveProducts, ...missingCampaignMocks]
   }
 
   return MOCK_PRODUCTS

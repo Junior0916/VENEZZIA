@@ -75,7 +75,7 @@ function checkDeepLink() {
   try {
     const urlParams = new URLSearchParams(window.location.search)
     const campaignParam = urlParams.get('campaign')
-    if (campaignParam && (campaignParam === 'hotwheels' || campaignParam === 'maquillaje')) {
+    if (campaignParam && campaignStore.campaigns.some(c => c.id === campaignParam)) {
       campaignStore.setCampaign(campaignParam)
     }
 

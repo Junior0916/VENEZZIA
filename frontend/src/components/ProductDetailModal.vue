@@ -82,14 +82,14 @@
             <div class="flex items-center gap-2 mb-1">
               <span
                 class="text-xs font-semibold uppercase tracking-wider block"
-                :class="product.campaign === 'hotwheels' ? 'text-[#c22b38]' : 'text-[#965e9b]'"
+                :class="categoryColorClass"
               >
                 {{ product.category }}
               </span>
               <span
                 v-if="product.original_price"
                 class="px-2 py-0.2 rounded-full text-[10px] font-bold uppercase"
-                :class="product.campaign === 'hotwheels' ? 'bg-[#fee2e2] text-[#b91c1c]' : 'bg-[#fffdf5] text-[#926014] border border-[#f3e1b9]'"
+                :class="promoBadgeClass"
               >
                 Promoción
               </span>
@@ -163,7 +163,7 @@
                 >
                   <span
                     class="font-bold"
-                    :class="product.campaign === 'hotwheels' ? 'text-[#c22b38]' : 'text-[#caa35f]'"
+                    :class="checkmarkColorClass"
                   >✓</span>
                   <span>{{ item }}</span>
                 </li>
@@ -178,7 +178,7 @@
               <button
                 @click="handleAddToCart"
                 class="flex-1 py-3.5 rounded-full text-white font-semibold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs active:scale-98"
-                :class="product.campaign === 'hotwheels' ? 'bg-[#c22b38] hover:bg-[#991b1b]' : 'bg-[#27172b] hover:bg-[#caa35f] hover:text-[#27172b] border border-[#caa35f]/40'"
+                :class="addToCartButtonClass"
               >
                 <span>Añadir a la Bolsa • </span><span class="whitespace-nowrap">S/&nbsp;{{ computedFinalPrice.toFixed(2) }}</span>
               </button>
@@ -360,6 +360,38 @@ const cartStore = useCartStore()
 const activeImageView = ref('product')
 const selectedAddon = ref('none')
 const copiedLink = ref(false)
+
+const categoryColorClass = computed(() => {
+  const camp = props.product?.campaign
+  if (camp === 'hotwheels') return 'text-[#c22b38]'
+  if (camp === 'graduacion') return 'text-[#b45309]'
+  if (camp === 'cumpleanos') return 'text-[#c026d3]'
+  return 'text-[#965e9b]'
+})
+
+const promoBadgeClass = computed(() => {
+  const camp = props.product?.campaign
+  if (camp === 'hotwheels') return 'bg-[#fee2e2] text-[#b91c1c]'
+  if (camp === 'graduacion') return 'bg-[#fefce8] text-[#854d0e] border border-[#fef08a]'
+  if (camp === 'cumpleanos') return 'bg-[#fdf2f8] text-[#9d174d] border border-[#fbcfe8]'
+  return 'bg-[#fffdf5] text-[#926014] border border-[#f3e1b9]'
+})
+
+const checkmarkColorClass = computed(() => {
+  const camp = props.product?.campaign
+  if (camp === 'hotwheels') return 'text-[#c22b38]'
+  if (camp === 'graduacion') return 'text-[#b45309]'
+  if (camp === 'cumpleanos') return 'text-[#c026d3]'
+  return 'text-[#caa35f]'
+})
+
+const addToCartButtonClass = computed(() => {
+  const camp = props.product?.campaign
+  if (camp === 'hotwheels') return 'bg-[#c22b38] hover:bg-[#991b1b]'
+  if (camp === 'graduacion') return 'bg-[#854d0e] hover:bg-[#caa35f] hover:text-[#27172b] border border-amber-400/40'
+  if (camp === 'cumpleanos') return 'bg-[#be185d] hover:bg-[#9d174d]'
+  return 'bg-[#27172b] hover:bg-[#caa35f] hover:text-[#27172b] border border-[#caa35f]/40'
+})
 
 // Lightbox & High-Resolution Zoom State
 const isLightboxOpen = ref(false)

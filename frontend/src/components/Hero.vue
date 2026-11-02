@@ -4,35 +4,21 @@
       <!-- Campaign Switcher Banner (Interactive, High-end) -->
       <div class="mb-6 p-1.5 sm:p-2 bg-white/85 backdrop-blur-xs rounded-2xl sm:rounded-full border border-[#eedee9] shadow-[0_2px_16px_-4px_rgba(154,104,155,0.06)] flex flex-col sm:flex-row items-center justify-between gap-2">
         <div class="px-4 py-1 text-xs text-gray-500 font-medium flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full animate-pulse" :class="campaignStore.activeCampaignId === 'hotwheels' ? 'bg-[#c22b38]' : 'bg-[#caa35f]'"></span>
+          <span class="w-2 h-2 rounded-full animate-pulse" :class="heroAccentBg"></span>
           <span class="font-semibold text-gray-700">Explorar por Fecha Especial:</span>
         </div>
 
-        <div class="grid grid-cols-2 gap-1.5 sm:gap-2 w-full sm:w-auto">
-          <!-- Switcher Button 1: Maquillaje -->
+        <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5 sm:gap-2 w-full sm:w-auto">
           <button
-            @click="campaignStore.setCampaign('maquillaje')"
+            v-for="camp in campaignStore.campaigns"
+            :key="camp.id"
+            @click="campaignStore.setCampaign(camp.id)"
             :class="[
-              'px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-xs font-semibold tracking-wide transition-all duration-300 cursor-pointer flex items-center justify-center',
-              campaignStore.activeCampaignId === 'maquillaje'
-                ? 'bg-gradient-to-r from-[#27172b] to-[#401f46] text-white shadow-sm ring-2 ring-[#caa35f]/30 border border-[#caa35f]/50'
-                : 'bg-[#faf6fc] text-gray-700 hover:bg-[#f5edf8] hover:text-[#965e9b]'
+              'px-3.5 sm:px-5 py-2 rounded-xl sm:rounded-full text-xs font-semibold tracking-wide transition-all duration-300 cursor-pointer flex items-center justify-center',
+              getHeroSwitcherClasses(camp.id)
             ]"
           >
-            <span>Día del Maquillaje</span>
-          </button>
-
-          <!-- Switcher Button 2: Hot Wheels -->
-          <button
-            @click="campaignStore.setCampaign('hotwheels')"
-            :class="[
-              'px-4 sm:px-6 py-2 rounded-xl sm:rounded-full text-xs font-semibold tracking-wide transition-all duration-300 cursor-pointer flex items-center justify-center',
-              campaignStore.activeCampaignId === 'hotwheels'
-                ? 'bg-[#c22b38] text-white shadow-sm ring-2 ring-red-500/20'
-                : 'bg-[#fff1f2] text-gray-800 hover:bg-[#ffe4e6] hover:text-[#c22b38]'
-            ]"
-          >
-            <span>Día Hot Wheels</span>
+            <span>{{ camp.navTitle || camp.shortName }}</span>
           </button>
         </div>
       </div>
@@ -45,7 +31,7 @@
             <div class="md:col-span-5 order-2 md:order-1 flex justify-center">
               <div
                 class="w-56 sm:w-64 aspect-[4/5] rounded-2xl overflow-hidden border border-[#eedee9] p-3 flex items-center justify-center shadow-xs transition-colors duration-500"
-                :class="campaignStore.activeCampaignId === 'hotwheels' ? 'bg-[#7c1a26]/10' : 'bg-[#fbf7fc]'"
+                :class="heroImageBgClass"
               >
                 <img
                   :src="campaignStore.activeCampaign.heroPrimaryImage"
@@ -64,7 +50,7 @@
             <div class="md:col-span-7 order-1 md:order-2 text-center md:text-left">
               <span
                 class="text-xs font-semibold uppercase tracking-widest block mb-2 transition-colors duration-300 justify-center md:justify-start"
-                :class="campaignStore.activeCampaignId === 'hotwheels' ? 'text-[#c22b38]' : 'text-[#965e9b]'"
+                :class="heroBadgeColorClass"
               >
                 {{ campaignStore.activeCampaign.badge }}
               </span>
@@ -81,7 +67,7 @@
                 <a
                   href="#catalogo"
                   class="px-7 py-3 rounded-full text-white text-xs font-semibold tracking-wider uppercase transition-all duration-300 cursor-pointer shadow-xs active:scale-95"
-                  :class="campaignStore.activeCampaignId === 'hotwheels' ? 'bg-[#c22b38] hover:bg-[#991b1b]' : 'bg-[#27172b] hover:bg-[#caa35f] hover:text-[#27172b] border border-[#caa35f]/50'"
+                  :class="heroCtaButtonClass"
                 >
                   Ver Catálogo Completo
                 </a>
@@ -104,7 +90,7 @@
           <div>
             <span
               class="text-[11px] font-medium tracking-wider uppercase block mb-1"
-              :class="campaignStore.activeCampaignId === 'hotwheels' ? 'text-[#c22b38]' : 'text-[#965e9b]'"
+              :class="heroBadgeColorClass"
             >
               Destacado • {{ campaignStore.activeCampaign.shortName }}
             </span>
@@ -112,7 +98,7 @@
               {{ campaignStore.activeCampaign.heroSideTitle }}
             </h2>
             <p class="text-xs text-gray-500 mb-3">
-              {{ campaignStore.activeCampaignId === 'hotwheels' ? 'Peluche importado, 2 autos Hot Wheels y rosas eternas.' : 'Peluche original, 3 rosas eternas y maquillaje.' }}
+              {{ heroSideDesc }}
             </p>
             <div class="text-xl font-bold text-[#27172b] mb-4 whitespace-nowrap">
               <span class="text-xs text-[#caa35f] font-semibold uppercase tracking-wider mr-1">Precio</span>
@@ -154,6 +140,69 @@ import IconWhatsApp from './icons/IconWhatsApp.vue'
 import { useCampaignStore } from '../stores/campaign'
 
 const campaignStore = useCampaignStore()
+
+const heroAccentBg = computed(() => {
+  const id = campaignStore.activeCampaignId
+  if (id === 'hotwheels') return 'bg-[#c22b38]'
+  if (id === 'graduacion') return 'bg-[#caa35f]'
+  if (id === 'cumpleanos') return 'bg-[#c026d3]'
+  return 'bg-[#caa35f]'
+})
+
+const heroBadgeColorClass = computed(() => {
+  const id = campaignStore.activeCampaignId
+  if (id === 'hotwheels') return 'text-[#c22b38]'
+  if (id === 'graduacion') return 'text-[#b45309]'
+  if (id === 'cumpleanos') return 'text-[#c026d3]'
+  return 'text-[#965e9b]'
+})
+
+const heroImageBgClass = computed(() => {
+  const id = campaignStore.activeCampaignId
+  if (id === 'hotwheels') return 'bg-[#7c1a26]/10'
+  if (id === 'graduacion') return 'bg-[#fefce8]'
+  if (id === 'cumpleanos') return 'bg-[#fdf2f8]'
+  return 'bg-[#fbf7fc]'
+})
+
+const heroCtaButtonClass = computed(() => {
+  const id = campaignStore.activeCampaignId
+  if (id === 'hotwheels') return 'bg-[#c22b38] hover:bg-[#991b1b]'
+  if (id === 'graduacion') return 'bg-[#854d0e] hover:bg-[#caa35f] hover:text-[#27172b] border border-amber-400/40'
+  if (id === 'cumpleanos') return 'bg-[#be185d] hover:bg-[#9d174d]'
+  return 'bg-[#27172b] hover:bg-[#caa35f] hover:text-[#27172b] border border-[#caa35f]/50'
+})
+
+const heroSideDesc = computed(() => {
+  const id = campaignStore.activeCampaignId
+  if (id === 'hotwheels') return 'Peluche importado, 2 autos Hot Wheels y rosas eternas.'
+  if (id === 'graduacion') return 'Girasoles radiantes, birrete decorativo y rosas doradas.'
+  if (id === 'cumpleanos') return 'Bouquet festivo en colores pastel, rosas eternas y topper.'
+  return 'Peluche original, 3 rosas eternas y cosméticos premium.'
+})
+
+function getHeroSwitcherClasses(campId) {
+  const isActive = campaignStore.activeCampaignId === campId
+  if (campId === 'hotwheels') {
+    return isActive
+      ? 'bg-[#c22b38] text-white shadow-sm ring-2 ring-red-500/20'
+      : 'bg-[#fff1f2] text-gray-800 hover:bg-[#ffe4e6] hover:text-[#c22b38]'
+  }
+  if (campId === 'graduacion') {
+    return isActive
+      ? 'bg-[#854d0e] text-white shadow-sm ring-2 ring-amber-500/20'
+      : 'bg-[#fefce8] text-gray-800 hover:bg-[#fef9c3] hover:text-[#854d0e]'
+  }
+  if (campId === 'cumpleanos') {
+    return isActive
+      ? 'bg-[#be185d] text-white shadow-sm ring-2 ring-pink-500/20'
+      : 'bg-[#fdf2f8] text-gray-800 hover:bg-[#fce7f3] hover:text-[#be185d]'
+  }
+  // Default: maquillaje
+  return isActive
+    ? 'bg-gradient-to-r from-[#27172b] to-[#401f46] text-white shadow-sm ring-2 ring-[#caa35f]/30 border border-[#caa35f]/50'
+    : 'bg-[#faf6fc] text-gray-700 hover:bg-[#f5edf8] hover:text-[#965e9b]'
+}
 
 const whatsappCtaUrl = computed(() => {
   const campaignName = campaignStore.activeCampaign.name

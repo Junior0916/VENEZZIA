@@ -16,11 +16,11 @@
         decoding="async"
       />
 
-      <!-- Promo Badge if original_price exists (Refined Gold or Red for Hot Wheels) -->
+      <!-- Promo Badge if original_price exists -->
       <div
         v-if="product.original_price"
         class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase shadow-2xs"
-        :class="product.campaign === 'hotwheels' ? 'bg-[#fee2e2] text-[#b91c1c] border border-[#fca5a5]/60' : 'bg-gradient-to-r from-[#caa35f] to-[#b0873b] text-white border border-[#f3e1b9]'"
+        :class="promoBadgeClass"
       >
         Promo
       </div>
@@ -31,7 +31,7 @@
       <div>
         <span
           class="text-[11px] font-medium tracking-wider uppercase block mb-1 transition-colors"
-          :class="product.campaign === 'hotwheels' ? 'text-[#c22b38]' : 'text-[#965e9b]'"
+          :class="categoryColorClass"
         >
           {{ product.category }}
         </span>
@@ -63,7 +63,7 @@
         <button
           @click="addToCart"
           class="px-3.5 sm:px-4 py-2 rounded-full text-white text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer shadow-xs active:scale-95 shrink-0"
-          :class="product.campaign === 'hotwheels' ? 'bg-[#c22b38] hover:bg-[#991b1b]' : 'bg-[#27172b] hover:bg-[#caa35f] hover:text-[#27172b] border border-[#caa35f]/40'"
+          :class="addToCartButtonClass"
         >
           Añadir
         </button>
@@ -81,6 +81,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useCartStore } from '../stores/cart'
 
 const props = defineProps({
@@ -93,6 +94,30 @@ const props = defineProps({
 defineEmits(['select-product'])
 
 const cartStore = useCartStore()
+
+const categoryColorClass = computed(() => {
+  const camp = props.product.campaign
+  if (camp === 'hotwheels') return 'text-[#c22b38]'
+  if (camp === 'graduacion') return 'text-[#b45309]'
+  if (camp === 'cumpleanos') return 'text-[#c026d3]'
+  return 'text-[#965e9b]'
+})
+
+const addToCartButtonClass = computed(() => {
+  const camp = props.product.campaign
+  if (camp === 'hotwheels') return 'bg-[#c22b38] hover:bg-[#991b1b]'
+  if (camp === 'graduacion') return 'bg-[#854d0e] hover:bg-[#caa35f] hover:text-[#27172b] border border-amber-400/40'
+  if (camp === 'cumpleanos') return 'bg-[#be185d] hover:bg-[#9d174d]'
+  return 'bg-[#27172b] hover:bg-[#caa35f] hover:text-[#27172b] border border-[#caa35f]/40'
+})
+
+const promoBadgeClass = computed(() => {
+  const camp = props.product.campaign
+  if (camp === 'hotwheels') return 'bg-[#fee2e2] text-[#b91c1c] border border-[#fca5a5]/60'
+  if (camp === 'graduacion') return 'bg-[#fefce8] text-[#854d0e] border border-[#fef08a]'
+  if (camp === 'cumpleanos') return 'bg-[#fdf2f8] text-[#9d174d] border border-[#fbcfe8]'
+  return 'bg-gradient-to-r from-[#caa35f] to-[#b0873b] text-white border border-[#f3e1b9]'
+})
 
 function addToCart() {
   cartStore.addToCart(props.product, 1)
