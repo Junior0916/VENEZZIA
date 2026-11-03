@@ -53,7 +53,9 @@ const router = createRouter({
         setTimeout(() => {
           const el = document.querySelector(to.hash)
           if (el) {
-            resolve({ el: to.hash, behavior: 'smooth' })
+            const header = document.getElementById('site-header') || document.querySelector('header')
+            const headerHeight = header ? header.offsetHeight : 140
+            resolve({ el: to.hash, top: headerHeight, behavior: 'smooth' })
           } else {
             resolve({ top: 0, behavior: 'smooth' })
           }

@@ -240,6 +240,7 @@ import {
   BookOpen
 } from 'lucide-vue-next'
 import { useRouter, useRoute } from 'vue-router'
+import { scrollToSectionDeferred } from '../utils/scroll'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import IconInstagram from './icons/IconInstagram.vue'
 import IconTikTok from './icons/IconTikTok.vue'
@@ -252,32 +253,18 @@ const route = useRoute()
 const campaignStore = useCampaignStore()
 const siteSettingsStore = useSiteSettingsStore()
 
-function navigateToSection(sectionId) {
+async function navigateToSection(sectionId) {
   if (route && route.path !== '/') {
-    router.push('/').then(() => {
-      setTimeout(() => {
-        const el = document.getElementById(sectionId)
-        if (el) el.scrollIntoView({ behavior: 'smooth' })
-      }, 150)
-    })
-  } else {
-    const el = document.getElementById(sectionId)
-    if (el) el.scrollIntoView({ behavior: 'smooth' })
+    await router.push('/')
   }
+  await scrollToSectionDeferred(sectionId)
 }
 
-function selectCampaign(id) {
+async function selectCampaign(id) {
   campaignStore.setCampaign(id)
-  if (router) {
-    router.push('/').then(() => {
-      setTimeout(() => {
-        const el = document.getElementById('catalogo')
-        if (el) el.scrollIntoView({ behavior: 'smooth' })
-      }, 100)
-    })
-  } else {
-    const el = document.getElementById('catalogo')
-    if (el) el.scrollIntoView({ behavior: 'smooth' })
+  if (route && route.path !== '/') {
+    await router.push('/')
   }
+  await scrollToSectionDeferred('catalogo')
 }
 </script>

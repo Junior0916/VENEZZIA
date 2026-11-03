@@ -66,6 +66,7 @@
               <div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
                 <a
                   href="#catalogo"
+                  @click.prevent="scrollToSection('catalogo')"
                   class="px-7 py-3 rounded-full text-white text-xs font-semibold tracking-wider uppercase transition-all duration-300 cursor-pointer shadow-xs active:scale-95"
                   :class="heroCtaButtonClass"
                 >
@@ -123,6 +124,7 @@
           <div class="mt-4">
             <a
               href="#catalogo"
+              @click.prevent="scrollToSection('catalogo')"
               class="inline-block w-full py-2.5 rounded-full border border-[#caa35f] text-[#27172b] hover:bg-[#caa35f] hover:text-[#27172b] text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer bg-white/60"
             >
               Explorar Catálogo
@@ -139,6 +141,7 @@ import { computed } from 'vue'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import { useCampaignStore } from '../stores/campaign'
 import { useSiteSettingsStore } from '../stores/siteSettings'
+import { scrollToSection } from '../utils/scroll'
 
 const campaignStore = useCampaignStore()
 const siteSettingsStore = useSiteSettingsStore()

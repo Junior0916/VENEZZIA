@@ -1,5 +1,5 @@
 <template>
-  <section id="envios" class="py-14 sm:py-20 bg-white/70 backdrop-blur-xs border-t border-[#eedee9]">
+  <section id="envios" class="scroll-mt-32 sm:scroll-mt-36 md:scroll-mt-40 py-12 sm:py-16 bg-white/70 backdrop-blur-xs border-t border-[#eedee9]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Section Header -->
       <div class="text-center max-w-xl mx-auto mb-10">

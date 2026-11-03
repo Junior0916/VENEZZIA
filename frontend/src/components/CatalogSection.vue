@@ -1,5 +1,5 @@
 <template>
-  <section id="catalogo" class="py-14 sm:py-20 bg-[#faf7fb]">
+  <section id="catalogo" class="scroll-mt-32 sm:scroll-mt-36 md:scroll-mt-40 py-12 sm:py-16 bg-[#faf7fb]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Section Header (Clean, Editorial, High-end) -->
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-6 border-b border-[#eedee9]">

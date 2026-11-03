@@ -1,5 +1,5 @@
 <template>
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#eedee9]/80 shadow-[0_4px_24px_-10px_rgba(154,104,155,0.08)]">
+  <header id="site-header" class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#eedee9]/80 shadow-[0_4px_24px_-10px_rgba(154,104,155,0.08)]">
     <!-- Top Utility Announcement Bar (Soft Lilac Mist & Champagne Gold Accents) -->
     <div class="border-b border-[#eedee9] bg-gradient-to-r from-[#faf5fc] via-[#fbf7fd] to-[#f8f1fa] text-[11px] text-gray-500 py-1 px-4 sm:px-6 lg:px-8">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
@@ -373,6 +373,7 @@ import { useCampaignStore } from '../stores/campaign'
 import { useSearchStore } from '../stores/search'
 import { useSiteSettingsStore } from '../stores/siteSettings'
 import { useRouter, useRoute } from 'vue-router'
+import { scrollToSection, scrollToSectionDeferred } from '../utils/scroll'
 
 const props = defineProps({
   products: {
@@ -512,43 +513,21 @@ function clearSearch() {
 const router = useRouter()
 const route = useRoute()
 
-function navigateToSection(sectionId) {
+async function navigateToSection(sectionId) {
   searchStore.closeDropdown()
   if (route && route.path !== '/') {
-    router.push('/').then(() => {
-      setTimeout(() => {
-        const el = document.getElementById(sectionId)
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' })
-        }
-      }, 150)
-    })
-  } else {
-    const el = document.getElementById(sectionId)
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' })
-    }
+    await router.push('/')
   }
+  await scrollToSectionDeferred(sectionId)
 }
 
-function selectCampaign(campaignId) {
+async function selectCampaign(campaignId) {
   campaignStore.setCampaign(campaignId)
   searchStore.clearQuery()
-  if (router) {
-    router.push('/').then(() => {
-      setTimeout(() => {
-        const el = document.getElementById('catalogo')
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' })
-        }
-      }, 100)
-    })
-  } else {
-    const el = document.getElementById('catalogo')
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' })
-    }
+  if (route && route.path !== '/') {
+    await router.push('/')
   }
+  await scrollToSectionDeferred('catalogo')
 }
 
 function selectProductResult(product) {
@@ -561,10 +540,7 @@ function selectProductResult(product) {
 
 function handleSearchSubmit() {
   searchStore.closeDropdown()
-  const el = document.getElementById('catalogo')
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth' })
-  }
+  scrollToSectionDeferred('catalogo')
 }
 </script>
 

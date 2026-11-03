@@ -51,3 +51,24 @@
 .border-gold-soft {
   border-color: #e5cd97;
 }
+
+/* Ensure smooth native scrolling across browser engines */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Guarantee sticky header breathing room for native anchor navigation */
+#catalogo,
+#envios,
+#ocasiones {
+  scroll-margin-top: 135px;
+}
+
+@media (min-width: 768px) {
+  #catalogo,
+  #envios,
+  #ocasiones {
+    scroll-margin-top: 150px;
+  }
+}
+

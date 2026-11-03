@@ -1,5 +1,5 @@
 <template>
-  <section id="ocasiones" class="py-10 sm:py-14 bg-white/70 backdrop-blur-xs border-y border-[#eedee9]">
+  <section id="ocasiones" class="scroll-mt-32 sm:scroll-mt-36 md:scroll-mt-40 py-10 sm:py-14 bg-white/70 backdrop-blur-xs border-y border-[#eedee9]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-xl mx-auto mb-8 sm:mb-10">
         <span

@@ -33,6 +33,7 @@ import ShippingGuide from '../components/ShippingGuide.vue'
 import Newsletter from '../components/Newsletter.vue'
 import { useCampaignStore } from '../stores/campaign'
 import { useSearchStore } from '../stores/search'
+import { scrollToSectionDeferred } from '../utils/scroll'
 
 const props = defineProps({
   allProducts: {
@@ -97,19 +98,13 @@ function handleCategorySelect(filter) {
   } else {
     activeCategory.value = filter
   }
-  const el = document.getElementById('catalogo')
-  if (el) el.scrollIntoView({ behavior: 'smooth' })
+  scrollToSectionDeferred('catalogo')
 }
 
 onMounted(() => {
   if (window.location.hash) {
     const targetId = window.location.hash.replace('#', '')
-    setTimeout(() => {
-      const el = document.getElementById(targetId)
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' })
-      }
-    }, 150)
+    scrollToSectionDeferred(targetId)
   }
 })
 </script>
