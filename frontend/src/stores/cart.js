@@ -40,6 +40,23 @@ export const useCartStore = defineStore('cart', {
       }
       this.saveToStorage()
       this.isOpen = true
+
+      // Registrar evento de e-commerce en Google Analytics 4
+      try {
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+          window.gtag('event', 'add_to_cart', {
+            currency: 'PEN',
+            value: Number(product.price) * quantity,
+            items: [{
+              item_id: product.id,
+              item_name: product.name,
+              item_category: product.category,
+              price: Number(product.price),
+              quantity
+            }]
+          })
+        }
+      } catch (_) {}
     },
 
     updateQuantity(itemKey, quantity) {

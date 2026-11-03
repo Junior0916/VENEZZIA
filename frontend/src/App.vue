@@ -60,6 +60,22 @@ function openProductModal(product) {
   } catch (e) {
     // fallback safe
   }
+
+  // Registrar visualización de producto en Google Analytics 4
+  try {
+    if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+      window.gtag('event', 'view_item', {
+        currency: 'PEN',
+        value: Number(product.price),
+        items: [{
+          item_id: product.id,
+          item_name: product.name,
+          item_category: product.category,
+          price: Number(product.price)
+        }]
+      })
+    }
+  } catch (_) {}
 }
 
 function closeProductModal() {
