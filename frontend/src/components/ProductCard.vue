@@ -3,15 +3,24 @@
     <!-- Centered Product Image Container (4:5 Luxury Ratio - 600x750 Framing) -->
     <div
       @click="$emit('select-product', product)"
-      class="relative aspect-[4/5] w-full overflow-hidden bg-[#faf6f5] cursor-pointer flex items-center justify-center p-2.5 sm:p-3"
+      class="relative aspect-[4/5] w-full overflow-hidden bg-[#faf6f5] cursor-pointer flex items-center justify-center p-2 sm:p-2.5"
       title="Clic para ver detalles completos y contenido exacto"
     >
+      <!-- Capa de fondo ambiental: se adapta dinámicamente si la foto no es 4:5 -->
+      <img
+        :src="product.image"
+        alt=""
+        aria-hidden="true"
+        class="absolute inset-0 w-full h-full object-cover blur-md opacity-25 scale-110 pointer-events-none"
+      />
+
+      <!-- Imagen del producto: se adapta y escala proporcionalmente (object-contain) para que NUNCA se corte ningún detalle -->
       <img
         :src="product.image"
         :alt="product.name"
         width="600"
         height="750"
-        class="w-full h-full object-cover object-center rounded-xl group-hover:scale-104 transition-transform duration-500 ease-out"
+        class="relative z-10 w-full h-full object-contain object-center rounded-xl group-hover:scale-104 transition-transform duration-500 ease-out"
         loading="lazy"
         decoding="async"
       />
@@ -19,7 +28,7 @@
       <!-- Promo Badge if original_price exists -->
       <div
         v-if="product.original_price"
-        class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase shadow-2xs"
+        class="absolute top-2.5 right-2.5 z-20 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase shadow-2xs"
         :class="promoBadgeClass"
       >
         Promo

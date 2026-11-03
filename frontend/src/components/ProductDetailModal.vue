@@ -23,17 +23,26 @@
           <!-- Main Selected Image Container (4:5 Luxury Ratio - 600x750 Framing) -->
           <div
             @click="openLightbox"
-            class="group relative w-full aspect-[4/5] rounded-2xl overflow-hidden bg-[#faf6f5] border border-[#eedee9] p-2.5 sm:p-3 flex items-center justify-center shadow-xs cursor-zoom-in"
+            class="group relative w-full aspect-[4/5] rounded-2xl overflow-hidden bg-[#faf6f5] border border-[#eedee9] p-2 sm:p-2.5 flex items-center justify-center shadow-xs cursor-zoom-in"
             title="Clic para ampliar en alta definición"
           >
+            <!-- Capa de fondo ambiental: se adapta dinámicamente si la foto no es 4:5 -->
+            <img
+              :src="currentDisplayImage"
+              alt=""
+              aria-hidden="true"
+              class="absolute inset-0 w-full h-full object-cover blur-md opacity-25 scale-110 pointer-events-none"
+            />
+
+            <!-- Imagen del producto: se escala proporcionalmente (object-contain) para que NUNCA se corte ningún detalle -->
             <img
               :src="currentDisplayImage"
               :alt="product.name"
-              class="w-full h-full object-cover object-center rounded-xl transition-all duration-300 group-hover:scale-[1.03]"
+              class="relative z-10 w-full h-full object-contain object-center rounded-xl transition-all duration-300 group-hover:scale-[1.03]"
             />
 
             <!-- Visual Magnifier Hint Pill -->
-            <div class="absolute bottom-4 right-4 bg-black/60 group-hover:bg-black/85 backdrop-blur-md text-white text-[11px] font-medium py-1.5 px-3 rounded-full flex items-center gap-1.5 shadow-lg opacity-90 group-hover:opacity-100 transition-all pointer-events-none">
+            <div class="absolute bottom-4 right-4 z-20 bg-black/60 group-hover:bg-black/85 backdrop-blur-md text-white text-[11px] font-medium py-1.5 px-3 rounded-full flex items-center gap-1.5 shadow-lg opacity-90 group-hover:opacity-100 transition-all pointer-events-none">
               <ZoomIn class="w-3.5 h-3.5 text-[#caa35f]" />
               <span>Ampliar foto</span>
             </div>

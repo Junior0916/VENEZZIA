@@ -60,7 +60,7 @@
                 <img
                   :src="item.product.image"
                   :alt="item.product.name"
-                  class="w-16 h-16 rounded-2xl object-cover border border-[#eedee9] bg-[#fbf7fc] shrink-0"
+                  class="w-16 h-16 rounded-2xl object-contain p-1 border border-[#eedee9] bg-[#faf7fb] shrink-0"
                 />
 
                 <!-- Info -->
