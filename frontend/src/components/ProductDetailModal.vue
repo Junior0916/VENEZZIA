@@ -151,7 +151,10 @@
             </div>
 
             <!-- Included Items List (Clean, High-end Checklist) -->
-            <div class="bg-[#fbf7fc] rounded-2xl p-4 border border-[#eedee9] mb-5">
+            <div
+              v-if="product.items_included && product.items_included.length > 0"
+              class="bg-[#fbf7fc] rounded-2xl p-4 border border-[#eedee9] mb-5"
+            >
               <h4 class="text-xs font-semibold uppercase tracking-wider text-[#27172b] mb-2">
                 Contenido exacto del detalle:
               </h4>

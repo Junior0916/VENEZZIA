@@ -1,7 +1,7 @@
 import PocketBase from 'pocketbase'
 
 function getPocketBaseUrl() {
-  const envUrl = import.meta.env.VITE_POCKETBASE_URL
+  const envUrl = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env.VITE_POCKETBASE_URL : undefined
   const isBrowser = typeof window !== 'undefined'
   const isLocalHost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
 
@@ -885,16 +885,19 @@ const PRODUCT_OPTIMIZED_ASSETS = {
   'hw-ramo-clubes': '/products/ramo-clubes-futbol_centered.webp',
   'hw-ramo-spiderman': '/products/ramo-spiderman-hotwheels_centered.webp',
   'hw-box-superheroes': '/products/box-superheroes-pilsen_centered.webp',
-  'hw-box-pinguino': '/products/box-pinguino-lucifer_centered.webp',
-  'grad006girasol0': 'https://images.unsplash.com/photo-1538677685457-bfe8192dbdf6?auto=format&fit=crop&w=600&q=80',
-  'grad-ramo-girasoles': 'https://images.unsplash.com/photo-1538677685457-bfe8192dbdf6?auto=format&fit=crop&w=600&q=80'
+  'hw-box-pinguino': '/products/box-pinguino-lucifer_centered.webp'
 }
 
 function resolveProductImage(record, client) {
   // 1. Highest Priority: PocketBase User Uploaded File
   // When a user uploads a new image in PocketBase, record.image contains the uploaded filename (e.g. 'ramo_123.webp')
   if (record?.image && client?.files?.getURL && !record.image.startsWith('http://') && !record.image.startsWith('https://') && !record.image.startsWith('/')) {
-    return client.files.getURL(record, record.image, { thumb: '600x750' })
+    let url = client.files.getURL(record, record.image, { thumb: '600x750' })
+    if (record.updated) {
+      const sep = url.includes('?') ? '&' : '?'
+      url += `${sep}v=${new Date(record.updated).getTime()}`
+    }
+    return url
   }
 
   // 2. Direct external URL (e.g. Unsplash) or direct public path (/products/...)
@@ -930,9 +933,42 @@ function resolveProductImage(record, client) {
   if (norm.includes('2 carritos')) return '/products/ramo-hotwheels-2_centered.webp'
   if (norm.includes('3 carritos')) return '/products/ramo-hotwheels-3_centered.webp'
 
-  if (norm.includes('triunfo') || norm.includes('girasol')) return 'https://images.unsplash.com/photo-1538677685457-bfe8192dbdf6?auto=format&fit=crop&w=600&q=80'
-
   return '/products/box_basico_centered.webp'
+}
+
+export function parseItemsIncluded(raw) {
+  if (!raw) return []
+  if (Array.isArray(raw)) {
+    return raw.map(s => String(s).trim()).filter(Boolean)
+  }
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim()
+    if (!trimmed) return []
+
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      try {
+        const parsed = JSON.parse(trimmed)
+        if (Array.isArray(parsed)) {
+          return parsed.map(s => String(s).trim()).filter(Boolean)
+        }
+      } catch (e) {
+        // Fallback to line splitting
+      }
+    }
+
+    const lines = trimmed
+      .split(/\r?\n|•|;/)
+      .map(s => s.trim().replace(/^[-*•\d+.)]\s*/, '').trim())
+      .filter(Boolean)
+
+    if (lines.length > 0) return lines
+
+    return trimmed
+      .split(',')
+      .map(s => s.trim().replace(/^[-*•\d+.)]\s*/, '').trim())
+      .filter(Boolean)
+  }
+  return []
 }
 
 export async function fetchProducts() {
@@ -940,6 +976,10 @@ export async function fetchProducts() {
     let catalogCardUrl = record.catalog_card || ''
     if (catalogCardUrl && client?.files?.getURL && !catalogCardUrl.startsWith('http://') && !catalogCardUrl.startsWith('https://') && !catalogCardUrl.startsWith('/')) {
       catalogCardUrl = client.files.getURL(record, catalogCardUrl, { thumb: '600x750' })
+      if (record.updated) {
+        const sep = catalogCardUrl.includes('?') ? '&' : '?'
+        catalogCardUrl += `${sep}v=${new Date(record.updated).getTime()}`
+      }
     }
     return {
       id: record.id,
@@ -952,7 +992,7 @@ export async function fetchProducts() {
       image: resolveProductImage(record, client),
       catalog_card: catalogCardUrl,
       in_stock: record.in_stock,
-      items_included: record.items_included || []
+      items_included: parseItemsIncluded(record.items_included)
     }
   }
 
