@@ -888,7 +888,7 @@ const PRODUCT_OPTIMIZED_ASSETS = {
   'hw-box-pinguino': '/products/box-pinguino-lucifer_centered.webp'
 }
 
-function resolveProductImage(record, client) {
+function resolveProductImage(record, client = pb) {
   // 1. Highest Priority: PocketBase User Uploaded File
   // When a user uploads a new image in PocketBase, record.image contains the uploaded filename (e.g. 'ramo_123.webp')
   if (record?.image && client?.files?.getURL && !record.image.startsWith('http://') && !record.image.startsWith('https://') && !record.image.startsWith('/')) {
@@ -1000,7 +1000,7 @@ export async function fetchProducts() {
 
   try {
     const records = await pb.collection('products').getFullList({
-      sort: '-created',
+
       filter: 'in_stock = true'
     })
 
@@ -1016,7 +1016,7 @@ export async function fetchProducts() {
     try {
       const remotePb = new PocketBase('https://admin.venezzia.shop')
       const remoteRecords = await remotePb.collection('products').getFullList({
-        sort: '-created',
+  
         filter: 'in_stock = true'
       })
       if (remoteRecords && remoteRecords.length > 0) {
@@ -1035,4 +1035,66 @@ export async function fetchProducts() {
   }
 
   return MOCK_PRODUCTS
+}
+
+
+/**
+ * Escucha cambios en tiempo real (SSE) en PocketBase.
+ * Cuando alguien edita, añade o borra un producto, campaña o configuración,
+ * se ejecutan los callbacks proporcionados sin necesidad de recargar la página.
+ */
+export function subscribeToRealtime({ onProductsChange, onCampaignsChange, onSettingsChange } = {}) {
+  const clients = [pb]
+  if (POCKETBASE_URL !== 'https://admin.venezzia.shop') {
+    try {
+      clients.push(new PocketBase('https://admin.venezzia.shop'))
+    } catch (_) {}
+  }
+
+  const cleanups = []
+
+  for (const client of clients) {
+    try {
+      if (onProductsChange) {
+        client.collection('products').subscribe('*', (e) => {
+          onProductsChange(e)
+        }).then(unsub => cleanups.push(unsub)).catch(err => {
+          console.warn('[PB Realtime] Products subscription warning:', err?.message || err)
+        })
+      }
+
+      if (onCampaignsChange) {
+        client.collection('campaigns').subscribe('*', (e) => {
+          onCampaignsChange(e)
+        }).then(unsub => cleanups.push(unsub)).catch(err => {
+          console.warn('[PB Realtime] Campaigns subscription warning:', err?.message || err)
+        })
+      }
+
+      if (onSettingsChange) {
+        client.collection('site_settings').subscribe('*', (e) => {
+          onSettingsChange(e)
+        }).then(unsub => cleanups.push(unsub)).catch(err => {
+          console.warn('[PB Realtime] Settings subscription warning:', err?.message || err)
+        })
+      }
+    } catch (err) {
+      console.warn('[PB Realtime] Setup error:', err?.message || err)
+    }
+  }
+
+  return () => {
+    cleanups.forEach(fn => {
+      try {
+        if (typeof fn === 'function') fn()
+      } catch (_) {}
+    })
+    for (const client of clients) {
+      try {
+        client.collection('products').unsubscribe('*').catch(() => {})
+        client.collection('campaigns').unsubscribe('*').catch(() => {})
+        client.collection('site_settings').unsubscribe('*').catch(() => {})
+      } catch (_) {}
+    }
+  }
 }

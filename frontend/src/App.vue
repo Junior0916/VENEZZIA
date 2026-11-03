@@ -33,13 +33,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
 import CartDrawer from './components/CartDrawer.vue'
 import FloatingChat from './components/FloatingChat.vue'
 import ProductDetailModal from './components/ProductDetailModal.vue'
-import { fetchProducts } from './services/pocketbase'
+import { fetchProducts, subscribeToRealtime } from './services/pocketbase'
 import { useCampaignStore } from './stores/campaign'
 import { useSiteSettingsStore } from './stores/siteSettings'
 
@@ -48,6 +48,7 @@ const siteSettingsStore = useSiteSettingsStore()
 
 const allProducts = ref([])
 const selectedProductModal = ref(null)
+let unsubscribeRealtime = null
 
 function openProductModal(product) {
   selectedProductModal.value = product
@@ -96,6 +97,20 @@ function checkDeepLink() {
   }
 }
 
+async function reloadCatalog() {
+  const products = await fetchProducts()
+  allProducts.value = products
+  campaignStore.setProducts(products)
+
+  // Si hay un modal abierto, refrescar sus datos en tiempo real
+  if (selectedProductModal.value) {
+    const fresh = products.find(p => p.id === selectedProductModal.value.id)
+    if (fresh) {
+      selectedProductModal.value = fresh
+    }
+  }
+}
+
 onMounted(async () => {
   // Load dynamic CMS settings & campaigns from PocketBase
   await Promise.allSettled([
@@ -103,13 +118,34 @@ onMounted(async () => {
     campaignStore.loadCampaigns()
   ])
 
-  allProducts.value = await fetchProducts()
-  campaignStore.setProducts(allProducts.value)
+  await reloadCatalog()
   checkDeepLink()
+
+  // Conectar suscripción SSE en tiempo real a PocketBase
+  unsubscribeRealtime = subscribeToRealtime({
+    onProductsChange: async () => {
+      console.log('[PB Realtime] Products updated, reloading catalog...')
+      await reloadCatalog()
+    },
+    onCampaignsChange: async () => {
+      console.log('[PB Realtime] Campaigns updated, reloading campaigns...')
+      await campaignStore.loadCampaigns()
+    },
+    onSettingsChange: async () => {
+      console.log('[PB Realtime] Site settings updated, reloading settings...')
+      await siteSettingsStore.loadSettings()
+    }
+  })
 
   // Handle browser back/forward buttons
   window.addEventListener('popstate', () => {
     checkDeepLink()
   })
+})
+
+onUnmounted(() => {
+  if (typeof unsubscribeRealtime === 'function') {
+    unsubscribeRealtime()
+  }
 })
 </script>
