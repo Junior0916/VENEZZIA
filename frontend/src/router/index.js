@@ -36,6 +36,12 @@ const routes = [
     alias: ['/recortador', '/herramientas/recortador', '/optimizador']
   },
   {
+    path: '/duplicar',
+    name: 'duplicar-producto',
+    component: () => import('../views/DuplicateProductView.vue'),
+    alias: ['/admin/duplicar', '/duplicador', '/clonar-producto']
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/'
   }
