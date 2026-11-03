@@ -885,7 +885,9 @@ const PRODUCT_OPTIMIZED_ASSETS = {
   'hw-ramo-clubes': '/products/ramo-clubes-futbol_centered.webp',
   'hw-ramo-spiderman': '/products/ramo-spiderman-hotwheels_centered.webp',
   'hw-box-superheroes': '/products/box-superheroes-pilsen_centered.webp',
-  'hw-box-pinguino': '/products/box-pinguino-lucifer_centered.webp'
+  'hw-box-pinguino': '/products/box-pinguino-lucifer_centered.webp',
+  'grad006girasol0': 'https://images.unsplash.com/photo-1538677685457-bfe8192dbdf6?auto=format&fit=crop&w=600&q=80',
+  'grad-ramo-girasoles': 'https://images.unsplash.com/photo-1538677685457-bfe8192dbdf6?auto=format&fit=crop&w=600&q=80'
 }
 
 function resolveProductImage(record, client) {
@@ -927,6 +929,8 @@ function resolveProductImage(record, client) {
   if (norm.includes('1 carrito')) return '/products/ramo-hotwheels-1_centered.webp'
   if (norm.includes('2 carritos')) return '/products/ramo-hotwheels-2_centered.webp'
   if (norm.includes('3 carritos')) return '/products/ramo-hotwheels-3_centered.webp'
+
+  if (norm.includes('triunfo') || norm.includes('girasol')) return 'https://images.unsplash.com/photo-1538677685457-bfe8192dbdf6?auto=format&fit=crop&w=600&q=80'
 
   return '/products/box_basico_centered.webp'
 }
