@@ -1,8 +1,8 @@
 <template>
   <div class="py-10 sm:py-16 bg-[#faf7fb] min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Breadcrumb -->
-      <nav class="flex items-center gap-2 text-xs text-gray-500 mb-6">
+    <!-- Breadcrumb -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+      <nav class="flex items-center gap-2 text-xs text-gray-500">
         <router-link to="/" class="hover:text-[#965e9b] transition-colors flex items-center gap-1">
           <Home class="w-3.5 h-3.5" />
           <span>Inicio</span>
@@ -10,14 +10,95 @@
         <span>/</span>
         <span class="text-[#27172b] font-semibold">Gestión de Catálogo y Orden</span>
       </nav>
+    </div>
 
-      <!-- Header Card -->
+    <!-- 1. LOGIN GATE: Shown when user is NOT authenticated as Superuser -->
+    <div v-if="!isAuthenticated" class="max-w-md mx-auto px-4 py-8">
+      <div class="bg-white rounded-3xl p-8 sm:p-10 border border-[#eedee9] text-center shadow-xl">
+        <div class="w-14 h-14 rounded-2xl bg-[#27172b] text-[#caa35f] flex items-center justify-center mx-auto mb-4 shadow-sm">
+          <Lock class="w-7 h-7" />
+        </div>
+
+        <span class="text-[10px] font-bold text-[#caa35f] uppercase tracking-wider block mb-1">
+          Área Restringida • Solo Administradores
+        </span>
+        <h2 class="text-xl sm:text-2xl font-serif font-bold text-[#27172b] mb-2">
+          Acceso a Gestión de Catálogo
+        </h2>
+        <p class="text-xs text-gray-500 mb-6 leading-relaxed">
+          Ingresa tus credenciales de administrador de PocketBase para acceder al organizador y duplicador de productos.
+        </p>
+
+        <form @submit.prevent="loginAsAdmin" class="space-y-4 text-left">
+          <div>
+            <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Correo de Administrador</label>
+            <input
+              type="email"
+              v-model="loginEmail"
+              required
+              autocomplete="username"
+              class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:border-[#965e9b] focus:outline-none"
+              placeholder="venezzia@gmail.com"
+            />
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Contraseña</label>
+            <input
+              type="password"
+              v-model="loginPassword"
+              required
+              autocomplete="current-password"
+              class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:border-[#965e9b] focus:outline-none"
+              placeholder="••••••••••••"
+            />
+          </div>
+
+          <!-- Environment Selector -->
+          <div>
+            <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Conectar con:</label>
+            <select
+              v-model="targetServer"
+              @change="onServerChange"
+              class="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs bg-[#faf7fb] text-gray-700 focus:outline-none"
+            >
+              <option value="remote">Servidor de Producción (admin.venezzia.shop)</option>
+              <option value="local">Servidor Local (127.0.0.1:8090)</option>
+            </select>
+          </div>
+
+          <div v-if="loginError" class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
+            <AlertCircle class="w-4 h-4 shrink-0" />
+            <span>{{ loginError }}</span>
+          </div>
+
+          <button
+            type="submit"
+            :disabled="isLoggingIn"
+            class="w-full py-3 rounded-xl bg-[#27172b] text-white text-xs font-bold hover:bg-[#3d2444] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm cursor-pointer"
+          >
+            <RefreshCw v-if="isLoggingIn" class="w-4 h-4 animate-spin text-[#caa35f]" />
+            <span>{{ isLoggingIn ? 'Verificando credenciales...' : 'Iniciar Sesión' }}</span>
+          </button>
+
+          <div class="pt-3 text-center border-t border-gray-100">
+            <router-link to="/" class="text-xs text-gray-400 hover:text-[#965e9b] transition-colors">
+              ← Volver a la Tienda Pública
+            </router-link>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 2. PROTECTED WORKSPACE: Only visible when Authenticated -->
+    <div v-else class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header Card with Logout button -->
       <div class="bg-white rounded-3xl p-6 sm:p-10 border border-[#eedee9] shadow-[0_2px_16px_-4px_rgba(154,104,155,0.06)] mb-8">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-[#f4eaf6]">
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f6eef8] border border-[#e8d5ec] text-xs font-semibold text-[#753d77] mb-2">
               <Sparkles class="w-3.5 h-3.5 text-[#caa35f]" />
-              <span>Gestión de Catálogo Venezzia</span>
+              <span>Gestión de Catálogo Venezzia • Sesión Activa</span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-serif font-bold text-[#27172b] tracking-tight">
               Organizador y Duplicador de Productos
@@ -27,17 +108,17 @@
             </p>
           </div>
 
-          <!-- Environment Selector & Status -->
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div class="p-3 bg-[#faf5fb] rounded-2xl border border-[#eedee9] text-left shrink-0">
-              <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Destino</span>
+          <!-- Environment, PB link & Logout Button -->
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="p-2.5 bg-[#faf5fb] rounded-2xl border border-[#eedee9] text-left shrink-0">
+              <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Servidor</span>
               <select
                 v-model="targetServer"
                 @change="onServerChange"
-                class="text-xs font-semibold text-[#27172b] bg-transparent outline-none cursor-pointer mt-0.5"
+                class="text-xs font-semibold text-[#27172b] bg-transparent outline-none cursor-pointer"
               >
-                <option value="remote">Servidor VPS (admin.venezzia.shop)</option>
-                <option value="local">Local (127.0.0.1:8090)</option>
+                <option value="remote">admin.venezzia.shop</option>
+                <option value="local">127.0.0.1:8090</option>
               </select>
             </div>
 
@@ -45,11 +126,21 @@
               :href="adminUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-2xl bg-[#27172b] text-white text-xs font-semibold hover:bg-[#3d2444] transition-all shadow-sm shrink-0"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-[#27172b] text-white text-xs font-semibold hover:bg-[#3d2444] transition-all shadow-sm shrink-0"
             >
-              <span>Abrir PocketBase Admin</span>
-              <ArrowUpRight class="w-4 h-4 text-[#caa35f]" />
+              <span>PocketBase</span>
+              <ArrowUpRight class="w-3.5 h-3.5 text-[#caa35f]" />
             </a>
+
+            <!-- Cerrar Sesion Button -->
+            <button
+              @click="logoutAdmin"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold transition-all shrink-0 cursor-pointer"
+              title="Cerrar sesión y bloquear el acceso"
+            >
+              <LogOut class="w-3.5 h-3.5" />
+              <span>Cerrar Sesión</span>
+            </button>
           </div>
         </div>
 
@@ -83,57 +174,8 @@
         </div>
       </div>
 
-      <!-- Auth Prompt if not logged in as superuser -->
-      <div v-if="!isAuthenticated" class="bg-white rounded-3xl p-8 border border-[#eedee9] max-w-md mx-auto text-center shadow-md mb-8">
-        <div class="w-12 h-12 rounded-2xl bg-[#f6eef8] text-[#965e9b] flex items-center justify-center mx-auto mb-4">
-          <Package class="w-6 h-6" />
-        </div>
-        <h3 class="text-lg font-bold text-[#27172b] mb-1">Acceso de Administrador</h3>
-        <p class="text-xs text-gray-500 mb-6">
-          Ingresa tus credenciales de PocketBase para gestionar los productos en la base de datos.
-        </p>
-
-        <form @submit.prevent="loginAsAdmin" class="space-y-4 text-left">
-          <div>
-            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Correo Administrador</label>
-            <input
-              type="email"
-              v-model="loginEmail"
-              required
-              class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:border-[#965e9b] focus:outline-none"
-              placeholder="venezzia@gmail.com"
-            />
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Contraseña</label>
-            <input
-              type="password"
-              v-model="loginPassword"
-              required
-              class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:border-[#965e9b] focus:outline-none"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <div v-if="loginError" class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
-            <AlertCircle class="w-4 h-4 shrink-0" />
-            <span>{{ loginError }}</span>
-          </div>
-
-          <button
-            type="submit"
-            :disabled="isLoggingIn"
-            class="w-full py-3 rounded-xl bg-[#27172b] text-white text-xs font-bold hover:bg-[#3d2444] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            <RefreshCw v-if="isLoggingIn" class="w-4 h-4 animate-spin text-[#caa35f]" />
-            <span>{{ isLoggingIn ? 'Conectando...' : 'Conectar con PocketBase' }}</span>
-          </button>
-        </form>
-      </div>
-
       <!-- MAIN WORKSPACE -->
-      <div v-else class="space-y-6">
+      <div class="space-y-6">
 
         <!-- ========================================== -->
         <!-- TAB 1: ORGANIZAR ORDEN (DRAG & DROP) -->
@@ -646,8 +688,10 @@ import {
   Copy, Check, Search, ExternalLink, Sparkles, Filter,
   ArrowRight, RefreshCw, AlertCircle, Home, CheckCircle2,
   Package, Tag, DollarSign, Layers, PlusCircle, ArrowUpRight,
-  Move, GripVertical, ChevronUp, ChevronDown, Save
+  Move, GripVertical, ChevronUp, ChevronDown, Save, Lock, LogOut
 } from 'lucide-vue-next'
+
+const AUTH_STORAGE_KEY = 'venezzia_admin_auth'
 
 const activeToolTab = ref('reorder') // 'reorder' o 'duplicate'
 
@@ -655,8 +699,8 @@ const targetServer = ref('remote')
 const currentPbClient = ref(null)
 
 const isAuthenticated = ref(false)
-const loginEmail = ref('venezzia@gmail.com')
-const loginPassword = ref('venezzia2026')
+const loginEmail = ref('')
+const loginPassword = ref('')
 const isLoggingIn = ref(false)
 const loginError = ref('')
 
@@ -721,48 +765,83 @@ function getRecordAdminUrl(recordId) {
 function initPbClient() {
   const url = getTargetBaseUrl()
   currentPbClient.value = new PocketBase(url)
-  if (currentPbClient.value.authStore.isValid && currentPbClient.value.authStore.isSuperuser) {
-    isAuthenticated.value = true
-    loadProducts()
-  } else {
-    attemptAutoLogin()
-  }
+
+  // Check saved session in localStorage
+  try {
+    const saved = localStorage.getItem(AUTH_STORAGE_KEY)
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      if (parsed && parsed.token && parsed.server === targetServer.value) {
+        currentPbClient.value.authStore.save(parsed.token, parsed.record)
+        if (currentPbClient.value.authStore.isValid && currentPbClient.value.authStore.isSuperuser) {
+          isAuthenticated.value = true
+          loadProducts()
+          return
+        }
+      }
+    }
+  } catch (_) {}
+
+  isAuthenticated.value = false
 }
 
-async function attemptAutoLogin() {
+async function loginAsAdmin() {
+  if (!loginEmail.value || !loginPassword.value) return
   isLoggingIn.value = true
+  loginError.value = ''
+
   try {
-    await currentPbClient.value.collection('_superusers').authWithPassword(loginEmail.value, loginPassword.value)
-    isAuthenticated.value = true
-    loginError.value = ''
-    await loadProducts()
+    const url = getTargetBaseUrl()
+    currentPbClient.value = new PocketBase(url)
+    const authData = await currentPbClient.value.collection('_superusers').authWithPassword(
+      loginEmail.value.trim(),
+      loginPassword.value
+    )
+
+    if (authData && authData.token) {
+      // Save session securely on this device
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+        token: authData.token,
+        record: authData.record,
+        server: targetServer.value
+      }))
+
+      isAuthenticated.value = true
+      loginPassword.value = '' // Clear password from memory
+      await loadProducts()
+    } else {
+      throw new Error('No se pudo autenticar como superusuario.')
+    }
   } catch (err) {
+    loginError.value = 'Credenciales incorrectas. Verifica tu correo y contraseña de PocketBase.'
     isAuthenticated.value = false
   } finally {
     isLoggingIn.value = false
   }
 }
 
-async function loginAsAdmin() {
-  isLoggingIn.value = true
-  loginError.value = ''
+function logoutAdmin() {
   try {
-    await currentPbClient.value.collection('_superusers').authWithPassword(loginEmail.value, loginPassword.value)
-    isAuthenticated.value = true
-    await loadProducts()
-  } catch (err) {
-    loginError.value = err?.message || 'Credenciales incorrectas de PocketBase.'
-  } finally {
-    isLoggingIn.value = false
-  }
+    localStorage.removeItem(AUTH_STORAGE_KEY)
+    if (currentPbClient.value && currentPbClient.value.authStore) {
+      currentPbClient.value.authStore.clear()
+    }
+  } catch (_) {}
+
+  isAuthenticated.value = false
+  products.value = []
+  reorderProductList.value = []
+  loginPassword.value = ''
+  loginError.value = ''
 }
 
 function onServerChange() {
+  logoutAdmin()
   initPbClient()
 }
 
 async function loadProducts() {
-  if (!currentPbClient.value) return
+  if (!currentPbClient.value || !isAuthenticated.value) return
   isLoadingProducts.value = true
   try {
     const records = await currentPbClient.value.collection('products').getFullList()
@@ -799,6 +878,9 @@ async function loadProducts() {
     syncReorderList()
   } catch (err) {
     console.error('Error loading products:', err)
+    if (err?.status === 401 || err?.status === 403) {
+      logoutAdmin()
+    }
   } finally {
     isLoadingProducts.value = false
   }
