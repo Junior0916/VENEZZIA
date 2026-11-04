@@ -992,7 +992,9 @@ export async function fetchProducts() {
       image: resolveProductImage(record, client),
       catalog_card: catalogCardUrl,
       in_stock: record.in_stock,
-      items_included: parseItemsIncluded(record.items_included)
+      items_included: parseItemsIncluded(record.items_included),
+      order: record.order !== undefined && record.order !== null ? Number(record.order) : 0,
+      created: record.created || ''
     }
   }
 
@@ -1028,6 +1030,23 @@ export async function fetchProducts() {
   }
 
   if (liveProducts && liveProducts.length > 0) {
+    // Ordenar productos:
+    // 1. Si tienen número de orden explícito (1, 2, 3...), se respeta exactamente ese número.
+    // 2. Si es un producto nuevo o sin orden asignado (0 o null), se posiciona en el lugar #1 (al inicio).
+    // 3. En caso de empate, el producto más recientemente creado va primero.
+    liveProducts.sort((a, b) => {
+      const orderA = (a.order !== null && a.order !== undefined && a.order !== '') ? Number(a.order) : 0
+      const orderB = (b.order !== null && b.order !== undefined && b.order !== '') ? Number(b.order) : 0
+      if (orderA !== orderB) {
+        if (orderA === 0) return -1
+        if (orderB === 0) return 1
+        return orderA - orderB
+      }
+      const dateA = a.created ? new Date(a.created).getTime() : 0
+      const dateB = b.created ? new Date(b.created).getTime() : 0
+      return dateB - dateA
+    })
+
     // Merge any campaigns that don't have records in PocketBase yet from MOCK_PRODUCTS
     const campaignsInLive = new Set(liveProducts.map(p => p.campaign || 'maquillaje'))
     const missingCampaignMocks = MOCK_PRODUCTS.filter(p => !campaignsInLive.has(p.campaign))

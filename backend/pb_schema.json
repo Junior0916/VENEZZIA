@@ -79,7 +79,13 @@
       },
       {
         "name": "items_included",
-        "type": "json",
+        "type": "text",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "name": "order",
+        "type": "number",
         "required": false,
         "presentable": false
       }
