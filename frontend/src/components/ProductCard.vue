@@ -6,6 +6,12 @@
       class="relative aspect-[4/5] w-full overflow-hidden bg-[#faf6f5] cursor-pointer flex items-center justify-center p-2 sm:p-2.5"
       title="Clic para ver detalles completos y contenido exacto"
     >
+      <!-- Shimmer Placeholder while image loads -->
+      <div
+        v-if="!isImageLoaded"
+        class="absolute inset-2 sm:inset-2.5 rounded-xl bg-gradient-to-tr from-[#faf3f9] via-[#f5eaf4] to-[#faf3f9] animate-pulse z-5"
+      />
+
       <!-- Capa de fondo ambiental: se adapta dinámicamente si la foto no es 4:5 -->
       <img
         :src="product.image"
@@ -22,7 +28,9 @@
         :alt="product.name"
         width="600"
         height="750"
-        class="relative z-10 w-full h-full object-contain object-center rounded-xl group-hover:scale-104 transition-transform duration-500 ease-out"
+        @load="isImageLoaded = true"
+        class="relative z-10 w-full h-full object-contain object-center rounded-xl transition-all duration-300 ease-out"
+        :class="isImageLoaded ? 'opacity-100 group-hover:scale-104' : 'opacity-0'"
         loading="lazy"
         decoding="async"
       />
@@ -92,8 +100,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useCartStore } from '../stores/cart'
+
+const isImageLoaded = ref(false)
 
 const props = defineProps({
   product: {

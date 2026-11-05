@@ -39,14 +39,30 @@ import Footer from './components/Footer.vue'
 import CartDrawer from './components/CartDrawer.vue'
 import FloatingChat from './components/FloatingChat.vue'
 import ProductDetailModal from './components/ProductDetailModal.vue'
-import { fetchProducts, subscribeToRealtime } from './services/pocketbase'
+import { fetchProducts, subscribeToRealtime, MOCK_PRODUCTS } from './services/pocketbase'
 import { useCampaignStore } from './stores/campaign'
 import { useSiteSettingsStore } from './stores/siteSettings'
 
 const campaignStore = useCampaignStore()
 const siteSettingsStore = useSiteSettingsStore()
 
-const allProducts = ref([])
+const CATALOG_CACHE_KEY = 'venezzia_catalog_cache_v2'
+
+function getInitialProducts() {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(CATALOG_CACHE_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed
+      }
+    } catch (_) {}
+  }
+  return MOCK_PRODUCTS
+}
+
+// 0ms instant display from local cache or official mock fallback
+const allProducts = ref(getInitialProducts())
 const selectedProductModal = ref(null)
 let unsubscribeRealtime = null
 
@@ -115,27 +131,38 @@ function checkDeepLink() {
 
 async function reloadCatalog() {
   const products = await fetchProducts()
-  allProducts.value = products
-  campaignStore.setProducts(products)
+  if (products && products.length > 0) {
+    allProducts.value = products
+    campaignStore.setProducts(products)
 
-  // Si hay un modal abierto, refrescar sus datos en tiempo real
-  if (selectedProductModal.value) {
-    const fresh = products.find(p => p.id === selectedProductModal.value.id)
-    if (fresh) {
-      selectedProductModal.value = fresh
+    try {
+      localStorage.setItem(CATALOG_CACHE_KEY, JSON.stringify(products))
+    } catch (_) {}
+
+    // Si hay un modal abierto, refrescar sus datos en tiempo real
+    if (selectedProductModal.value) {
+      const fresh = products.find(p => p.id === selectedProductModal.value.id)
+      if (fresh) {
+        selectedProductModal.value = fresh
+      }
     }
   }
 }
 
-onMounted(async () => {
-  // Load dynamic CMS settings & campaigns from PocketBase
-  await Promise.allSettled([
-    siteSettingsStore.loadSettings(),
-    campaignStore.loadCampaigns()
-  ])
+onMounted(() => {
+  // Sync initial products immediately to campaignStore (0ms instant render)
+  if (allProducts.value && allProducts.value.length > 0) {
+    campaignStore.setProducts(allProducts.value)
+  }
 
-  await reloadCatalog()
-  checkDeepLink()
+  // Load dynamic CMS settings, campaigns & fresh catalog in PARALLEL (non-blocking)
+  Promise.allSettled([
+    siteSettingsStore.loadSettings(),
+    campaignStore.loadCampaigns(),
+    reloadCatalog()
+  ]).then(() => {
+    checkDeepLink()
+  })
 
   // Conectar suscripción SSE en tiempo real a PocketBase
   unsubscribeRealtime = subscribeToRealtime({
