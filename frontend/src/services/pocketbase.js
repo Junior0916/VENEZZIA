@@ -892,7 +892,10 @@ function resolveProductImage(record, client = pb) {
   // 1. Highest Priority: PocketBase User Uploaded File
   // When a user uploads a new image in PocketBase, record.image contains the uploaded filename (e.g. 'ramo_123.webp')
   if (record?.image && client?.files?.getURL && !record.image.startsWith('http://') && !record.image.startsWith('https://') && !record.image.startsWith('/')) {
-    let url = client.files.getURL(record, record.image, { thumb: '0x1200' })
+    const isWebP = (record.image || '').toLowerCase().endsWith('.webp')
+    let url = isWebP
+      ? client.files.getURL(record, record.image)
+      : client.files.getURL(record, record.image, { thumb: '800x0' })
     if (record.updated) {
       const sep = url.includes('?') ? '&' : '?'
       url += `${sep}v=${new Date(record.updated).getTime()}`
@@ -975,7 +978,10 @@ export async function fetchProducts() {
   const mapRecord = (record, client) => {
     let catalogCardUrl = record.catalog_card || ''
     if (catalogCardUrl && client?.files?.getURL && !catalogCardUrl.startsWith('http://') && !catalogCardUrl.startsWith('https://') && !catalogCardUrl.startsWith('/')) {
-      catalogCardUrl = client.files.getURL(record, catalogCardUrl, { thumb: '0x1200' })
+      const isCardWebP = (catalogCardUrl || '').toLowerCase().endsWith('.webp')
+      catalogCardUrl = isCardWebP
+        ? client.files.getURL(record, catalogCardUrl)
+        : client.files.getURL(record, catalogCardUrl, { thumb: '800x0' })
       if (record.updated) {
         const sep = catalogCardUrl.includes('?') ? '&' : '?'
         catalogCardUrl += `${sep}v=${new Date(record.updated).getTime()}`

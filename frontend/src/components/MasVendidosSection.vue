@@ -19,7 +19,9 @@
           <div class="relative flex justify-center items-center my-4">
             <div class="relative w-48 sm:w-56 h-56 sm:h-64 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/80 bg-white">
               <img
-                src="/products/ramo_premium_lotso.png"
+                src="/products/ramo_premium_lotso_centered.webp"
+                loading="lazy"
+                decoding="async"
                 alt="Ramo Premium Lotso Venezzia"
                 class="w-full h-full object-cover"
               />

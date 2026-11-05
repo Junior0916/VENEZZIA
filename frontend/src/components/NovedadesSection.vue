@@ -48,7 +48,9 @@
           <div class="relative flex justify-center items-center my-4">
             <div class="relative w-48 sm:w-56 h-56 sm:h-64 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/80 bg-white">
               <img
-                src="/products/box_kitty_premium.png"
+                src="/products/box_kitty_premium_centered.webp"
+                loading="lazy"
+                decoding="async"
                 alt="Novedades en Boxes Venezzia"
                 class="w-full h-full object-cover"
               />

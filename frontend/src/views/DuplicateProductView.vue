@@ -174,6 +174,51 @@
         </div>
       </div>
 
+      <!-- WebP Image Health & Optimizer Bar -->
+      <div class="bg-white rounded-3xl p-5 border border-[#eedee9] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3">
+          <div :class="[
+            'w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs',
+            unoptimizedProducts.length > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
+          ]">
+            <Sparkles class="w-5 h-5" />
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-[#27172b]">Optimización de Formato de Imágenes</span>
+              <span :class="[
+                'text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider',
+                unoptimizedProducts.length > 0 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+              ]">
+                {{ unoptimizedProducts.length > 0 ? `${unoptimizedProducts.length} imagen(es) no WebP` : '100% WebP Activo' }}
+              </span>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-0.5 leading-relaxed">
+              {{ unoptimizedProducts.length > 0
+                ? 'Se detectaron fotos en PNG/JPG pesado. Conviértelas a formato WebP ultraligero con 1 solo clic para acelerar la carga en móviles.'
+                : 'Todas las imágenes del catálogo están convertidas a WebP de alta fidelidad (~90KB). La tienda carga de forma instantánea.' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+          <button
+            v-if="unoptimizedProducts.length > 0"
+            @click="optimizeAllToWebP"
+            :disabled="isOptimizingWebp"
+            class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
+          >
+            <RefreshCw v-if="isOptimizingWebp" class="w-3.5 h-3.5 animate-spin text-white" />
+            <Zap v-else class="w-3.5 h-3.5 text-amber-200" />
+            <span>{{ isOptimizingWebp ? optimizeWebpProgress : `Optimizar ${unoptimizedProducts.length} a WebP (-95% peso)` }}</span>
+          </button>
+          <div v-else class="flex items-center gap-1.5 text-xs text-emerald-700 font-semibold bg-emerald-50 px-3.5 py-2 rounded-xl border border-emerald-200">
+            <CheckCircle2 class="w-4 h-4 text-emerald-600" />
+            <span>Carga ultrarrápida (WebP)</span>
+          </div>
+        </div>
+      </div>
+
       <!-- MAIN WORKSPACE -->
       <div class="space-y-6">
 
@@ -688,7 +733,7 @@ import {
   Copy, Check, Search, ExternalLink, Sparkles, Filter,
   ArrowRight, RefreshCw, AlertCircle, Home, CheckCircle2,
   Package, Tag, DollarSign, Layers, PlusCircle, ArrowUpRight,
-  Move, GripVertical, ChevronUp, ChevronDown, Save, Lock, LogOut
+  Move, GripVertical, ChevronUp, ChevronDown, Save, Lock, LogOut, Zap
 } from 'lucide-vue-next'
 
 const AUTH_STORAGE_KEY = 'venezzia_admin_auth'
@@ -734,6 +779,82 @@ const duplicateForm = ref({
   order: 1,
   copyImage: true
 })
+
+// WebP Image Optimization State
+const isOptimizingWebp = ref(false)
+const optimizeWebpProgress = ref('')
+const unoptimizedProducts = computed(() => {
+  return products.value.filter(p => p.image && !p.image.toLowerCase().endsWith('.webp'))
+})
+
+function convertBlobToWebP(blob, maxDim = 1200, quality = 0.86) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    const url = URL.createObjectURL(blob)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      let w = img.width
+      let h = img.height
+      if (Math.max(w, h) > maxDim) {
+        const ratio = maxDim / Math.max(w, h)
+        w = Math.round(w * ratio)
+        h = Math.round(h * ratio)
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, w, h)
+      canvas.toBlob((webpBlob) => {
+        resolve(webpBlob || blob)
+      }, 'image/webp', quality)
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      resolve(blob)
+    }
+    img.src = url
+  })
+}
+
+async function optimizeAllToWebP() {
+  if (unoptimizedProducts.value.length === 0 || isOptimizingWebp.value) return
+  isOptimizingWebp.value = true
+  optimizeWebpProgress.value = `Iniciando optimización de ${unoptimizedProducts.value.length} imágenes...`
+
+  let successCount = 0
+  const total = unoptimizedProducts.value.length
+
+  for (let i = 0; i < total; i++) {
+    const prod = unoptimizedProducts.value[i]
+    optimizeWebpProgress.value = `Optimizando (${i + 1}/${total}): ${prod.name}...`
+    try {
+      const origUrl = currentPbClient.value.files.getURL(prod, prod.image)
+      const res = await fetch(origUrl)
+      if (!res.ok) continue
+      const rawBlob = await res.blob()
+      const webpBlob = await convertBlobToWebP(rawBlob, 1200, 0.86)
+
+      const baseName = prod.image.replace(/\.[^/.]+$/, '')
+      const newName = `${baseName}.webp`
+
+      const formData = new FormData()
+      formData.append('image', webpBlob, newName)
+
+      await currentPbClient.value.collection('products').update(prod.id, formData)
+      successCount++
+    } catch (err) {
+      console.error(`Error optimizando ${prod.name}:`, err)
+    }
+  }
+
+  optimizeWebpProgress.value = `¡Completado! Se optimizaron ${successCount} imágenes a WebP.`
+  await loadProducts()
+  setTimeout(() => {
+    isOptimizingWebp.value = false
+    optimizeWebpProgress.value = ''
+  }, 4000)
+}
 
 const campaignsList = [
   { id: 'all', name: 'Todos los Productos' },
@@ -866,7 +987,10 @@ async function loadProducts() {
     products.value = records.map(r => {
       let displayImg = ''
       if (r.image) {
-        displayImg = currentPbClient.value.files.getURL(r, r.image, { thumb: '0x800' })
+        const isWebp = (r.image || '').toLowerCase().endsWith('.webp')
+        displayImg = isWebp
+          ? currentPbClient.value.files.getURL(r, r.image)
+          : currentPbClient.value.files.getURL(r, r.image, { thumb: '0x800' })
       }
       return {
         ...r,
@@ -1061,13 +1185,18 @@ async function executeDuplication() {
     formData.append('order', String(duplicateForm.value.order || 1))
     formData.append('items_included', duplicateForm.value.items_included || '')
 
-    // Download original image file and append to FormData as Blob
+    // Download original image file and append to FormData as Blob (auto-converting to WebP if needed)
     if (duplicateForm.value.copyImage && orig.image) {
       const origImgUrl = currentPbClient.value.files.getURL(orig, orig.image)
       const res = await fetch(origImgUrl)
       if (res.ok) {
-        const blob = await res.blob()
-        formData.append('image', blob, orig.image)
+        let blob = await res.blob()
+        let filename = orig.image
+        if (!orig.image.toLowerCase().endsWith('.webp')) {
+          blob = await convertBlobToWebP(blob)
+          filename = orig.image.replace(/\.[^/.]+$/, '') + '.webp'
+        }
+        formData.append('image', blob, filename)
       }
     }
 

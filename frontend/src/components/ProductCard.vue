@@ -12,6 +12,8 @@
         alt=""
         aria-hidden="true"
         class="absolute inset-0 w-full h-full object-cover blur-md opacity-25 scale-110 pointer-events-none"
+        loading="lazy"
+        decoding="async"
       />
 
       <!-- Imagen del producto: se adapta y escala proporcionalmente (object-contain) para que NUNCA se corte ningún detalle -->
