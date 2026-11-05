@@ -158,8 +158,16 @@
                       {{ item.name }}
                     </div>
                   </div>
-                  <div class="text-xs font-bold text-[#27172b] shrink-0 whitespace-nowrap">
-                    S/&nbsp;{{ Number(item.price).toFixed(2) }}
+                  <div class="flex flex-col items-end shrink-0 gap-1">
+                    <div class="text-xs font-bold text-[#27172b] whitespace-nowrap">
+                      S/&nbsp;{{ Number(item.price).toFixed(2) }}
+                    </div>
+                    <span
+                      v-if="item.in_stock === false"
+                      class="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-[#fff1f2] text-[#e11d48] border border-[#fecdd3]"
+                    >
+                      Agotado
+                    </span>
                   </div>
                 </div>
               </div>
@@ -325,7 +333,15 @@
               >
                 <img :src="item.image" :alt="item.name" class="w-9 h-9 rounded-lg object-contain bg-[#fbf7fc] p-1 shrink-0" />
                 <div class="flex-1 min-w-0">
-                  <div class="text-xs font-semibold text-gray-900 truncate">{{ item.name }}</div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-semibold text-gray-900 truncate">{{ item.name }}</span>
+                    <span
+                      v-if="item.in_stock === false"
+                      class="px-1.5 py-0.2 rounded-full text-[8px] font-extrabold uppercase tracking-wider bg-[#fff1f2] text-[#e11d48] border border-[#fecdd3] shrink-0"
+                    >
+                      Agotado
+                    </span>
+                  </div>
                   <div class="text-[10px] text-gray-400">{{ getCampaignName(item.campaign) }} • <span class="whitespace-nowrap">S/&nbsp;{{ Number(item.price).toFixed(2) }}</span></div>
                 </div>
               </div>

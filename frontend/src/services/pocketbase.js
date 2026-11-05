@@ -997,7 +997,7 @@ export async function fetchProducts() {
       category: record.category || 'General',
       image: resolveProductImage(record, client),
       catalog_card: catalogCardUrl,
-      in_stock: record.in_stock,
+      in_stock: record.in_stock !== false,
       items_included: parseItemsIncluded(record.items_included),
       order: record.order !== undefined && record.order !== null ? Number(record.order) : 0,
       created: record.created || ''
@@ -1009,7 +1009,7 @@ export async function fetchProducts() {
   try {
     const records = await pb.collection('products').getFullList({
 
-      filter: 'in_stock = true'
+
     })
 
     if (records && records.length > 0) {
@@ -1025,7 +1025,7 @@ export async function fetchProducts() {
       const remotePb = new PocketBase('https://admin.venezzia.shop')
       const remoteRecords = await remotePb.collection('products').getFullList({
   
-        filter: 'in_stock = true'
+  
       })
       if (remoteRecords && remoteRecords.length > 0) {
         liveProducts = remoteRecords.map(r => mapRecord(r, remotePb))

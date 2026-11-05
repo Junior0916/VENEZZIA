@@ -325,6 +325,18 @@
                     <span v-if="index === 0" class="text-[10px] font-bold text-[#caa35f] uppercase tracking-wider">
                       ★ Primer Lugar
                     </span>
+                    <span
+                      v-if="prod.in_stock === false"
+                      class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-[#fff1f2] text-[#e11d48] border border-[#fecdd3]"
+                    >
+                      Agotado
+                    </span>
+                    <span
+                      v-else
+                      class="px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    >
+                      En stock
+                    </span>
                   </div>
 
                   <!-- Grip Handle Icon -->
@@ -494,6 +506,19 @@
 
                   <div class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#27172b] text-[#caa35f] shadow-2xs">
                     #{{ prod.order || 1 }}
+                  </div>
+
+                  <div
+                    v-if="prod.in_stock === false"
+                    class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-[#fff1f2] border border-[#fecdd3] text-[#e11d48] shadow-2xs"
+                  >
+                    Agotado
+                  </div>
+                  <div
+                    v-else
+                    class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-2xs"
+                  >
+                    En stock
                   </div>
                 </div>
 

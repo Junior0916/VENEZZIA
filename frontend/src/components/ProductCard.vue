@@ -30,7 +30,10 @@
         height="750"
         @load="isImageLoaded = true"
         class="relative z-10 w-full h-full object-contain object-center rounded-xl transition-all duration-300 ease-out"
-        :class="isImageLoaded ? 'opacity-100 group-hover:scale-104' : 'opacity-0'"
+        :class="[
+          isImageLoaded ? 'opacity-100 group-hover:scale-104' : 'opacity-0',
+          product.in_stock === false ? 'grayscale-[20%] opacity-90' : ''
+        ]"
         loading="lazy"
         decoding="async"
       />
@@ -42,6 +45,15 @@
         :class="promoBadgeClass"
       >
         Promo
+      </div>
+
+      <!-- Agotado Badge if in_stock === false -->
+      <div
+        v-if="product.in_stock === false"
+        class="absolute top-2.5 left-2.5 z-20 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase bg-[#e11d48] text-white shadow-md flex items-center gap-1 border border-white/40 backdrop-blur-xs"
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+        <span>Agotado</span>
       </div>
     </div>
 
@@ -78,13 +90,22 @@
           </div>
         </div>
 
-        <!-- Add to Cart Action -->
+        <!-- Add to Cart Action / Agotado Indicator -->
         <button
-          @click="addToCart"
+          v-if="product.in_stock !== false"
+          @click.stop="addToCart"
           class="px-3.5 sm:px-4 py-2 rounded-full text-white text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer shadow-xs active:scale-95 shrink-0"
           :class="addToCartButtonClass"
         >
           Añadir
+        </button>
+        <button
+          v-else
+          @click.stop="$emit('select-product', product)"
+          class="px-3 py-1.5 rounded-full bg-[#fff1f2] border border-[#fecdd3] text-[#e11d48] text-[10px] font-bold tracking-wider uppercase cursor-pointer hover:bg-[#ffe4e6] transition-colors shrink-0 shadow-2xs"
+          title="Producto temporalmente agotado - Clic para ver opciones"
+        >
+          Agotado
         </button>
       </div>
 

@@ -46,8 +46,20 @@
               :alt="product.name"
               @load="isImageLoading = false"
               class="relative z-10 w-full h-full object-contain object-center rounded-xl transition-all duration-300 group-hover:scale-[1.03]"
-              :class="isImageLoading ? 'opacity-0' : 'opacity-100'"
+              :class="[
+                isImageLoading ? 'opacity-0' : 'opacity-100',
+                product.in_stock === false ? 'grayscale-[20%] opacity-90' : ''
+              ]"
             />
+
+            <!-- Agotado Floating Badge -->
+            <div
+              v-if="product.in_stock === false"
+              class="absolute top-4 left-4 z-20 px-3 py-1 rounded-full text-[10px] font-extrabold tracking-wider uppercase bg-[#e11d48] text-white shadow-md flex items-center gap-1 border border-white/40 backdrop-blur-xs pointer-events-none"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+              <span>Agotado</span>
+            </div>
 
             <!-- Visual Magnifier Hint Pill -->
             <div class="absolute bottom-4 right-4 z-20 bg-black/60 group-hover:bg-black/85 backdrop-blur-md text-white text-[11px] font-medium py-1.5 px-3 rounded-full flex items-center gap-1.5 shadow-lg opacity-90 group-hover:opacity-100 transition-all pointer-events-none">
@@ -109,6 +121,13 @@
                 :class="promoBadgeClass"
               >
                 Promoción
+              </span>
+              <span
+                v-if="product.in_stock === false"
+                class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#e11d48] text-white shadow-2xs flex items-center gap-1"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                <span>Agotado</span>
               </span>
             </div>
 
@@ -196,12 +215,20 @@
             <div class="flex items-center gap-3">
               <!-- Add to Cart Button -->
               <button
+                v-if="product.in_stock !== false"
                 @click="handleAddToCart"
                 class="flex-1 py-3.5 rounded-full text-white font-semibold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs active:scale-98"
                 :class="addToCartButtonClass"
               >
                 <span>Añadir a la Bolsa • </span><span class="whitespace-nowrap">S/&nbsp;{{ computedFinalPrice.toFixed(2) }}</span>
               </button>
+              <div
+                v-else
+                class="flex-1 py-3.5 px-4 rounded-full bg-[#fff1f2] border border-[#fecdd3] text-[#e11d48] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 select-none shadow-2xs text-center"
+              >
+                <span class="w-2 h-2 rounded-full bg-[#e11d48] animate-pulse"></span>
+                <span>Temporalmente Agotado</span>
+              </div>
 
               <!-- Structured WhatsApp Consultation / Order Button -->
               <a
@@ -209,15 +236,18 @@
                 target="_blank"
                 rel="noopener noreferrer"
                 class="px-5 py-3.5 rounded-full bg-[#25D366] text-white hover:bg-[#20ba5a] transition-all hover:scale-103 shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer font-semibold text-xs shrink-0"
-                title="Pedir directamente con la ficha completa por WhatsApp"
+                :title="product.in_stock === false ? 'Consultar reposición por WhatsApp' : 'Pedir directamente con la ficha completa por WhatsApp'"
               >
                 <IconWhatsApp customClass="w-5 h-5 text-white" />
-                <span class="hidden sm:inline">Pedir por WhatsApp</span>
+                <span class="hidden sm:inline">{{ product.in_stock === false ? 'Consultar Reposición' : 'Pedir por WhatsApp' }}</span>
               </a>
             </div>
 
             <!-- Discrete advisor info note -->
-            <p class="text-[11px] text-gray-400 text-center">
+            <p v-if="product.in_stock === false" class="text-[11px] text-[#e11d48] text-center font-medium">
+              Este producto no tiene stock disponible en este momento. Puedes consultar por WhatsApp para agendarlo o consultar reposición.
+            </p>
+            <p v-else class="text-[11px] text-gray-400 text-center">
               El mensaje de WhatsApp incluye automáticamente la lista de contenido, precio y foto para atención inmediata.
             </p>
           </div>
@@ -577,13 +607,16 @@ const whatsappUrl = computed(() => {
   const isHw = props.product.campaign === 'hotwheels'
   const campaignName = isHw ? 'Día de Regalar Hot Wheels' : 'Día de Regalar Maquillaje'
   const directUrl = `${window.location.origin}/?prod=${props.product.id}`
+  const isAgotado = props.product.in_stock === false
 
   // Build the message parts cleanly without emojis or clutter
   let lines = [
     `¡Hola Venezzia Detalles!`,
-    `Deseo solicitar información / agendar el siguiente detalle:`,
+    isAgotado
+      ? `Vi en su catálogo online el siguiente detalle que figura como *AGOTADO* y deseo consultar si tienen fecha estimada de reposición o si se puede elaborar a pedido:`
+      : `Deseo solicitar información / agendar el siguiente detalle:`,
     ``,
-    `*Producto:* ${props.product.name}`,
+    `*Producto:* ${props.product.name}${isAgotado ? ' (AGOTADO)' : ''}`,
     `*Colección:* ${campaignName}`,
     `*Categoría:* ${props.product.category || 'General'}`,
     `*Precio:* S/ ${Number(props.product.price).toFixed(2)}`
@@ -612,7 +645,11 @@ const whatsappUrl = computed(() => {
   lines.push(`*Ficha y fotografía:*`)
   lines.push(`${directUrl}`)
   lines.push(``)
-  lines.push(`¿Tienen disponibilidad y cobertura de entrega? Muchas gracias.`)
+  if (isAgotado) {
+    lines.push(`¿Podrían confirmarme si es posible prepararlo o cuándo volverá a tener stock? Muchas gracias.`)
+  } else {
+    lines.push(`¿Tienen disponibilidad y cobertura de entrega? Muchas gracias.`)
+  }
 
   const fullText = lines.join('\n')
   return `https://wa.me/51932449996?text=${encodeURIComponent(fullText)}`
