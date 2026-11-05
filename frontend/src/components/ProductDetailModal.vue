@@ -26,6 +26,12 @@
             class="group relative w-full aspect-[4/5] rounded-2xl overflow-hidden bg-[#faf6f5] border border-[#eedee9] p-2 sm:p-2.5 flex items-center justify-center shadow-xs cursor-zoom-in"
             title="Clic para ampliar en alta definición"
           >
+            <!-- Shimmer Placeholder while switching images -->
+            <div
+              v-if="isImageLoading"
+              class="absolute inset-2 sm:inset-2.5 rounded-xl bg-gradient-to-tr from-[#faf3f9] via-[#f5eaf4] to-[#faf3f9] animate-pulse z-15 pointer-events-none"
+            />
+
             <!-- Capa de fondo ambiental: se adapta dinámicamente si la foto no es 4:5 -->
             <img
               :src="currentDisplayImage"
@@ -38,7 +44,9 @@
             <img
               :src="currentDisplayImage"
               :alt="product.name"
+              @load="isImageLoading = false"
               class="relative z-10 w-full h-full object-contain object-center rounded-xl transition-all duration-300 group-hover:scale-[1.03]"
+              :class="isImageLoading ? 'opacity-0' : 'opacity-100'"
             />
 
             <!-- Visual Magnifier Hint Pill -->
@@ -524,6 +532,31 @@ const currentDisplayImage = computed(() => {
     return props.product.catalog_card
   }
   return props.product?.image || '/products/box_basico_centered.jpg'
+})
+
+const isImageLoading = ref(false)
+
+// Preload catalog card image into browser cache immediately when modal opens
+watch(
+  () => props.product,
+  (newProd) => {
+    activeImageView.value = 'product'
+    isImageLoading.value = false
+    if (newProd?.catalog_card) {
+      const preloadImg = new Image()
+      preloadImg.src = newProd.catalog_card
+    }
+  },
+  { immediate: true }
+)
+
+watch(currentDisplayImage, (newUrl) => {
+  if (!newUrl) return
+  isImageLoading.value = true
+  const img = new Image()
+  img.onload = () => { isImageLoading.value = false }
+  img.onerror = () => { isImageLoading.value = false }
+  img.src = newUrl
 })
 
 const addonPrice = computed(() => {
