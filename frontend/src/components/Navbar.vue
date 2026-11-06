@@ -16,8 +16,8 @@
         <!-- Mobile Layout (< 640px) -->
         <div class="sm:hidden bg-gradient-to-r from-[#180010] via-[#27172b] to-[#0f051d] px-3 py-2 space-y-1.5">
           <!-- Row 1: Live Badge on left, Countdown & Action on right -->
-          <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-1.5">
+          <div class="flex items-center justify-between gap-1.5">
+            <div class="flex items-center gap-1.5 shrink-0">
               <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ff0050] text-white text-[9px] font-black uppercase tracking-wider shadow-xs animate-pulse">
                 <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
                 <span>EN VIVO</span>
@@ -25,7 +25,7 @@
               <span class="text-[10px] font-bold text-white/90">TIKTOK LIVE</span>
             </div>
 
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-1.5 shrink-0">
               <span class="text-[10px] text-gray-300 font-medium">Termina:</span>
               <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/15 border border-white/20 text-white font-mono font-black text-xs tracking-wider shadow-inner">
                 <Clock class="w-3 h-3 text-[#00f2fe]" />
@@ -35,10 +35,10 @@
                 href="https://www.tiktok.com/@venezzia.detalles/live"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#ff0050] hover:bg-[#d90043] text-white text-[9px] font-bold shadow-xs active:scale-95"
+                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#ff0050] hover:bg-[#d90043] text-white text-[10px] font-extrabold shadow-xs active:scale-95 whitespace-nowrap shrink-0"
               >
-                <IconTikTok customClass="w-2.5 h-2.5 text-white" />
-                <span>Ver</span>
+                <IconTikTok customClass="w-3 h-3 text-white" />
+                <span>Ver Live</span>
               </a>
             </div>
           </div>
