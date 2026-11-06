@@ -38,9 +38,17 @@
         decoding="async"
       />
 
-      <!-- Promo Badge if original_price exists -->
+      <!-- TikTok Live Promo Badge -->
       <div
-        v-if="product.original_price"
+        v-if="hasLiveDiscount && product.in_stock !== false"
+        class="absolute top-2.5 right-2.5 z-20 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-[#ff0050] text-white shadow-md flex items-center gap-1 border border-white/60 animate-pulse"
+      >
+        <span>🔥 LIVE -S/&nbsp;{{ liveDiscount }}</span>
+      </div>
+
+      <!-- Promo Badge if original_price exists and no live promo -->
+      <div
+        v-else-if="product.original_price"
         class="absolute top-2.5 right-2.5 z-20 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase shadow-2xs"
         :class="promoBadgeClass"
       >
@@ -78,15 +86,27 @@
         <div class="min-w-0 shrink">
           <span class="text-[11px] sm:text-xs text-gray-400 block -mb-0.5 font-light">Precio</span>
           <div class="flex items-baseline gap-1.5 flex-wrap sm:flex-nowrap whitespace-nowrap">
-            <span
-              v-if="product.original_price"
-              class="text-xs text-gray-400 line-through font-normal whitespace-nowrap shrink-0"
-            >
-              S/&nbsp;{{ Number(product.original_price).toFixed(2) }}
-            </span>
-            <span class="text-base sm:text-xl font-bold text-[#27172b] whitespace-nowrap shrink-0">
-              S/&nbsp;{{ Number(product.price).toFixed(2) }}
-            </span>
+            <!-- TikTok Live Discount Price -->
+            <template v-if="hasLiveDiscount">
+              <span class="text-xs text-gray-400 line-through font-normal whitespace-nowrap shrink-0">
+                S/&nbsp;{{ Number(product.price).toFixed(2) }}
+              </span>
+              <span class="text-base sm:text-xl font-extrabold text-[#c22b38] whitespace-nowrap shrink-0">
+                S/&nbsp;{{ finalPrice.toFixed(2) }}
+              </span>
+            </template>
+            <!-- Standard / Promo Price -->
+            <template v-else>
+              <span
+                v-if="product.original_price"
+                class="text-xs text-gray-400 line-through font-normal whitespace-nowrap shrink-0"
+              >
+                S/&nbsp;{{ Number(product.original_price).toFixed(2) }}
+              </span>
+              <span class="text-base sm:text-xl font-bold text-[#27172b] whitespace-nowrap shrink-0">
+                S/&nbsp;{{ Number(product.price).toFixed(2) }}
+              </span>
+            </template>
           </div>
         </div>
 
@@ -123,6 +143,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useCartStore } from '../stores/cart'
+import { useSiteSettingsStore } from '../stores/siteSettings'
 
 const isImageLoaded = ref(false)
 
@@ -136,6 +157,11 @@ const props = defineProps({
 defineEmits(['select-product'])
 
 const cartStore = useCartStore()
+const siteSettingsStore = useSiteSettingsStore()
+
+const liveDiscount = computed(() => siteSettingsStore.getProductLiveDiscount(props.product))
+const hasLiveDiscount = computed(() => liveDiscount.value > 0)
+const finalPrice = computed(() => siteSettingsStore.getProductFinalPrice(props.product))
 
 const categoryColorClass = computed(() => {
   const camp = props.product.campaign
@@ -162,6 +188,12 @@ const promoBadgeClass = computed(() => {
 })
 
 function addToCart() {
-  cartStore.addToCart(props.product, 1)
+  const prodToAdd = {
+    ...props.product,
+    price: finalPrice.value,
+    base_price: props.product.price,
+    liveDiscount: liveDiscount.value
+  }
+  cartStore.addToCart(prodToAdd, 1)
 }
 </script>

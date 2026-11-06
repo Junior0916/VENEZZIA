@@ -68,9 +68,17 @@
                   <h4 class="text-xs sm:text-sm font-semibold text-[#27172b] line-clamp-2 leading-snug">
                     {{ item.product.name }}
                   </h4>
-                  <p class="text-xs text-[#965e9b] font-bold mt-1 whitespace-nowrap">
-                    S/&nbsp;{{ Number(item.product.price).toFixed(2) }}
-                  </p>
+                  <div class="flex items-center gap-2 mt-1 flex-wrap">
+                    <p class="text-xs text-[#965e9b] font-bold whitespace-nowrap">
+                      S/&nbsp;{{ Number(item.product.price).toFixed(2) }}
+                    </p>
+                    <span
+                      v-if="item.product.liveDiscount"
+                      class="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-[#ffe4e6] text-[#be123c] border border-[#fecdd3]"
+                    >
+                      🔥 Live -S/&nbsp;{{ item.product.liveDiscount }}
+                    </span>
+                  </div>
 
                   <!-- Stepper & Delete -->
                   <div class="flex items-center justify-between mt-3">
@@ -599,7 +607,8 @@ const whatsappCartUrl = computed(() => {
 
   cartStore.items.forEach(item => {
     const p = item.product
-    lines.push(`- ${item.quantity}x ${p.name} — S/ ${(p.price * item.quantity).toFixed(2)}`)
+    const liveTag = p.liveDiscount ? ` (🔥 Descuento TikTok Live: -S/ ${p.liveDiscount})` : ''
+    lines.push(`- ${item.quantity}x ${p.name}${liveTag} — S/ ${(p.price * item.quantity).toFixed(2)}`)
     lines.push(`  ↳ Ficha: ${window.location.origin}/?prod=${p.id}`)
   })
 

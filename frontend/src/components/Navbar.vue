@@ -1,5 +1,52 @@
 <template>
   <header id="site-header" class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#eedee9]/80 shadow-[0_4px_24px_-10px_rgba(154,104,155,0.08)]">
+    <!-- TikTok Live Flash Sale Sticky Bar (Only visible while live promo countdown is active) -->
+    <transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="transform -translate-y-full opacity-0"
+      enter-to-class="transform translate-y-0 opacity-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="transform translate-y-0 opacity-100"
+      leave-to-class="transform -translate-y-full opacity-0"
+    >
+      <div
+        v-if="siteSettingsStore.isLiveOfferActive"
+        class="bg-gradient-to-r from-[#ff0050] via-[#c22b38] to-[#00f2fe] text-white p-[1px] shadow-md relative z-50 overflow-hidden"
+      >
+        <div class="bg-gradient-to-r from-[#180010] via-[#27172b] to-[#0f051d] px-3 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2.5">
+          <!-- Left: Live Pulsing Indicator & Message -->
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#ff0050] text-white text-[10px] font-black uppercase tracking-wider shadow-sm shrink-0 animate-pulse">
+              <span class="w-2 h-2 rounded-full bg-white"></span>
+              <span>EN VIVO</span>
+            </span>
+
+            <p class="text-xs sm:text-sm font-bold text-white truncate flex items-center gap-1.5">
+              <span>{{ siteSettingsStore.liveBannerText || '¡OFERTA FLASH EN VIVO EN TIKTOK!' }}</span>
+            </p>
+          </div>
+
+          <!-- Right: Countdown Timer Display & CTA -->
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-[11px] text-gray-300 hidden md:inline font-medium">Termina en:</span>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md text-white font-mono font-black text-xs sm:text-sm tracking-wider shadow-inner">
+              <Clock class="w-3.5 h-3.5 text-[#00f2fe]" />
+              <span>{{ siteSettingsStore.formattedLiveTimeLeft }}</span>
+            </div>
+            <a
+              href="https://www.tiktok.com/@venezzia.detalles/live"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#ff0050] hover:bg-[#d90043] text-white text-[10px] font-bold tracking-wide transition-all shadow-xs"
+            >
+              <IconTikTok customClass="w-3 h-3 text-white" />
+              <span>Ver Live</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </transition>
+
     <!-- Top Utility Announcement Bar (Soft Lilac Mist & Champagne Gold Accents) -->
     <div class="border-b border-[#eedee9] bg-gradient-to-r from-[#faf5fc] via-[#fbf7fd] to-[#f8f1fa] text-[11px] text-gray-500 py-1 px-4 sm:px-6 lg:px-8">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
@@ -380,7 +427,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { ChevronDown, Search, ShoppingBag, X, Truck } from 'lucide-vue-next'
+import { ChevronDown, Search, ShoppingBag, X, Truck, Clock } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import IconInstagram from './icons/IconInstagram.vue'
 import IconTikTok from './icons/IconTikTok.vue'

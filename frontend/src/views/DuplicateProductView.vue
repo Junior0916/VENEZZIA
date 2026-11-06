@@ -144,8 +144,28 @@
           </div>
         </div>
 
-        <!-- Mode Navigation Tabs: Duplicar vs Organizar Arrastrando -->
+        <!-- Mode Navigation Tabs: Live vs Duplicar vs Organizar Arrastrando -->
         <div class="mt-6 flex flex-wrap items-center gap-3">
+          <button
+            @click="activeToolTab = 'live'"
+            :class="[
+              'flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
+              activeToolTab === 'live'
+                ? 'bg-[#ff0050] text-white ring-2 ring-[#00f2fe]/60 shadow-md'
+                : 'bg-[#faf7fb] border border-[#eedee9] text-gray-600 hover:bg-[#f3edf5]'
+            ]"
+          >
+            <span v-if="siteSettingsStore.isLiveOfferActive" class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+            <Flame v-else class="w-4 h-4 text-[#ff0050]" />
+            <span>🔴 Dinámica TikTok Live Flash (Temporizador)</span>
+            <span
+              v-if="siteSettingsStore.isLiveOfferActive"
+              class="px-2 py-0.5 rounded-full bg-black/30 text-white font-mono text-[10px] ml-1"
+            >
+              {{ siteSettingsStore.formattedLiveTimeLeft }}
+            </span>
+          </button>
+
           <button
             @click="activeToolTab = 'reorder'"
             :class="[
@@ -223,9 +243,277 @@
       <div class="space-y-6">
 
         <!-- ========================================== -->
+        <!-- TAB 0: DINÁMICA TIKTOK LIVE FLASH (TEMPORIZADOR) -->
+        <!-- ========================================== -->
+        <div v-if="activeToolTab === 'live'" class="space-y-6">
+          <!-- Live Active Status & Urgent Timer Card -->
+          <div
+            v-if="siteSettingsStore.isLiveOfferActive"
+            class="bg-gradient-to-br from-[#180010] via-[#27172b] to-[#12000a] text-white rounded-3xl p-6 sm:p-8 border-2 border-[#ff0050] shadow-2xl relative overflow-hidden"
+          >
+            <!-- Glowing background aura -->
+            <div class="absolute -top-24 -right-24 w-72 h-72 bg-[#ff0050]/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+              <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ff0050] text-white text-xs font-black uppercase tracking-wider mb-3 shadow-md animate-pulse">
+                  <span class="w-2 h-2 rounded-full bg-white"></span>
+                  <span>EN VIVO EN TIKTOK ACTIVO</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-serif font-black tracking-tight text-white">
+                  Descuentos Flash Transmitiéndose
+                </h2>
+                <p class="text-xs sm:text-sm text-gray-300 mt-1 max-w-xl">
+                  {{ siteSettingsStore.liveBannerText || 'Descuentos especiales activos en toda la tienda web.' }}
+                </p>
+                <div class="mt-3 flex items-center gap-3 text-xs text-gray-400">
+                  <span>Campaña: <strong class="text-white uppercase">{{ siteSettingsStore.liveCampaign }}</strong></span>
+                  <span>•</span>
+                  <span>Descuento base: <strong class="text-white">S/ {{ siteSettingsStore.liveDiscountDefault }}</strong></span>
+                </div>
+              </div>
+
+              <!-- Huge Timer Display & Quick Actions -->
+              <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 flex flex-col items-center text-center shrink-0 min-w-[260px]">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-[#00f2fe]">Tiempo Restante en la Web</span>
+                <div class="font-mono text-4xl sm:text-5xl font-black text-white my-1 tracking-wider">
+                  {{ siteSettingsStore.formattedLiveTimeLeft }}
+                </div>
+                <span class="text-[11px] text-gray-300 mb-4">
+                  Se apagará solo al llegar a 00:00
+                </span>
+
+                <!-- Quick live controls (+5m, +10m, stop) -->
+                <div class="flex flex-wrap items-center justify-center gap-2 w-full">
+                  <button
+                    @click="extendLiveTime(5)"
+                    :disabled="isSavingLiveSettings"
+                    class="flex-1 py-2 px-3 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+                    title="Añadir 5 minutos al temporizador en tiempo real"
+                  >
+                    <Plus class="w-3.5 h-3.5 text-[#00f2fe]" />
+                    <span>+5 Min</span>
+                  </button>
+
+                  <button
+                    @click="extendLiveTime(10)"
+                    :disabled="isSavingLiveSettings"
+                    class="flex-1 py-2 px-3 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+                    title="Añadir 10 minutos al temporizador"
+                  >
+                    <Plus class="w-3.5 h-3.5 text-[#00f2fe]" />
+                    <span>+10 Min</span>
+                  </button>
+
+                  <button
+                    @click="stopLiveOffer"
+                    :disabled="isSavingLiveSettings"
+                    class="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95"
+                    title="Finalizar la dinámica y restablecer precios regulares inmediatamente"
+                  >
+                    <Square class="w-3.5 h-3.5" />
+                    <span>Apagar Dinámica Ahora</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Inactive Activation Form -->
+          <div
+            v-else
+            class="bg-white rounded-3xl p-6 sm:p-8 border border-[#eedee9] shadow-xs space-y-6"
+          >
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-[#ff0050]/10 text-[#ff0050] flex items-center justify-center shrink-0">
+                <Flame class="w-6 h-6" />
+              </div>
+              <div class="flex-1">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold uppercase tracking-wider mb-1">
+                  <span>Modo Transmisión en Vivo</span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-serif font-bold text-[#27172b]">
+                  Lanzar Descuento Flash para TikTok Live
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-500 mt-1 max-w-2xl leading-relaxed">
+                  Activa los descuentos con temporizador regresivo. Al finalizar el tiempo elegido (ej: 15 min), todos los precios vuelven a su valor normal automáticamente sin que tengas que intervenir.
+                </p>
+              </div>
+            </div>
+
+            <!-- Configuration Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 pt-4 border-t border-[#f4eaf6]">
+              <!-- Duration Selector (Cols 1-6) -->
+              <div class="md:col-span-6 space-y-2">
+                <label class="block text-xs font-bold text-[#27172b] uppercase tracking-wider">
+                  ⏱️ Duración del Descuento Flash:
+                </label>
+                <div class="grid grid-cols-4 gap-2">
+                  <button
+                    v-for="mins in [10, 15, 20, 30]"
+                    :key="mins"
+                    type="button"
+                    @click="selectedLiveDuration = mins; customLiveMinutes = ''"
+                    :class="[
+                      'py-3 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-center',
+                      selectedLiveDuration === mins && !customLiveMinutes
+                        ? 'bg-[#27172b] text-white ring-2 ring-[#caa35f] shadow-sm'
+                        : 'bg-[#faf7fb] border border-[#eedee9] text-gray-700 hover:bg-[#f2e7f4]'
+                    ]"
+                  >
+                    {{ mins }} min
+                    <span v-if="mins === 15" class="block text-[9px] text-[#caa35f] font-normal">★ Favorito</span>
+                  </button>
+                </div>
+
+                <!-- Custom minutes input -->
+                <div class="pt-1 flex items-center gap-2">
+                  <span class="text-xs text-gray-500">O escribir minutos libres:</span>
+                  <input
+                    v-model="customLiveMinutes"
+                    type="number"
+                    min="1"
+                    max="300"
+                    placeholder="Ej: 45"
+                    class="w-24 text-xs font-bold px-3 py-1.5 rounded-xl border border-[#eedee9] bg-[#faf7fb] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/40"
+                  />
+                  <span class="text-xs text-gray-500">minutos</span>
+                </div>
+              </div>
+
+              <!-- Campaign & Headline (Cols 7-12) -->
+              <div class="md:col-span-6 space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-[#27172b] uppercase tracking-wider mb-1">
+                    Colección a Aplicar Descuento:
+                  </label>
+                  <select
+                    v-model="selectedLiveCampaign"
+                    class="w-full text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#faf7fb] focus:bg-white focus:outline-none cursor-pointer"
+                  >
+                    <option value="hotwheels">Día de Regalar Hot Wheels (Recomendado)</option>
+                    <option value="maquillaje">Día de Regalar Maquillaje</option>
+                    <option value="graduacion">Graduación</option>
+                    <option value="all">Todas las Colecciones</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-[#27172b] uppercase tracking-wider mb-1">
+                    Texto para el Cintillo Superior en la Tienda:
+                  </label>
+                  <input
+                    v-model="liveBannerTextInput"
+                    type="text"
+                    placeholder="¡EN VIVO EN TIKTOK! S/ 10 de descuento en Box Hot Wheels"
+                    class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#faf7fb] focus:bg-white focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Big Start Button -->
+            <div class="pt-4 border-t border-[#f4eaf6] flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div class="text-xs text-gray-500">
+                Al presionar el botón, la tienda web mostrará el cintillo rojo y aplicará los precios rebajados durante <strong>{{ customLiveMinutes ? customLiveMinutes : selectedLiveDuration }} minutos</strong>.
+              </div>
+
+              <button
+                @click="startLiveOffer"
+                :disabled="isSavingLiveSettings"
+                class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#ff0050] to-[#c22b38] hover:from-[#e60047] hover:to-[#a9222e] text-white font-extrabold text-sm uppercase tracking-wider transition-all shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0"
+              >
+                <RefreshCw v-if="isSavingLiveSettings" class="w-4 h-4 animate-spin" />
+                <Play v-else class="w-4 h-4 fill-white" />
+                <span>{{ isSavingLiveSettings ? 'Iniciando Dinámica...' : `▶️ Iniciar Oferta Flash (${customLiveMinutes ? customLiveMinutes : selectedLiveDuration} min)` }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Product Discount Configuration Table / Grid -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-[#eedee9] shadow-xs space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#f4eaf6]">
+              <div>
+                <h3 class="text-base font-bold text-[#27172b]">
+                  Precios y Descuentos Asignados por Producto
+                </h3>
+                <p class="text-xs text-gray-500">
+                  Aquí puedes ver y cambiar el descuento exacto que tendrá cada producto durante la transmisión.
+                </p>
+              </div>
+              <div class="text-xs font-semibold text-[#caa35f] bg-[#fffaf2] px-3 py-1.5 rounded-xl border border-[#eedee9]">
+                💡 Box Básico: -S/ 5.00 | Otros Box: -S/ 10.00
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div
+                v-for="prod in liveProductsDisplayList"
+                :key="prod.id"
+                class="bg-[#faf7fb] rounded-2xl p-4 border border-[#eedee9] flex flex-col justify-between"
+              >
+                <div>
+                  <div class="aspect-[4/5] w-full rounded-xl bg-white mb-3 p-2 flex items-center justify-center relative overflow-hidden">
+                    <img
+                      v-if="prod.displayImage"
+                      :src="prod.displayImage"
+                      :alt="prod.name"
+                      class="w-full h-full object-contain rounded-lg"
+                      loading="lazy"
+                    />
+                    <div v-else class="text-gray-300"><Package class="w-8 h-8" /></div>
+                    <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#27172b] text-white">
+                      Base: S/ {{ Number(prod.price).toFixed(2) }}
+                    </div>
+                  </div>
+
+                  <h4 class="text-xs font-bold text-[#27172b] line-clamp-2 mb-2 leading-snug">
+                    {{ prod.name }}
+                  </h4>
+                </div>
+
+                <div class="pt-3 border-t border-[#eedee9] space-y-2">
+                  <div class="flex items-center justify-between gap-2 text-xs">
+                    <span class="text-gray-500 font-medium">Descuento Live:</span>
+                    <div class="flex items-center gap-1">
+                      <span class="font-bold text-gray-700">S/</span>
+                      <input
+                        v-model.number="prod.live_discount"
+                        type="number"
+                        min="0"
+                        max="100"
+                        class="w-16 px-2 py-1 rounded-lg border border-gray-300 text-xs font-bold text-center bg-white focus:outline-none focus:ring-2 focus:ring-[#ff0050]"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between text-xs pt-1">
+                    <span class="text-gray-500 font-medium">Precio en Live:</span>
+                    <span class="font-black text-[#ff0050] text-sm">
+                      S/ {{ Math.max(0, Number(prod.price) - Number(prod.live_discount || 0)).toFixed(2) }}
+                    </span>
+                  </div>
+
+                  <button
+                    @click="saveSingleProductDiscount(prod)"
+                    :disabled="savingProductDiscountId === prod.id"
+                    class="w-full py-1.5 px-3 rounded-xl bg-[#27172b] hover:bg-[#965e9b] text-white text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
+                  >
+                    <RefreshCw v-if="savingProductDiscountId === prod.id" class="w-3 h-3 animate-spin" />
+                    <Save v-else class="w-3 h-3 text-[#caa35f]" />
+                    <span>{{ savingProductDiscountId === prod.id ? 'Guardando...' : 'Guardar Descuento' }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
         <!-- TAB 1: ORGANIZAR ORDEN (DRAG & DROP) -->
         <!-- ========================================== -->
-        <div v-if="activeToolTab === 'reorder'" class="space-y-6">
+        <div v-else-if="activeToolTab === 'reorder'" class="space-y-6">
           <!-- Instruction Banner for User & Partner -->
           <div class="bg-white rounded-3xl p-6 border border-[#eedee9] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-start gap-3">
@@ -758,12 +1046,24 @@ import {
   Copy, Check, Search, ExternalLink, Sparkles, Filter,
   ArrowRight, RefreshCw, AlertCircle, Home, CheckCircle2,
   Package, Tag, DollarSign, Layers, PlusCircle, ArrowUpRight,
-  Move, GripVertical, ChevronUp, ChevronDown, Save, Lock, LogOut, Zap
+  Move, GripVertical, ChevronUp, ChevronDown, Save, Lock, LogOut, Zap,
+  Flame, Clock, Play, Square, Plus
 } from 'lucide-vue-next'
+import { useSiteSettingsStore } from '../stores/siteSettings'
+
+const siteSettingsStore = useSiteSettingsStore()
 
 const AUTH_STORAGE_KEY = 'venezzia_admin_auth'
 
-const activeToolTab = ref('reorder') // 'reorder' o 'duplicate'
+const activeToolTab = ref('live') // 'live', 'reorder' o 'duplicate'
+
+const selectedLiveDuration = ref(15)
+const customLiveMinutes = ref('')
+const selectedLiveCampaign = ref('hotwheels')
+const selectedLiveDiscount = ref(10)
+const liveBannerTextInput = ref('¡EN VIVO EN TIKTOK! S/ 10 de descuento en Box Hot Wheels')
+const isSavingLiveSettings = ref(false)
+const savingProductDiscountId = ref(null)
 
 const targetServer = ref('remote')
 const currentPbClient = ref(null)
@@ -1020,6 +1320,7 @@ async function loadProducts() {
       return {
         ...r,
         order: r.order !== undefined && r.order !== null ? Number(r.order) : 1,
+        live_discount: r.live_discount !== undefined && r.live_discount !== null && r.live_discount !== '' ? Number(r.live_discount) : 0,
         displayImage: displayImg
       }
     })
@@ -1032,6 +1333,104 @@ async function loadProducts() {
     }
   } finally {
     isLoadingProducts.value = false
+  }
+}
+
+const liveProductsDisplayList = computed(() => {
+  return products.value.filter(p => {
+    if (selectedLiveCampaign.value === 'all') return true
+    return p.campaign === selectedLiveCampaign.value || (p.name || '').toLowerCase().includes('hot wheels')
+  })
+})
+
+async function startLiveOffer() {
+  const duration = customLiveMinutes.value ? Number(customLiveMinutes.value) : Number(selectedLiveDuration.value || 15)
+  if (isNaN(duration) || duration <= 0) return
+
+  isSavingLiveSettings.value = true
+  try {
+    const endsAt = new Date(Date.now() + duration * 60 * 1000).toISOString()
+    const settingsList = await currentPbClient.value.collection('site_settings').getFullList()
+    const targetId = settingsList.length > 0 ? settingsList[0].id : 'settgeneral0001'
+
+    const payload = {
+      live_active: true,
+      live_ends_at: endsAt,
+      live_campaign: selectedLiveCampaign.value,
+      live_discount_default: Number(selectedLiveDiscount.value || 10),
+      live_banner_text: liveBannerTextInput.value || '¡EN VIVO EN TIKTOK! Descuento especial en Box de Hot Wheels'
+    }
+
+    await currentPbClient.value.collection('site_settings').update(targetId, payload)
+    siteSettingsStore.applySettings(payload)
+  } catch (err) {
+    console.error('Error starting live offer:', err)
+    alert('Error al iniciar dinámica en PocketBase: ' + (err.message || 'Error'))
+  } finally {
+    isSavingLiveSettings.value = false
+  }
+}
+
+async function extendLiveTime(extraMinutes) {
+  isSavingLiveSettings.value = true
+  try {
+    const currentEnd = siteSettingsStore.liveEndsAt ? new Date(siteSettingsStore.liveEndsAt).getTime() : Date.now()
+    const baseTime = currentEnd > Date.now() ? currentEnd : Date.now()
+    const newEnd = new Date(baseTime + extraMinutes * 60 * 1000).toISOString()
+
+    const settingsList = await currentPbClient.value.collection('site_settings').getFullList()
+    const targetId = settingsList.length > 0 ? settingsList[0].id : 'settgeneral0001'
+
+    const payload = {
+      live_active: true,
+      live_ends_at: newEnd
+    }
+
+    await currentPbClient.value.collection('site_settings').update(targetId, payload)
+    siteSettingsStore.applySettings(payload)
+  } catch (err) {
+    console.error('Error extending live time:', err)
+  } finally {
+    isSavingLiveSettings.value = false
+  }
+}
+
+async function stopLiveOffer() {
+  if (!confirm('¿Seguro que deseas apagar la dinámica de TikTok Live y restaurar precios normales ahora?')) return
+  isSavingLiveSettings.value = true
+  try {
+    const settingsList = await currentPbClient.value.collection('site_settings').getFullList()
+    const targetId = settingsList.length > 0 ? settingsList[0].id : 'settgeneral0001'
+
+    const payload = {
+      live_active: false,
+      live_ends_at: ''
+    }
+
+    await currentPbClient.value.collection('site_settings').update(targetId, payload)
+    siteSettingsStore.applySettings(payload)
+  } catch (err) {
+    console.error('Error stopping live offer:', err)
+  } finally {
+    isSavingLiveSettings.value = false
+  }
+}
+
+async function saveSingleProductDiscount(prod) {
+  savingProductDiscountId.value = prod.id
+  try {
+    const discountVal = prod.live_discount !== undefined && prod.live_discount !== null && prod.live_discount !== ''
+      ? Number(prod.live_discount)
+      : 0
+    await currentPbClient.value.collection('products').update(prod.id, {
+      live_discount: discountVal
+    })
+    prod.live_discount = discountVal
+  } catch (err) {
+    console.error('Error saving product live discount:', err)
+    alert('Error al guardar descuento del producto: ' + err.message)
+  } finally {
+    savingProductDiscountId.value = null
   }
 }
 

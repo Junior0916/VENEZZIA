@@ -999,6 +999,7 @@ export async function fetchProducts() {
       catalog_card: catalogCardUrl,
       in_stock: record.in_stock !== false,
       items_included: parseItemsIncluded(record.items_included),
+      live_discount: record.live_discount !== undefined && record.live_discount !== null && record.live_discount !== '' ? Number(record.live_discount) : null,
       order: record.order !== undefined && record.order !== null ? Number(record.order) : 0,
       created: record.created || ''
     }

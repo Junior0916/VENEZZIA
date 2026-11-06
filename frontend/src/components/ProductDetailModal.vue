@@ -116,7 +116,13 @@
                 {{ product.category }}
               </span>
               <span
-                v-if="product.original_price"
+                v-if="hasLiveDiscount && product.in_stock !== false"
+                class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#ff0050] text-white shadow-2xs flex items-center gap-1 animate-pulse"
+              >
+                <span>🔥 OFERTA LIVE -S/&nbsp;{{ liveDiscount }}</span>
+              </span>
+              <span
+                v-else-if="product.original_price"
                 class="px-2 py-0.2 rounded-full text-[10px] font-bold uppercase"
                 :class="promoBadgeClass"
               >
@@ -137,15 +143,29 @@
 
             <!-- Price Breakdown -->
             <div class="flex items-baseline gap-2 mb-3 flex-wrap sm:flex-nowrap">
-              <span
-                v-if="product.original_price && selectedAddon === 'none'"
-                class="text-sm text-gray-400 line-through whitespace-nowrap"
-              >
-                S/&nbsp;{{ Number(product.original_price).toFixed(2) }}
-              </span>
-              <div class="text-2xl sm:text-3xl font-bold text-[#27172b] whitespace-nowrap">
-                S/&nbsp;{{ computedFinalPrice.toFixed(2) }}
-              </div>
+              <!-- If has live discount, show strikethrough of base + addon -->
+              <template v-if="hasLiveDiscount">
+                <span class="text-sm text-gray-400 line-through whitespace-nowrap">
+                  S/&nbsp;{{ (Number(product.price) + addonPrice).toFixed(2) }}
+                </span>
+                <div class="text-2xl sm:text-3xl font-extrabold text-[#c22b38] whitespace-nowrap">
+                  S/&nbsp;{{ computedFinalPrice.toFixed(2) }}
+                </div>
+                <span class="px-2 py-0.5 rounded-md bg-[#ffe4e6] text-[#be123c] text-[10px] font-bold">
+                  Descuento Live aplicado
+                </span>
+              </template>
+              <template v-else>
+                <span
+                  v-if="product.original_price && selectedAddon === 'none'"
+                  class="text-sm text-gray-400 line-through whitespace-nowrap"
+                >
+                  S/&nbsp;{{ Number(product.original_price).toFixed(2) }}
+                </span>
+                <div class="text-2xl sm:text-3xl font-bold text-[#27172b] whitespace-nowrap">
+                  S/&nbsp;{{ computedFinalPrice.toFixed(2) }}
+                </div>
+              </template>
               <span v-if="selectedAddon !== 'none'" class="text-[11px] text-gray-500 font-medium">
                 (incluye auto adicional)
               </span>
@@ -396,6 +416,7 @@ import { ref, computed, watch, reactive, onMounted, onUnmounted } from 'vue'
 import { X, Link as LinkIcon, ZoomIn, ZoomOut, Check } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import { useCartStore } from '../stores/cart'
+import { useSiteSettingsStore } from '../stores/siteSettings'
 
 const props = defineProps({
   product: {
@@ -406,6 +427,10 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 const cartStore = useCartStore()
+const siteSettingsStore = useSiteSettingsStore()
+
+const liveDiscount = computed(() => siteSettingsStore.getProductLiveDiscount(props.product))
+const hasLiveDiscount = computed(() => liveDiscount.value > 0)
 
 const activeImageView = ref('product')
 const selectedAddon = ref('none')
@@ -597,7 +622,9 @@ const addonPrice = computed(() => {
 
 const computedFinalPrice = computed(() => {
   if (!props.product) return 0
-  return Number(props.product.price) + addonPrice.value
+  const base = Number(props.product.price)
+  const discount = hasLiveDiscount.value ? liveDiscount.value : 0
+  return Math.max(0, base - discount) + addonPrice.value
 })
 
 // Generate the complete structured message so the advisor never needs to look up anything
@@ -618,9 +645,16 @@ const whatsappUrl = computed(() => {
     ``,
     `*Producto:* ${props.product.name}${isAgotado ? ' (AGOTADO)' : ''}`,
     `*Colección:* ${campaignName}`,
-    `*Categoría:* ${props.product.category || 'General'}`,
-    `*Precio:* S/ ${Number(props.product.price).toFixed(2)}`
+    `*Categoría:* ${props.product.category || 'General'}`
   ]
+
+  if (hasLiveDiscount.value) {
+    lines.push(`*Precio Regular:* S/ ${Number(props.product.price).toFixed(2)}`)
+    lines.push(`🔥 *Descuento TikTok Live:* -S/ ${liveDiscount.value.toFixed(2)}`)
+    lines.push(`*Precio con Descuento Live:* S/ ${(Number(props.product.price) - liveDiscount.value).toFixed(2)}`)
+  } else {
+    lines.push(`*Precio:* S/ ${Number(props.product.price).toFixed(2)}`)
+  }
 
   // Add-on info if selected
   if (selectedAddon.value === 'clasico') {
@@ -672,6 +706,8 @@ function handleAddToCart() {
   const itemToAdd = {
     ...props.product,
     price: computedFinalPrice.value,
+    base_price: props.product.price,
+    liveDiscount: hasLiveDiscount.value ? liveDiscount.value : null,
     addon: selectedAddon.value !== 'none' ? selectedAddon.value : null
   }
 
