@@ -68,6 +68,14 @@ export const useSiteSettingsStore = defineStore('siteSettings', () => {
   function getProductLiveDiscount(product) {
     if (!isLiveOfferActive.value || !product) return 0
 
+    const targetCamp = (liveCampaign.value || 'hotwheels').toLowerCase()
+    const prodCamp = (product.campaign || '').toLowerCase()
+
+    // If a specific campaign is selected, only products from that campaign qualify
+    if (targetCamp !== 'all' && prodCamp !== targetCamp) {
+      return 0
+    }
+
     // 1. Explicit per-product override in PocketBase
     if (product.live_discount !== undefined && product.live_discount !== null && product.live_discount !== '') {
       const explicit = Number(product.live_discount)
@@ -75,22 +83,18 @@ export const useSiteSettingsStore = defineStore('siteSettings', () => {
       if (explicit === 0) return 0 // Explicitly excluded
     }
 
-    // 2. Campaign match (e.g. 'hotwheels' or 'all')
-    const targetCamp = (liveCampaign.value || 'hotwheels').toLowerCase()
-    const prodCamp = (product.campaign || '').toLowerCase()
-
-    if (targetCamp === 'all' || prodCamp === targetCamp) {
+    // 2. Campaign default discount (e.g. 'hotwheels', 'maquillaje', 'cumpleanos', 'graduacion' or 'all')
+    if (targetCamp === 'hotwheels') {
       // By default applies to Box products if campaign is hotwheels
       const isBox = (product.name || '').toLowerCase().includes('box') ||
                     (product.category || '').toLowerCase().includes('box')
-      if (targetCamp === 'hotwheels' && !isBox) {
+      if (!isBox) {
         // Non-box Hot Wheels only get discount if explicitly assigned
         return 0
       }
-      return Number(liveDiscountDefault.value || 10.00)
     }
 
-    return 0
+    return Number(liveDiscountDefault.value || 10.00)
   }
 
   // Get effective price considering live discount

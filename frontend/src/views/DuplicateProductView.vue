@@ -389,11 +389,13 @@
                   </label>
                   <select
                     v-model="selectedLiveCampaign"
+                    @change="onLiveCampaignChange"
                     class="w-full text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#faf7fb] focus:bg-white focus:outline-none cursor-pointer"
                   >
-                    <option value="hotwheels">Día de Regalar Hot Wheels (Recomendado)</option>
+                    <option value="hotwheels">Día de Regalar Hot Wheels</option>
                     <option value="maquillaje">Día de Regalar Maquillaje</option>
-                    <option value="graduacion">Graduación</option>
+                    <option value="cumpleanos">Colección Cumpleaños</option>
+                    <option value="graduacion">Colección Graduación</option>
                     <option value="all">Todas las Colecciones</option>
                   </select>
                 </div>
@@ -442,7 +444,8 @@
                 </p>
               </div>
               <div class="text-xs font-semibold text-[#caa35f] bg-[#fffaf2] px-3 py-1.5 rounded-xl border border-[#eedee9]">
-                💡 Box Básico: -S/ 5.00 | Otros Box: -S/ 10.00
+                <span v-if="selectedLiveCampaign === 'hotwheels'">💡 Box Básico: -S/ 5.00 | Otros Box: -S/ 10.00</span>
+                <span v-else>💡 Asigna el descuento en soles (S/) que desees a cada producto</span>
               </div>
             </div>
 
@@ -1336,10 +1339,24 @@ async function loadProducts() {
   }
 }
 
+function onLiveCampaignChange() {
+  if (selectedLiveCampaign.value === 'hotwheels') {
+    liveBannerTextInput.value = '¡EN VIVO EN TIKTOK! S/ 10 de descuento en Box Hot Wheels'
+  } else if (selectedLiveCampaign.value === 'maquillaje') {
+    liveBannerTextInput.value = '¡EN VIVO EN TIKTOK! Descuento especial en Colección Maquillaje'
+  } else if (selectedLiveCampaign.value === 'cumpleanos') {
+    liveBannerTextInput.value = '¡EN VIVO EN TIKTOK! Descuento especial en Colección Cumpleaños'
+  } else if (selectedLiveCampaign.value === 'graduacion') {
+    liveBannerTextInput.value = '¡EN VIVO EN TIKTOK! Descuento especial en Colección Graduación'
+  } else {
+    liveBannerTextInput.value = '¡EN VIVO EN TIKTOK! Descuentos Flash activos en toda la tienda'
+  }
+}
+
 const liveProductsDisplayList = computed(() => {
   return products.value.filter(p => {
     if (selectedLiveCampaign.value === 'all') return true
-    return p.campaign === selectedLiveCampaign.value || (p.name || '').toLowerCase().includes('hot wheels')
+    return (p.campaign || '').toLowerCase() === selectedLiveCampaign.value.toLowerCase()
   })
 })
 
