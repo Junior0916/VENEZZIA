@@ -13,22 +13,59 @@
         v-if="siteSettingsStore.isLiveOfferActive"
         class="bg-gradient-to-r from-[#ff0050] via-[#c22b38] to-[#00f2fe] text-white p-[1px] shadow-md relative z-50 overflow-hidden"
       >
-        <div class="bg-gradient-to-r from-[#180010] via-[#27172b] to-[#0f051d] px-3 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2.5">
-          <!-- Left: Live Pulsing Indicator & Message -->
+        <!-- Mobile Layout (< 640px) -->
+        <div class="sm:hidden bg-gradient-to-r from-[#180010] via-[#27172b] to-[#0f051d] px-3 py-2 space-y-1.5">
+          <!-- Row 1: Live Badge on left, Countdown & Action on right -->
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ff0050] text-white text-[9px] font-black uppercase tracking-wider shadow-xs animate-pulse">
+                <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                <span>EN VIVO</span>
+              </span>
+              <span class="text-[10px] font-bold text-white/90">TIKTOK LIVE</span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] text-gray-300 font-medium">Termina:</span>
+              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/15 border border-white/20 text-white font-mono font-black text-xs tracking-wider shadow-inner">
+                <Clock class="w-3 h-3 text-[#00f2fe]" />
+                <span>{{ siteSettingsStore.formattedLiveTimeLeft }}</span>
+              </div>
+              <a
+                href="https://www.tiktok.com/@venezzia.detalles/live"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#ff0050] hover:bg-[#d90043] text-white text-[9px] font-bold shadow-xs active:scale-95"
+              >
+                <IconTikTok customClass="w-2.5 h-2.5 text-white" />
+                <span>Ver</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Row 2: Full announcement message (Never truncated) -->
+          <p class="text-[11px] font-bold text-white leading-tight text-center sm:text-left pt-0.5 break-words">
+            {{ siteSettingsStore.liveBannerText || '¡OFERTA FLASH EN VIVO EN TIKTOK!' }}
+          </p>
+        </div>
+
+        <!-- Desktop & Tablet Layout (>= 640px) -->
+        <div class="hidden sm:flex bg-gradient-to-r from-[#180010] via-[#27172b] to-[#0f051d] px-4 sm:px-6 py-2 items-center justify-between gap-3">
+          <!-- Left: Live Pulsing Indicator & Message (Never truncated) -->
           <div class="flex items-center gap-2.5 min-w-0">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#ff0050] text-white text-[10px] font-black uppercase tracking-wider shadow-sm shrink-0 animate-pulse">
               <span class="w-2 h-2 rounded-full bg-white"></span>
               <span>EN VIVO</span>
             </span>
 
-            <p class="text-xs sm:text-sm font-bold text-white truncate flex items-center gap-1.5">
+            <p class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 leading-snug break-words">
               <span>{{ siteSettingsStore.liveBannerText || '¡OFERTA FLASH EN VIVO EN TIKTOK!' }}</span>
             </p>
           </div>
 
           <!-- Right: Countdown Timer Display & CTA -->
           <div class="flex items-center gap-2 shrink-0">
-            <span class="text-[11px] text-gray-300 hidden md:inline font-medium">Termina en:</span>
+            <span class="text-[11px] text-gray-300 font-medium">Termina en:</span>
             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md text-white font-mono font-black text-xs sm:text-sm tracking-wider shadow-inner">
               <Clock class="w-3.5 h-3.5 text-[#00f2fe]" />
               <span>{{ siteSettingsStore.formattedLiveTimeLeft }}</span>
@@ -37,7 +74,7 @@
               href="https://www.tiktok.com/@venezzia.detalles/live"
               target="_blank"
               rel="noopener noreferrer"
-              class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#ff0050] hover:bg-[#d90043] text-white text-[10px] font-bold tracking-wide transition-all shadow-xs"
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#ff0050] hover:bg-[#d90043] text-white text-[10px] font-bold tracking-wide transition-all shadow-xs"
             >
               <IconTikTok customClass="w-3 h-3 text-white" />
               <span>Ver Live</span>
