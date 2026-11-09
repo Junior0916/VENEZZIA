@@ -5,7 +5,8 @@ const STORAGE_KEY = 'onepage_cart_items'
 export const useCartStore = defineStore('cart', {
   state: () => ({
     items: JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'),
-    isOpen: false
+    isOpen: false,
+    preferredMethod: null
   }),
 
   getters: {
@@ -78,6 +79,7 @@ export const useCartStore = defineStore('cart', {
 
     clearCart() {
       this.items = []
+      this.preferredMethod = null
       this.saveToStorage()
     },
 

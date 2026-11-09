@@ -120,7 +120,32 @@
             </div>
 
             <!-- Customer Shipping Info Form -->
-            <div v-if="cartStore.items.length > 0" class="pt-4 border-t border-[#f2e6f0] space-y-3">
+            <div ref="shippingFormRef" v-if="cartStore.items.length > 0" class="pt-4 border-t border-[#f2e6f0] space-y-3">
+              <!-- WhatsApp Preferred Option Banner -->
+              <div
+                v-if="cartStore.preferredMethod === 'whatsapp'"
+                class="p-3.5 bg-emerald-50/90 border border-emerald-200/90 rounded-2xl flex items-start gap-2.5 text-xs text-emerald-950 shadow-2xs animate-in fade-in"
+              >
+                <div class="w-7 h-7 rounded-full bg-[#25D366] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                  <IconWhatsApp customClass="w-4 h-4 text-white" />
+                </div>
+                <div class="flex-1 leading-snug">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="font-bold text-xs text-emerald-950">Opción elegida: Coordinar por WhatsApp</span>
+                    <button
+                      type="button"
+                      @click="cartStore.preferredMethod = null"
+                      class="text-[10px] text-emerald-700 hover:text-emerald-900 underline font-normal cursor-pointer"
+                    >
+                      Cambiar
+                    </button>
+                  </div>
+                  <p class="text-[11px] text-emerald-800 mt-1">
+                    Por favor completa tus datos de entrega y dedicatoria abajo. Al pulsar el botón verde, se abrirá WhatsApp con el resumen completo y tus datos para agendar tu pedido.
+                  </p>
+                </div>
+              </div>
+
               <h3 class="text-xs font-serif font-bold uppercase tracking-wider text-[#27172b]">
                 Datos de Envío y Contacto
               </h3>
@@ -269,10 +294,19 @@
             <button
               type="button"
               @click="handleWhatsAppOrder"
-              class="w-full py-3.5 px-4 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs uppercase tracking-wider active:scale-[0.99] transition-all shadow-md shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer"
+              :class="[
+                'w-full py-3.5 px-4 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs uppercase tracking-wider active:scale-[0.99] transition-all shadow-md shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer',
+                cartStore.preferredMethod === 'whatsapp' ? 'ring-4 ring-emerald-300 ring-offset-2' : ''
+              ]"
             >
               <IconWhatsApp customClass="w-4 h-4 text-white" />
               <span>Coordinar Pedido por WhatsApp</span>
+              <span
+                v-if="cartStore.preferredMethod === 'whatsapp'"
+                class="text-[10px] bg-white/25 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider text-emerald-950"
+              >
+                Seleccionado
+              </span>
             </button>
 
             <!-- Or Pay with Card/Culqi -->
@@ -573,6 +607,7 @@ const processing = ref(false)
 const errorMessage = ref('')
 const phoneError = ref('')
 const phoneInputRef = ref(null)
+const shippingFormRef = ref(null)
 const isMapModalOpen = ref(false)
 const orderCompleted = ref(false)
 const lastChargeId = ref('')
@@ -861,6 +896,18 @@ function closeRejectModalAndOpenWhatsApp() {
   showRejectModal.value = false
   window.open(whatsappCartUrl.value, '_blank')
 }
+
+// Auto-scroll to shipping form if preferred method is WhatsApp
+watch(
+  () => [cartStore.isOpen, cartStore.preferredMethod],
+  ([isOpen, method]) => {
+    if (isOpen && method === 'whatsapp') {
+      setTimeout(() => {
+        shippingFormRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 200)
+    }
+  }
+)
 
 // Lock body scrolling when cart is open
 watch(

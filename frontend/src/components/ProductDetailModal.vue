@@ -252,15 +252,26 @@
 
               <!-- Structured WhatsApp Consultation / Order Button -->
               <a
+                v-if="product.in_stock === false"
                 :href="whatsappUrl"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="px-5 py-3.5 rounded-full bg-[#25D366] text-white hover:bg-[#20ba5a] transition-all hover:scale-103 shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer font-semibold text-xs shrink-0"
-                :title="product.in_stock === false ? 'Consultar reposición por WhatsApp' : 'Pedir directamente con la ficha completa por WhatsApp'"
+                title="Consultar reposición por WhatsApp"
               >
                 <IconWhatsApp customClass="w-5 h-5 text-white" />
-                <span class="hidden sm:inline">{{ product.in_stock === false ? 'Consultar Reposición' : 'Pedir por WhatsApp' }}</span>
+                <span class="hidden sm:inline">Consultar Reposición</span>
               </a>
+              <button
+                v-else
+                type="button"
+                @click="handleOrderViaWhatsApp"
+                class="px-5 py-3.5 rounded-full bg-[#25D366] text-white hover:bg-[#20ba5a] transition-all hover:scale-103 shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer font-semibold text-xs shrink-0"
+                title="Pedir por WhatsApp completando datos de entrega en la bolsa"
+              >
+                <IconWhatsApp customClass="w-5 h-5 text-white" />
+                <span class="hidden sm:inline">Pedir por WhatsApp</span>
+              </button>
             </div>
 
             <!-- Discrete advisor info note -->
@@ -268,7 +279,7 @@
               Este producto no tiene stock disponible en este momento. Puedes consultar por WhatsApp para agendarlo o consultar reposición.
             </p>
             <p v-else class="text-[11px] text-gray-400 text-center">
-              El mensaje de WhatsApp incluye automáticamente la lista de contenido, precio y foto para atención inmediata.
+              Al coordinar por WhatsApp, te llevaremos a la bolsa para ingresar los datos de entrega y dedicatoria.
             </p>
           </div>
         </div>
@@ -724,6 +735,30 @@ function handleAddToCart() {
   }
 
   cartStore.addToCart(itemToAdd, 1)
+  cartStore.preferredMethod = null
+  emit('close')
+  cartStore.openCart()
+}
+
+function handleOrderViaWhatsApp() {
+  if (!props.product) return
+
+  const itemToAdd = {
+    ...props.product,
+    price: computedFinalPrice.value,
+    base_price: props.product.price,
+    liveDiscount: hasLiveDiscount.value ? liveDiscount.value : null,
+    addon: selectedAddon.value !== 'none' ? selectedAddon.value : null
+  }
+
+  if (selectedAddon.value === 'clasico') {
+    itemToAdd.name = `${props.product.name} (+ 1 Auto Clásico)`
+  } else if (selectedAddon.value === 'premium') {
+    itemToAdd.name = `${props.product.name} (+ 1 Auto Premium)`
+  }
+
+  cartStore.addToCart(itemToAdd, 1)
+  cartStore.preferredMethod = 'whatsapp'
   emit('close')
   cartStore.openCart()
 }
