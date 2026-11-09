@@ -57,7 +57,7 @@
             <span class="text-xs font-bold text-[#27172b] block">Pasos para reportar una incidencia:</span>
             <ol class="list-decimal pl-5 space-y-1 text-xs text-gray-600">
               <li>Tomar 2 a 3 fotografías o un video corto donde se aprecie claramente el estado del producto y el empaque.</li>
-              <li>Escribir a nuestra línea oficial de atención WhatsApp <strong>+51 932 449 996</strong> o al correo <strong>contacto@venezzia.shop</strong>.</li>
+              <li>Escribir a nuestra línea oficial de atención por WhatsApp o al correo <strong>contacto@venezzia.shop</strong>.</li>
               <li>Indicar el número de pedido o nombre del comprador y describir brevemente lo ocurrido.</li>
               <li>Nuestro equipo de atención evaluará el caso de manera inmediata (tiempo de respuesta promedio: menor a 2 horas en horario de atención).</li>
             </ol>

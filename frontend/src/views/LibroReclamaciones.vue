@@ -507,6 +507,9 @@ import {
   Printer
 } from 'lucide-vue-next'
 import IconWhatsApp from '../components/icons/IconWhatsApp.vue'
+import { useSiteSettingsStore } from '../stores/siteSettings'
+
+const siteSettingsStore = useSiteSettingsStore()
 
 const submitted = ref(false)
 const submitting = ref(false)
@@ -567,7 +570,7 @@ onMounted(() => {
 
 const whatsappShareUrl = computed(() => {
   const msg = `Hola Venezzia Detalles, acabo de registrar la Hoja de Reclamación N° ${receipt.code} a nombre de ${receipt.fullName}. Adjunto mis datos para su revisión.`
-  return `https://wa.me/51932449996?text=${encodeURIComponent(msg)}`
+  return siteSettingsStore.whatsappLink(msg)
 })
 
 function handleLibroPhoneInput(e) {

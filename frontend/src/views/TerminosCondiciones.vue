@@ -37,7 +37,7 @@
             <strong>https://venezzia.shop</strong>, de propiedad y operación comercial bajo la marca
             <strong>VENEZZIA DETALLES</strong>, con domicilio en la ciudad de Lima, República del Perú, y canales
             de contacto oficiales: correo electrónico <strong>contacto@venezzia.shop</strong> y línea de atención al cliente
-            WhatsApp <strong>+51 932 449 996</strong>.
+            canal de atención al cliente vía WhatsApp.
           </p>
           <p>
             Al navegar en nuestra plataforma, registrar un pedido o efectuar un pago electrónico, el usuario declara haber leído,

@@ -220,7 +220,7 @@ function getHeroSwitcherClasses(campId) {
 }
 
 const whatsappCtaUrl = computed(() => {
-  const campaignName = campaignStore.activeCampaign.name
-  return siteSettingsStore.whatsappLink(`Hola Venezzia Detalles, quisiera consultar por el catálogo de ${campaignName}.`)
+
+  return siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')
 })
 </script>

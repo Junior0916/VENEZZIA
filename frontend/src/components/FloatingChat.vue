@@ -18,10 +18,10 @@
         </div>
         <div class="flex-1">
           <span class="block text-[10px] uppercase tracking-wider font-bold text-emerald-700 mb-0.5">
-            Asesora Online Venezzia
+            ASESORIA ONLINE VENEZZIA
           </span>
           <p class="leading-relaxed text-gray-600 font-medium">
-            ¡Hola! ¿Deseas consultar disponibilidad o personalizar tu dedicatoria especial?
+            ¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?
           </p>
         </div>
         <button
@@ -45,7 +45,7 @@
         rel="noopener noreferrer"
         class="relative w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white flex items-center justify-center shadow-lg shadow-emerald-500/35 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer group"
         aria-label="Contactar a Venezzia Detalles por WhatsApp oficial"
-        :title="'Escríbenos a ' + siteSettingsStore.formattedPhone"
+        title="Asesoría Online Venezzia por WhatsApp"
       >
         <!-- Authentic Official WhatsApp Icon -->
         <IconWhatsApp customClass="w-7 h-7 text-white drop-shadow-xs" />
@@ -64,6 +64,6 @@ const siteSettingsStore = useSiteSettingsStore()
 const showTooltip = ref(true)
 
 const whatsappUrl = computed(() => {
-  return siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera consultar sobre un arreglo de rosas eternas para entrega.')
+  return siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')
 })
 </script>

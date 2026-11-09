@@ -92,11 +92,11 @@
           <div class="flex items-center gap-3 text-gray-400">
             <!-- Official WhatsApp Logo -->
             <a
-              :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera hacer un pedido')"
+              :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
               target="_blank"
               rel="noopener noreferrer"
               class="text-[#25D366] hover:scale-115 transition-transform flex items-center"
-              :title="'Escríbenos a WhatsApp (' + siteSettingsStore.formattedPhone + ')'"
+              title="Atención Inmediata por WhatsApp"
             >
               <IconWhatsApp customClass="w-3.5 h-3.5" />
             </a>
@@ -138,13 +138,14 @@
 
           <!-- Direct WhatsApp Hotline -->
           <a
-            :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera hacer un pedido')"
+            :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
             target="_blank"
             rel="noopener noreferrer"
             class="hidden sm:inline-flex items-center gap-1.5 text-gray-600 hover:text-emerald-700 font-medium group transition-colors"
+            title="Atención Inmediata por WhatsApp"
           >
             <IconWhatsApp customClass="w-3.5 h-3.5 text-[#25D366] group-hover:scale-110 transition-transform" />
-            <span>Atención Inmediata: <strong class="text-gray-900 font-semibold">{{ siteSettingsStore.formattedPhone }}</strong></span>
+            <span class="text-gray-900 font-semibold hover:text-emerald-700 transition-colors">Atención Inmediata</span>
           </a>
         </div>
 
@@ -278,11 +279,11 @@
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
           <!-- WhatsApp Contact Button -->
           <a
-            :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera consultar por sus catálogos')"
+            :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
             target="_blank"
             rel="noopener noreferrer"
             class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-emerald-800 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/80 text-xs font-semibold transition-all hover:scale-102 cursor-pointer shadow-2xs"
-            :title="'Escribir al WhatsApp (' + siteSettingsStore.formattedPhone + ')'"
+            title="Asesoría Online Venezzia por WhatsApp"
           >
             <IconWhatsApp customClass="w-4 h-4 text-[#25D366]" />
             <span class="hidden lg:inline text-[11px]">Asistencia WhatsApp</span>
@@ -290,11 +291,12 @@
 
           <!-- Mobile WhatsApp Icon Only -->
           <a
-            :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera consultar por sus catálogos')"
+            :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
             target="_blank"
             rel="noopener noreferrer"
             class="sm:hidden p-2 text-[#25D366] hover:bg-emerald-50 rounded-full transition-all border border-emerald-100 shadow-2xs"
             aria-label="Contactar a WhatsApp"
+            title="Asesoría Online Venezzia"
           >
             <IconWhatsApp customClass="w-5 h-5 text-[#25D366]" />
           </a>
@@ -617,22 +619,23 @@
           <!-- Footer del Drawer -->
           <div class="p-5 border-t border-[#f4eaf6] bg-[#faf7fb] space-y-3">
             <a
-              :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera consultar por sus catálogos')"
+              :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
               target="_blank"
               rel="noopener noreferrer"
               class="w-full py-3 px-4 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+              title="Atención Directa por WhatsApp"
             >
               <IconWhatsApp customClass="w-4 h-4 text-white" />
-              <span>Atención Directa: {{ siteSettingsStore.formattedPhone }}</span>
+              <span>Atención Directa</span>
             </a>
 
             <div class="flex items-center justify-center gap-4 text-gray-400 pt-1">
               <a
-                :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera hacer un pedido')"
+                :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="text-[#25D366] hover:scale-115 transition-transform"
-                title="WhatsApp"
+                title="WhatsApp Oficial"
               >
                 <IconWhatsApp customClass="w-4 h-4" />
               </a>

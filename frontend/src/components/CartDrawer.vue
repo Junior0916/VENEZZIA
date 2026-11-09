@@ -553,8 +553,10 @@ import IconWhatsApp from './icons/IconWhatsApp.vue'
 import LocationPickerModal from './LocationPickerModal.vue'
 import { useCartStore } from '../stores/cart'
 import { openCulqiCheckout, sendChargeToBackend } from '../services/culqi'
+import { useSiteSettingsStore } from '../stores/siteSettings'
 
 const cartStore = useCartStore()
+const siteSettingsStore = useSiteSettingsStore()
 
 const customer = reactive({
   name: '',
@@ -633,7 +635,7 @@ const whatsappCartUrl = computed(() => {
   lines.push(``)
   lines.push(`¿Cómo coordinamos el anticipo y horario de despacho? Muchas gracias.`)
 
-  return `https://wa.me/51932449996?text=${encodeURIComponent(lines.join('\n'))}`
+  return siteSettingsStore.whatsappLink(lines.join('\n'))
 })
 
 const whatsappConfirmationUrl = computed(() => {
@@ -660,7 +662,7 @@ const whatsappConfirmationUrl = computed(() => {
   }
   lines.push(``)
   lines.push(`Adjunto mi confirmación para coordinar el horario de despacho. ¡Muchas gracias!`)
-  return `https://wa.me/51932449996?text=${encodeURIComponent(lines.join('\n'))}`
+  return siteSettingsStore.whatsappLink(lines.join('\n'))
 })
 
 function handlePhoneInput(e) {

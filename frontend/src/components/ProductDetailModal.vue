@@ -692,7 +692,7 @@ const whatsappUrl = computed(() => {
   }
 
   const fullText = lines.join('\n')
-  return `https://wa.me/51932449996?text=${encodeURIComponent(fullText)}`
+  return siteSettingsStore.whatsappLink(fullText)
 })
 
 function copyDirectLink() {
