@@ -194,11 +194,10 @@
                 </div>
                 <div>
                   <label class="block text-[11px] font-semibold text-gray-700 mb-1">Distrito / Ciudad *</label>
-                  <input
+                  <DistrictAutocomplete
                     v-model="customer.city"
-                    type="text"
-                    placeholder="Miraflores, Lima..."
-                    class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
+                    placeholder="Buscar distrito..."
+                    :has-error="Boolean(errorMessage && !customer.city.trim())"
                   />
                 </div>
               </div>
@@ -585,6 +584,8 @@ import {
 } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import LocationPickerModal from './LocationPickerModal.vue'
+import DistrictAutocomplete from './DistrictAutocomplete.vue'
+import peruLocations from '../data/peruLocations.json'
 import { useCartStore } from '../stores/cart'
 import { openCulqiCheckout, sendChargeToBackend } from '../services/culqi'
 import { useSiteSettingsStore } from '../stores/siteSettings'
@@ -624,6 +625,17 @@ function handleLocationSelected({ lat, lng, mapUrl, addressText }) {
   customer.mapCoords = { lat, lng }
   if (!customer.address.trim() && addressText) {
     customer.address = addressText
+  }
+  // Auto-detect Peru district from GPS reverse geocoded address if city not yet chosen
+  if (!customer.city.trim() && addressText) {
+    const textNorm = addressText.toLowerCase()
+    const foundDistrict = peruLocations.find(item => {
+      const dNorm = item.d.toLowerCase()
+      return dNorm.length >= 4 && new RegExp(`\\b${dNorm}\\b`, 'i').test(textNorm)
+    })
+    if (foundDistrict) {
+      customer.city = foundDistrict.label
+    }
   }
 }
 
