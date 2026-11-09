@@ -555,17 +555,9 @@
                       ]"
                     />
                     <div class="min-w-0">
-                      <div class="flex items-center gap-2">
-                        <span class="text-xs sm:text-sm font-bold text-[#27172b] group-hover:text-[#965e9b] transition-colors truncate">
-                          {{ camp.name }}
-                        </span>
-                        <span
-                          v-if="camp.id === 'navidad'"
-                          class="px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 shrink-0"
-                        >
-                          Nuevo
-                        </span>
-                      </div>
+                      <span class="text-xs sm:text-sm font-bold text-[#27172b] group-hover:text-[#965e9b] transition-colors block truncate">
+                        {{ camp.name }}
+                      </span>
                       <span class="text-[11px] text-gray-500 block truncate mt-0.5">
                         {{ camp.badge || camp.tagline }}
                       </span>
