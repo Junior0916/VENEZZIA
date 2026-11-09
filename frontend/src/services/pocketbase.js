@@ -829,8 +829,119 @@ export const MOCK_PRODUCTS = [
       'Vela chispeante de cumpleaños',
       'Caja cofre rígida con tapa de imán y lazo'
     ]
+  },
+  // ==========================================
+  // CAMPAÑA 5: COLECCIÓN NAVIDAD & NOCHEBUENA
+  // ==========================================
+  {
+    id: 'navi001boxnoche',
+    campaign: 'navidad',
+    name: 'Box Navideño Nochebuena con Luces LED & Rosas Eternas',
+    description: 'Caja festiva con rosas rojas eternas, follaje de pino navideño, luces LED cálidas integradas y tarjeta dedicatoria.',
+    price: 85.00,
+    original_price: 100.00,
+    category: 'Boxes Navideños',
+    image: '/products/box-pinguino-lucifer_centered.webp',
+    in_stock: true,
+    items_included: [
+      'Caja de regalo navideña con acabados dorados',
+      'Rosas eternas rojas de larga duración',
+      'Luces micro LED tono cálido integradas',
+      'Follaje navideño con piñas de pino naturales',
+      'Tarjeta de felicitación navideña personalizada'
+    ]
+  },
+  {
+    id: 'navi002ramorosas',
+    campaign: 'navidad',
+    name: 'Ramo Nochebuena Radiante de Rosas Eternas',
+    description: 'Ramo de gala con rosas rojas y detalles dorados en envoltura navideña de alta calidad con lazo de satén.',
+    price: 75.00,
+    original_price: 90.00,
+    category: 'Ramos con Rosas',
+    image: '/products/ramo_premium_lotso_centered.webp',
+    in_stock: true,
+    items_included: [
+      'Rosas rojas eternas seleccionadas',
+      'Topper con mensaje de Feliz Navidad en foil dorado',
+      'Papel coreano premium en tonos festivos',
+      'Lazo de cinta de satén con filo dorado',
+      'Tarjeta personalizada para dedicatoria'
+    ]
+  },
+  {
+    id: 'navi003boxchocol',
+    campaign: 'navidad',
+    name: 'Box Dulce Navidad con Bombones Ferrero & Rosas',
+    description: 'Elegante box navideño que incluye caja de bombones Ferrero Rocher, rosas eternas rojas y luces mágicas.',
+    price: 95.00,
+    original_price: 110.00,
+    category: 'Boxes Navideños',
+    image: '/products/box_osita_dormilona_centered.webp',
+    in_stock: true,
+    items_included: [
+      'Caja cofre de lujo con acabado navideño',
+      '1 Caja de bombones Ferrero Rocher x8',
+      'Rosas eternas preservadas con acentos dorados',
+      'Guirnalda de luces LED mágicas',
+      'Tarjeta de dedicatoria personalizada'
+    ]
+  },
+  {
+    id: 'navi004ramonieve',
+    campaign: 'navidad',
+    name: 'Ramo Nieve Mágica & Topper Navideño con Luces',
+    description: 'Ramo temático en tonos blanco nieve y rojo rubí con mini luces LED y detalles de follaje invernal.',
+    price: 80.00,
+    original_price: 95.00,
+    category: 'Ramos con Rosas',
+    image: '/products/ramo-pinguino-hotwheels_centered.webp',
+    in_stock: true,
+    items_included: [
+      'Rosas eternas bicolor rojas y blancas',
+      'Micro luces LED decorativas con pilas incluidas',
+      'Topper de Feliz Navidad brillante',
+      'Envoltura satinada con detalles brillantes',
+      'Tarjeta con dedicatoria impresa'
+    ]
+  },
+  {
+    id: 'navi005boxbrindi',
+    campaign: 'navidad',
+    name: 'Box Estrella Navideña Deluxe con Mini Espumante',
+    description: 'Exclusivo box para brindar en Nochebuena: botella de espumante Riccadonna, copa, bombones y rosas eternas.',
+    price: 115.00,
+    original_price: 130.00,
+    category: 'Boxes Navideños',
+    image: '/products/box-premium-oro-18k_centered.webp',
+    in_stock: true,
+    items_included: [
+      'Botella de espumante Riccadonna 200ml',
+      'Copa con lazo navideño decorativo',
+      'Bombones finos seleccionados',
+      'Rosas eternas y piñas navideñas',
+      'Caja rígida con visor y luces LED'
+    ]
+  },
+  {
+    id: 'navi006peluchen',
+    campaign: 'navidad',
+    name: 'Ramo Festivo con Peluche Navideño & Rosas Eternas',
+    description: 'Tierno detalle navideño con peluche temático de felpa suave, rosas eternas rojas y luces cálidas.',
+    price: 88.00,
+    original_price: 105.00,
+    category: 'Ramos con Rosas',
+    image: '/products/ramo_3_kitty_centered.webp',
+    in_stock: true,
+    items_included: [
+      'Peluche suave con gorrito navideño',
+      'Rosas eternas rojas aterciopeladas',
+      'Envoltura festiva con moño de gala',
+      'Luces cálidas LED',
+      'Tarjeta de dedicatoria navideña'
+    ]
   }
-]
+];
 
 const PRODUCT_OPTIMIZED_ASSETS = {
   // Makeup Products (All 8 updated today from PocketBase)
@@ -935,6 +1046,12 @@ function resolveProductImage(record, client = pb) {
   if (norm.includes('1 carrito')) return '/products/ramo-hotwheels-1_centered.webp'
   if (norm.includes('2 carritos')) return '/products/ramo-hotwheels-2_centered.webp'
   if (norm.includes('3 carritos')) return '/products/ramo-hotwheels-3_centered.webp'
+
+  // Navidad names
+  if (norm.includes('nochebuena') || norm.includes('navideño') || norm.includes('navidad') || norm.includes('nieve')) {
+    if (norm.includes('box') || norm.includes('caja')) return '/products/box-pinguino-lucifer_centered.webp'
+    return '/products/ramo-pinguino-hotwheels_centered.webp'
+  }
 
   return '/products/box_basico_centered.webp'
 }

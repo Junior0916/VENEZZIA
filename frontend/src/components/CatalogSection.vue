@@ -132,6 +132,7 @@ const isSearching = computed(() => {
 
 const badgeColorClass = computed(() => {
   const id = campaignStore.activeCampaignId
+  if (id === 'navidad') return 'text-[#15803d]'
   if (id === 'hotwheels') return 'text-[#c22b38]'
   if (id === 'graduacion') return 'text-[#b45309]'
   if (id === 'cumpleanos') return 'text-[#c026d3]'
@@ -140,6 +141,7 @@ const badgeColorClass = computed(() => {
 
 function getActiveTabClass() {
   const id = campaignStore.activeCampaignId
+  if (id === 'navidad') return 'bg-[#15803d] text-white shadow-xs border border-emerald-400/40'
   if (id === 'hotwheels') return 'bg-[#c22b38] text-white shadow-xs'
   if (id === 'graduacion') return 'bg-[#854d0e] text-white shadow-xs border border-amber-400/40'
   if (id === 'cumpleanos') return 'bg-[#be185d] text-white shadow-xs border border-pink-400/40'

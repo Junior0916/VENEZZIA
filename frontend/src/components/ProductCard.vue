@@ -165,6 +165,7 @@ const finalPrice = computed(() => siteSettingsStore.getProductFinalPrice(props.p
 
 const categoryColorClass = computed(() => {
   const camp = props.product.campaign
+  if (camp === 'navidad') return 'text-[#15803d]'
   if (camp === 'hotwheels') return 'text-[#c22b38]'
   if (camp === 'graduacion') return 'text-[#b45309]'
   if (camp === 'cumpleanos') return 'text-[#c026d3]'
@@ -173,6 +174,7 @@ const categoryColorClass = computed(() => {
 
 const addToCartButtonClass = computed(() => {
   const camp = props.product.campaign
+  if (camp === 'navidad') return 'bg-[#15803d] hover:bg-[#166534] border border-emerald-400/40'
   if (camp === 'hotwheels') return 'bg-[#c22b38] hover:bg-[#991b1b]'
   if (camp === 'graduacion') return 'bg-[#854d0e] hover:bg-[#caa35f] hover:text-[#27172b] border border-amber-400/40'
   if (camp === 'cumpleanos') return 'bg-[#be185d] hover:bg-[#9d174d]'
@@ -181,6 +183,7 @@ const addToCartButtonClass = computed(() => {
 
 const promoBadgeClass = computed(() => {
   const camp = props.product.campaign
+  if (camp === 'navidad') return 'bg-[#f0fdf4] text-[#166534] border border-[#bbf7d0]'
   if (camp === 'hotwheels') return 'bg-[#fee2e2] text-[#b91c1c] border border-[#fca5a5]/60'
   if (camp === 'graduacion') return 'bg-[#fefce8] text-[#854d0e] border border-[#fef08a]'
   if (camp === 'cumpleanos') return 'bg-[#fdf2f8] text-[#9d174d] border border-[#fbcfe8]'

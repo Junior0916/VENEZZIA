@@ -52,6 +52,7 @@ const campaignStore = useCampaignStore()
 
 const badgeColorClass = computed(() => {
   const id = campaignStore.activeCampaignId
+  if (id === 'navidad') return 'text-[#15803d]'
   if (id === 'hotwheels') return 'text-[#c22b38]'
   if (id === 'graduacion') return 'text-[#b45309]'
   if (id === 'cumpleanos') return 'text-[#c026d3]'

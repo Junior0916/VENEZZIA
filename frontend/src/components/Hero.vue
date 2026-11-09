@@ -148,6 +148,7 @@ const siteSettingsStore = useSiteSettingsStore()
 
 const heroAccentBg = computed(() => {
   const id = campaignStore.activeCampaignId
+  if (id === 'navidad') return 'bg-[#15803d]'
   if (id === 'hotwheels') return 'bg-[#c22b38]'
   if (id === 'graduacion') return 'bg-[#caa35f]'
   if (id === 'cumpleanos') return 'bg-[#c026d3]'
@@ -156,6 +157,7 @@ const heroAccentBg = computed(() => {
 
 const heroBadgeColorClass = computed(() => {
   const id = campaignStore.activeCampaignId
+  if (id === 'navidad') return 'text-[#15803d]'
   if (id === 'hotwheels') return 'text-[#c22b38]'
   if (id === 'graduacion') return 'text-[#b45309]'
   if (id === 'cumpleanos') return 'text-[#c026d3]'
@@ -164,6 +166,7 @@ const heroBadgeColorClass = computed(() => {
 
 const heroImageBgClass = computed(() => {
   const id = campaignStore.activeCampaignId
+  if (id === 'navidad') return 'bg-[#f0fdf4]'
   if (id === 'hotwheels') return 'bg-[#7c1a26]/10'
   if (id === 'graduacion') return 'bg-[#fefce8]'
   if (id === 'cumpleanos') return 'bg-[#fdf2f8]'
@@ -172,6 +175,7 @@ const heroImageBgClass = computed(() => {
 
 const heroCtaButtonClass = computed(() => {
   const id = campaignStore.activeCampaignId
+  if (id === 'navidad') return 'bg-[#15803d] hover:bg-[#166534] border border-emerald-400/40'
   if (id === 'hotwheels') return 'bg-[#c22b38] hover:bg-[#991b1b]'
   if (id === 'graduacion') return 'bg-[#854d0e] hover:bg-[#caa35f] hover:text-[#27172b] border border-amber-400/40'
   if (id === 'cumpleanos') return 'bg-[#be185d] hover:bg-[#9d174d]'
@@ -180,6 +184,7 @@ const heroCtaButtonClass = computed(() => {
 
 const heroSideDesc = computed(() => {
   const id = campaignStore.activeCampaignId
+  if (id === 'navidad') return 'Ramo temático de rosas eternas, luces navideñas y detalles festivos.'
   if (id === 'hotwheels') return 'Peluche importado, 2 autos Hot Wheels y rosas eternas.'
   if (id === 'graduacion') return 'Girasoles radiantes, birrete decorativo y rosas doradas.'
   if (id === 'cumpleanos') return 'Bouquet festivo en colores pastel, rosas eternas y topper.'
@@ -188,6 +193,11 @@ const heroSideDesc = computed(() => {
 
 function getHeroSwitcherClasses(campId) {
   const isActive = campaignStore.activeCampaignId === campId
+  if (campId === 'navidad') {
+    return isActive
+      ? 'bg-[#15803d] text-white shadow-sm ring-2 ring-emerald-500/20'
+      : 'bg-[#f0fdf4] text-gray-800 hover:bg-[#dcfce7] hover:text-[#15803d]'
+  }
   if (campId === 'hotwheels') {
     return isActive
       ? 'bg-[#c22b38] text-white shadow-sm ring-2 ring-red-500/20'

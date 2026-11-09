@@ -210,6 +210,58 @@ export const DEFAULT_CAMPAIGNS = [
         image: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=600&q=80'
       }
     ]
+  },
+  {
+    id: 'navidad',
+    name: 'Colección Navidad & Nochebuena',
+    navTitle: 'Navidad',
+    shortName: 'Navidad',
+    slug: 'navidad',
+    badge: 'Edición Especial Navidad & Nochebuena',
+    tagline: 'Regala la magia de la Navidad con exclusivos Christmas Boxes & Ramos de Rosas Eternas',
+    description: 'Arreglos navideños de edición limitada con rosas eternas rojas y doradas, follaje navideño, piñas de pino, finos bombones Ferrero Rocher y luces LED mágicas.',
+    heroTitle: 'Magia, amor y detalles para una Navidad inolvidable',
+    heroSubtitle: 'Sorprende en estas fiestas con nuestros boxes navideños premium, flores eternas de larga duración, peluches festivos y detalles con luces mágicas.',
+    heroPrimaryImage: '/products/box-pinguino-lucifer_centered.webp',
+    heroPrimaryTitle: 'Box Navideño Nochebuena con Luces',
+    heroSideImage: '/products/ramo-pinguino-hotwheels_centered.webp',
+    heroSideTitle: 'Ramo Nochebuena con Rosas Eternas',
+    heroSidePrice: 75.00,
+    accentColor: '#15803d',
+    accentBadgeBg: 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]',
+    filterTabs: [
+      { label: 'Todos los Arreglos', value: 'all' },
+      { label: 'Boxes Navideños', value: 'Boxes Navideños' },
+      { label: 'Ramos con Rosas', value: 'Ramos con Rosas' },
+      { label: 'Detalles con Luces', value: 'Detalles con Luces' }
+    ],
+    categories: [
+      {
+        name: 'Boxes Navideños',
+        filter: 'Boxes',
+        image: '/products/box-pinguino-lucifer_centered.webp'
+      },
+      {
+        name: 'Ramos Nochebuena',
+        filter: 'Ramos',
+        image: '/products/ramo-pinguino-hotwheels_centered.webp'
+      },
+      {
+        name: 'Peluches Festivos',
+        filter: 'Peluche',
+        image: '/products/ramo_premium_lotso_centered.webp'
+      },
+      {
+        name: 'Chocolates & Brindis',
+        filter: 'Chocolates',
+        image: '/products/box_osita_dormilona_centered.webp'
+      },
+      {
+        name: 'Luces & Detalles',
+        filter: 'Luces',
+        image: '/products/box-premium-oro-18k_centered.webp'
+      }
+    ]
   }
 ]
 
@@ -324,6 +376,8 @@ export const useCampaignStore = defineStore('campaign', () => {
       dynamicHeroPrimaryImage = findProductImage('Birrete', base.heroPrimaryImage)
     } else if (base.id === 'cumpleanos') {
       dynamicHeroPrimaryImage = findProductImage('Globos', base.heroPrimaryImage)
+    } else if (base.id === 'navidad') {
+      dynamicHeroPrimaryImage = findProductImage('Nochebuena', base.heroPrimaryImage)
     }
 
     // Dynamic Hero Side
@@ -341,6 +395,9 @@ export const useCampaignStore = defineStore('campaign', () => {
     } else if (base.id === 'cumpleanos') {
       dynamicHeroSideImage = findProductImage('Tulipanes', base.heroSideImage)
       dynamicHeroSidePrice = findProductPrice('Tulipanes', base.heroSidePrice)
+    } else if (base.id === 'navidad') {
+      dynamicHeroSideImage = findProductImage('Nieve', base.heroSideImage)
+      dynamicHeroSidePrice = findProductPrice('Nieve', base.heroSidePrice)
     }
 
     // Dynamic categories images from live products

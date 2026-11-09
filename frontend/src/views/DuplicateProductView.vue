@@ -394,6 +394,7 @@
                   >
                     <option value="hotwheels">Día de Regalar Hot Wheels</option>
                     <option value="maquillaje">Día de Regalar Maquillaje</option>
+                    <option value="navidad">Colección Navidad</option>
                     <option value="cumpleanos">Colección Cumpleaños</option>
                     <option value="graduacion">Colección Graduación</option>
                     <option value="all">Todas las Colecciones</option>
@@ -945,6 +946,7 @@
                 >
                   <option value="maquillaje">Maquillaje</option>
                   <option value="hotwheels">Hot Wheels</option>
+                  <option value="navidad">Navidad</option>
                   <option value="graduacion">Graduación</option>
                   <option value="cumpleanos">Cumpleaños</option>
                 </select>
@@ -1188,6 +1190,7 @@ const campaignsList = [
   { id: 'all', name: 'Todos los Productos' },
   { id: 'maquillaje', name: 'Maquillaje' },
   { id: 'hotwheels', name: 'Hot Wheels' },
+  { id: 'navidad', name: 'Navidad' },
   { id: 'graduacion', name: 'Graduación' },
   { id: 'cumpleanos', name: 'Cumpleaños' }
 ]
@@ -1195,6 +1198,7 @@ const campaignsList = [
 const campaignsReorderList = [
   { id: 'maquillaje', name: 'Día del Maquillaje' },
   { id: 'hotwheels', name: 'Día Hot Wheels' },
+  { id: 'navidad', name: 'Navidad' },
   { id: 'graduacion', name: 'Graduación' },
   { id: 'cumpleanos', name: 'Cumpleaños' }
 ]
@@ -1344,6 +1348,8 @@ function onLiveCampaignChange() {
     liveBannerTextInput.value = '¡EN VIVO EN TIKTOK! S/ 10 de descuento en Box Hot Wheels'
   } else if (selectedLiveCampaign.value === 'maquillaje') {
     liveBannerTextInput.value = '¡EN VIVO EN TIKTOK! Descuento especial en Colección Maquillaje'
+  } else if (selectedLiveCampaign.value === 'navidad') {
+    liveBannerTextInput.value = '¡EN VIVO EN TIKTOK! Descuento especial en Colección Navidad'
   } else if (selectedLiveCampaign.value === 'cumpleanos') {
     liveBannerTextInput.value = '¡EN VIVO EN TIKTOK! Descuento especial en Colección Cumpleaños'
   } else if (selectedLiveCampaign.value === 'graduacion') {

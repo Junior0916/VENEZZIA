@@ -547,6 +547,7 @@ function getCampaignName(id) {
 }
 
 function getCampaignDotClass(id) {
+  if (id === 'navidad') return 'bg-[#15803d]'
   if (id === 'hotwheels') return 'bg-[#c22b38]'
   if (id === 'graduacion') return 'bg-[#caa35f]'
   if (id === 'cumpleanos') return 'bg-[#c026d3]'
@@ -554,6 +555,7 @@ function getCampaignDotClass(id) {
 }
 
 function getCampaignBadgeClass(id) {
+  if (id === 'navidad') return 'bg-emerald-50 text-emerald-700 border border-emerald-200'
   if (id === 'hotwheels') return 'bg-red-50 text-red-600'
   if (id === 'graduacion') return 'bg-amber-50 text-amber-700'
   if (id === 'cumpleanos') return 'bg-pink-50 text-pink-700'
@@ -562,6 +564,11 @@ function getCampaignBadgeClass(id) {
 
 function getCampaignBtnClasses(campId) {
   const isActive = campaignStore.activeCampaignId === campId
+  if (campId === 'navidad') {
+    return isActive
+      ? 'bg-[#15803d] text-white shadow-xs border border-emerald-400/40 ring-1 ring-emerald-400/30'
+      : 'text-gray-700 hover:text-[#15803d] hover:bg-[#f0fdf4]'
+  }
   if (campId === 'hotwheels') {
     return isActive
       ? 'bg-[#c22b38] text-white shadow-xs border border-red-400/40 ring-1 ring-red-400/30'
@@ -585,6 +592,11 @@ function getCampaignBtnClasses(campId) {
 
 function getMobileCampaignPillClasses(campId) {
   const isActive = campaignStore.activeCampaignId === campId
+  if (campId === 'navidad') {
+    return isActive
+      ? 'bg-[#15803d] text-white shadow-xs'
+      : 'bg-white text-gray-700 border border-[#eedee9]'
+  }
   if (campId === 'hotwheels') {
     return isActive
       ? 'bg-[#c22b38] text-white shadow-xs'

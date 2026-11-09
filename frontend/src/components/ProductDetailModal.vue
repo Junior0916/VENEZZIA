@@ -416,6 +416,7 @@ import { ref, computed, watch, reactive, onMounted, onUnmounted } from 'vue'
 import { X, Link as LinkIcon, ZoomIn, ZoomOut, Check } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import { useCartStore } from '../stores/cart'
+import { useCampaignStore } from '../stores/campaign'
 import { useSiteSettingsStore } from '../stores/siteSettings'
 
 const props = defineProps({
@@ -427,6 +428,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 const cartStore = useCartStore()
+const campaignStore = useCampaignStore()
 const siteSettingsStore = useSiteSettingsStore()
 
 const liveDiscount = computed(() => siteSettingsStore.getProductLiveDiscount(props.product))
@@ -438,6 +440,7 @@ const copiedLink = ref(false)
 
 const categoryColorClass = computed(() => {
   const camp = props.product?.campaign
+  if (camp === 'navidad') return 'text-[#15803d]'
   if (camp === 'hotwheels') return 'text-[#c22b38]'
   if (camp === 'graduacion') return 'text-[#b45309]'
   if (camp === 'cumpleanos') return 'text-[#c026d3]'
@@ -446,6 +449,7 @@ const categoryColorClass = computed(() => {
 
 const promoBadgeClass = computed(() => {
   const camp = props.product?.campaign
+  if (camp === 'navidad') return 'bg-[#f0fdf4] text-[#166534] border border-[#bbf7d0]'
   if (camp === 'hotwheels') return 'bg-[#fee2e2] text-[#b91c1c]'
   if (camp === 'graduacion') return 'bg-[#fefce8] text-[#854d0e] border border-[#fef08a]'
   if (camp === 'cumpleanos') return 'bg-[#fdf2f8] text-[#9d174d] border border-[#fbcfe8]'
@@ -454,6 +458,7 @@ const promoBadgeClass = computed(() => {
 
 const checkmarkColorClass = computed(() => {
   const camp = props.product?.campaign
+  if (camp === 'navidad') return 'text-[#15803d]'
   if (camp === 'hotwheels') return 'text-[#c22b38]'
   if (camp === 'graduacion') return 'text-[#b45309]'
   if (camp === 'cumpleanos') return 'text-[#c026d3]'
@@ -462,6 +467,7 @@ const checkmarkColorClass = computed(() => {
 
 const addToCartButtonClass = computed(() => {
   const camp = props.product?.campaign
+  if (camp === 'navidad') return 'bg-[#15803d] hover:bg-[#166534] border border-emerald-400/40'
   if (camp === 'hotwheels') return 'bg-[#c22b38] hover:bg-[#991b1b]'
   if (camp === 'graduacion') return 'bg-[#854d0e] hover:bg-[#caa35f] hover:text-[#27172b] border border-amber-400/40'
   if (camp === 'cumpleanos') return 'bg-[#be185d] hover:bg-[#9d174d]'
@@ -631,8 +637,8 @@ const computedFinalPrice = computed(() => {
 const whatsappUrl = computed(() => {
   if (!props.product) return '#'
   
-  const isHw = props.product.campaign === 'hotwheels'
-  const campaignName = isHw ? 'Día de Regalar Hot Wheels' : 'Día de Regalar Maquillaje'
+  const currentCamp = campaignStore.campaigns.find(c => c.id === props.product?.campaign)
+  const campaignName = currentCamp?.name || (props.product?.campaign === 'hotwheels' ? 'Día de Regalar Hot Wheels' : 'Día de Regalar Maquillaje')
   const directUrl = `${window.location.origin}/?prod=${props.product.id}`
   const isAgotado = props.product.in_stock === false
 
