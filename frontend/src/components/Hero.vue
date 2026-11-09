@@ -184,7 +184,7 @@ const heroCtaButtonClass = computed(() => {
 
 const heroSideDesc = computed(() => {
   const id = campaignStore.activeCampaignId
-  if (id === 'navidad') return 'Ramo temático de rosas eternas, luces navideñas y detalles festivos.'
+  if (id === 'navidad') return 'Ramo de rosas eternas, luces navideñas y detalles festivos de Nochebuena.'
   if (id === 'hotwheels') return 'Peluche importado, 2 autos Hot Wheels y rosas eternas.'
   if (id === 'graduacion') return 'Girasoles radiantes, birrete decorativo y rosas doradas.'
   if (id === 'cumpleanos') return 'Bouquet festivo en colores pastel, rosas eternas y topper.'

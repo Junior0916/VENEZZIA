@@ -834,6 +834,28 @@ export const MOCK_PRODUCTS = [
   // CAMPAÑA 5: COLECCIÓN NAVIDAD & NOCHEBUENA
   // ==========================================
   {
+    id: 'advi2026calend',
+    campaign: 'navidad',
+    name: 'Calendario de Adviento 2026 • 12 Días 14 Sorpresas',
+    description: 'Edición limitada 2026: Caja interactiva de doble puerta con 12 compartimentos y 14 sorpresas exclusivas. Cada día descubre un detalle mágico para llenar tu Navidad de ilusión y alegría.',
+    price: 120.00,
+    original_price: 140.00,
+    category: 'Calendario de Adviento',
+    image: '/products/calendario-de-adviento-2026.webp',
+    catalog_card: '/products/calendario-de-adviento-2026.webp',
+    in_stock: true,
+    order: 1,
+    items_included: [
+      'Caja interactiva de doble puerta con diseño navideño exclusivo en tonos lila y dorado',
+      '12 Compartimentos mágicos numerados del 1 al 12',
+      '14 Sorpresas y detalles exclusivos en su interior',
+      'Mensajes inspiradores y dedicatorias en cada puertecita',
+      'Acabados de gala con foil brillante y lazo satinado',
+      'Ideal para regalar a esa persona especial o como autorregalo navideño',
+      'Edición limitada oficial Venezzia Detalles 2026'
+    ]
+  },
+  {
     id: 'navi001boxnoche',
     campaign: 'navidad',
     name: 'Box Navideño Nochebuena con Luces LED & Rosas Eternas',
@@ -1048,6 +1070,7 @@ function resolveProductImage(record, client = pb) {
   if (norm.includes('3 carritos')) return '/products/ramo-hotwheels-3_centered.webp'
 
   // Navidad names
+  if (norm.includes('adviento') || norm.includes('calendario')) return '/products/calendario-de-adviento-2026.webp'
   if (norm.includes('nochebuena') || norm.includes('navideño') || norm.includes('navidad') || norm.includes('nieve')) {
     if (norm.includes('box') || norm.includes('caja')) return '/products/box-pinguino-lucifer_centered.webp'
     return '/products/ramo-pinguino-hotwheels_centered.webp'

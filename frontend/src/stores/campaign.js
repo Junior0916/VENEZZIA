@@ -217,13 +217,13 @@ export const DEFAULT_CAMPAIGNS = [
     navTitle: 'Navidad',
     shortName: 'Navidad',
     slug: 'navidad',
-    badge: 'Edición Especial Navidad & Nochebuena',
-    tagline: 'Regala la magia de la Navidad con exclusivos Christmas Boxes & Ramos de Rosas Eternas',
+    badge: 'Edición Especial Limitada • Navidad 2026',
+    tagline: '12 Días • 14 Sorpresas: El regalo navideño más esperado de Venezzia Detalles',
     description: 'Arreglos navideños de edición limitada con rosas eternas rojas y doradas, follaje navideño, piñas de pino, finos bombones Ferrero Rocher y luces LED mágicas.',
-    heroTitle: 'Magia, amor y detalles para una Navidad inolvidable',
-    heroSubtitle: 'Sorprende en estas fiestas con nuestros boxes navideños premium, flores eternas de larga duración, peluches festivos y detalles con luces mágicas.',
-    heroPrimaryImage: '/products/box-pinguino-lucifer_centered.webp',
-    heroPrimaryTitle: 'Box Navideño Nochebuena con Luces',
+    heroTitle: 'Calendario de Adviento: 12 Días de Magia & Sorpresas',
+    heroSubtitle: 'Descubre la magia de la Navidad abriendo una sorpresa cada día. Edición limitada de 12 días y 14 sorpresas en una exclusiva caja interactiva de gala.',
+    heroPrimaryImage: '/products/calendario-de-adviento-2026.webp',
+    heroPrimaryTitle: 'Calendario de Adviento 2026 • 12 Días 14 Sorpresas',
     heroSideImage: '/products/ramo-pinguino-hotwheels_centered.webp',
     heroSideTitle: 'Ramo Nochebuena con Rosas Eternas',
     heroSidePrice: 75.00,
@@ -231,11 +231,17 @@ export const DEFAULT_CAMPAIGNS = [
     accentBadgeBg: 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]',
     filterTabs: [
       { label: 'Todos los Arreglos', value: 'all' },
+      { label: 'Calendario de Adviento', value: 'Calendario de Adviento' },
       { label: 'Boxes Navideños', value: 'Boxes Navideños' },
       { label: 'Ramos con Rosas', value: 'Ramos con Rosas' },
       { label: 'Detalles con Luces', value: 'Detalles con Luces' }
     ],
     categories: [
+      {
+        name: 'Calendario Adviento',
+        filter: 'Calendario',
+        image: '/products/calendario-de-adviento-2026.webp'
+      },
       {
         name: 'Boxes Navideños',
         filter: 'Boxes',
@@ -377,7 +383,7 @@ export const useCampaignStore = defineStore('campaign', () => {
     } else if (base.id === 'cumpleanos') {
       dynamicHeroPrimaryImage = findProductImage('Globos', base.heroPrimaryImage)
     } else if (base.id === 'navidad') {
-      dynamicHeroPrimaryImage = findProductImage('Nochebuena', base.heroPrimaryImage)
+      dynamicHeroPrimaryImage = findProductImage('Adviento', base.heroPrimaryImage)
     }
 
     // Dynamic Hero Side
