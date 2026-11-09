@@ -180,7 +180,7 @@
           </button>
 
           <button
-            @click="activeToolTab = 'visibility'"
+            @click="activeToolTab = 'visibility'; loadCampaignsAdmin()"
             :class="[
               'flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
               activeToolTab === 'visibility'
@@ -708,7 +708,7 @@
         <!-- ========================================== -->
         <!-- TAB 2: DUPLICADOR DE PRODUCTOS -->
         <!-- ========================================== -->
-        <div v-else class="space-y-6">
+        <div v-else-if="activeToolTab === 'duplicate'" class="space-y-6">
           <!-- Bookmarklet Banner -->
           <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#fbf7fc] via-[#fff] to-[#fcf9f5] border border-[#caa35f]/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div class="flex items-start gap-3">
@@ -866,7 +866,7 @@
         <!-- ========================================== -->
         <!-- TAB 3: VISIBILIDAD DE MENÚS Y PRODUCTOS     -->
         <!-- ========================================== -->
-        <div v-if="activeToolTab === 'visibility'" class="space-y-8">
+        <div v-else-if="activeToolTab === 'visibility'" class="space-y-8">
           <!-- SECCIÓN 1: ACTIVAR U OCULTAR MENÚS DE LA TIENDA -->
           <div class="bg-white rounded-3xl p-6 sm:p-8 border border-[#eedee9] shadow-xs">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#f4eaf6] mb-6">
@@ -1597,10 +1597,14 @@ async function loadProducts() {
     products.value = records.map(r => {
       let displayImg = ''
       if (r.image) {
-        const isWebp = (r.image || '').toLowerCase().endsWith('.webp')
-        displayImg = isWebp
-          ? currentPbClient.value.files.getURL(r, r.image)
-          : currentPbClient.value.files.getURL(r, r.image, { thumb: '0x800' })
+        if (r.image.startsWith('http') || r.image.startsWith('/')) {
+          displayImg = r.image
+        } else {
+          const isWebp = (r.image || '').toLowerCase().endsWith('.webp')
+          displayImg = isWebp
+            ? currentPbClient.value.files.getURL(r, r.image)
+            : currentPbClient.value.files.getURL(r, r.image, { thumb: '0x800' })
+        }
       }
       return {
         ...r,
@@ -1755,25 +1759,48 @@ function selectReorderCampaign(campId) {
 
 
 // Visibility State & Functions
-const adminCampaigns = ref([])
+const defaultAdminCampaigns = [
+  { id: 'maquillaje', slug: 'maquillaje', name: 'Día de Regalar Maquillaje', accent_color: '#965e9b', tagline: 'Makeup Boxes & Ramos Eternos', is_active: true },
+  { id: 'hotwheels', slug: 'hotwheels', name: 'Día de Regalar Hot Wheels', accent_color: '#c22b38', tagline: 'Ramos con Rosas, Boxes Temáticos y Joyería', is_active: true },
+  { id: 'navidad', slug: 'navidad', name: 'Colección Navidad & Nochebuena', accent_color: '#15803d', tagline: 'Calendario de Adviento & Boxes Navideños', is_active: true },
+  { id: 'graduacion', slug: 'graduacion', name: 'Colección Graduación & Éxitos', accent_color: '#b45309', tagline: 'Bouquets con Birretes & Peluches Graduados', is_active: true },
+  { id: 'cumpleanos', slug: 'cumpleanos', name: 'Colección Cumpleaños Mágico', accent_color: '#c026d3', tagline: 'Boxes sorpresa y ramos de ensueño', is_active: false }
+]
+const adminCampaigns = ref([...defaultAdminCampaigns])
 const isLoadingCampaigns = ref(false)
 const savingCampaignId = ref(null)
 
-const visibilityFilterCampaign = ref('navidad')
+const visibilityFilterCampaign = ref('all')
 const visibilityFilterStatus = ref('all')
 const visibilitySearchQuery = ref('')
 const savingProductActiveId = ref(null)
 const savingStockProdId = ref(null)
 
+function getCampaignName(campId) {
+  if (!campId) return 'General'
+  const match = campaignsList.find(c => c.id.toLowerCase() === String(campId).toLowerCase())
+  if (match && match.name) return match.name
+  const adminMatch = adminCampaigns.value.find(c => (c.slug || c.id || '').toLowerCase() === String(campId).toLowerCase())
+  if (adminMatch && adminMatch.name) return adminMatch.name
+  return String(campId).charAt(0).toUpperCase() + String(campId).slice(1)
+}
+
 async function loadCampaignsAdmin() {
-  if (!currentPbClient.value || !isAuthenticated.value) return
+  if (!currentPbClient.value) return
   isLoadingCampaigns.value = true
   try {
-    const records = await currentPbClient.value.collection('campaigns').getFullList({ sort: 'order' })
-    adminCampaigns.value = records.map(r => ({
-      ...r,
-      is_active: r.is_active !== false
-    }))
+    let records = []
+    try {
+      records = await currentPbClient.value.collection('campaigns').getFullList({ sort: 'order' })
+    } catch (_) {
+      records = await currentPbClient.value.collection('campaigns').getFullList()
+    }
+    if (records && records.length > 0) {
+      adminCampaigns.value = records.map(r => ({
+        ...r,
+        is_active: r.is_active !== false
+      }))
+    }
   } catch (err) {
     console.error('Error loading admin campaigns:', err)
   } finally {
@@ -1786,9 +1813,21 @@ async function toggleCampaignActive(camp) {
   savingCampaignId.value = camp.id
   const newStatus = !camp.is_active
   try {
-    await currentPbClient.value.collection('campaigns').update(camp.id, {
-      is_active: newStatus
-    })
+    try {
+      await currentPbClient.value.collection('campaigns').update(camp.id, {
+        is_active: newStatus
+      })
+    } catch (updateErr) {
+      const match = await currentPbClient.value.collection('campaigns').getFirstListItem(`slug="${camp.slug || camp.id}"`)
+      if (match) {
+        await currentPbClient.value.collection('campaigns').update(match.id, {
+          is_active: newStatus
+        })
+        camp.id = match.id
+      } else {
+        throw updateErr
+      }
+    }
     camp.is_active = newStatus
   } catch (err) {
     console.error('Error toggling campaign active status:', err)

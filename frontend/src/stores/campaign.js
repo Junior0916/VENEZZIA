@@ -275,7 +275,7 @@ export const DEFAULT_CAMPAIGNS = [
 export const CAMPAIGNS = DEFAULT_CAMPAIGNS
 
 export const useCampaignStore = defineStore('campaign', () => {
-  const campaigns = ref(DEFAULT_CAMPAIGNS)
+  const campaigns = ref(DEFAULT_CAMPAIGNS.filter(c => c.is_active !== false))
   const activeCampaignId = ref('maquillaje')
   const products = ref([])
 
