@@ -857,6 +857,7 @@ export const MOCK_PRODUCTS = [
   },
   {
     id: 'navi001boxnoche',
+    is_active: false,
     campaign: 'navidad',
     name: 'Box Navideño Nochebuena con Luces LED & Rosas Eternas',
     description: 'Caja festiva con rosas rojas eternas, follaje de pino navideño, luces LED cálidas integradas y tarjeta dedicatoria.',
@@ -875,6 +876,7 @@ export const MOCK_PRODUCTS = [
   },
   {
     id: 'navi002ramorosas',
+    is_active: false,
     campaign: 'navidad',
     name: 'Ramo Nochebuena Radiante de Rosas Eternas',
     description: 'Ramo de gala con rosas rojas y detalles dorados en envoltura navideña de alta calidad con lazo de satén.',
@@ -893,6 +895,7 @@ export const MOCK_PRODUCTS = [
   },
   {
     id: 'navi003boxchocol',
+    is_active: false,
     campaign: 'navidad',
     name: 'Box Dulce Navidad con Bombones Ferrero & Rosas',
     description: 'Elegante box navideño que incluye caja de bombones Ferrero Rocher, rosas eternas rojas y luces mágicas.',
@@ -911,6 +914,7 @@ export const MOCK_PRODUCTS = [
   },
   {
     id: 'navi004ramonieve',
+    is_active: false,
     campaign: 'navidad',
     name: 'Ramo Nieve Mágica & Topper Navideño con Luces',
     description: 'Ramo temático en tonos blanco nieve y rojo rubí con mini luces LED y detalles de follaje invernal.',
@@ -929,6 +933,7 @@ export const MOCK_PRODUCTS = [
   },
   {
     id: 'navi005boxbrindi',
+    is_active: false,
     campaign: 'navidad',
     name: 'Box Estrella Navideña Deluxe con Mini Espumante',
     description: 'Exclusivo box para brindar en Nochebuena: botella de espumante Riccadonna, copa, bombones y rosas eternas.',
@@ -947,6 +952,7 @@ export const MOCK_PRODUCTS = [
   },
   {
     id: 'navi006peluchen',
+    is_active: false,
     campaign: 'navidad',
     name: 'Ramo Festivo con Peluche Navideño & Rosas Eternas',
     description: 'Tierno detalle navideño con peluche temático de felpa suave, rosas eternas rojas y luces cálidas.',
@@ -1138,6 +1144,7 @@ export async function fetchProducts() {
       image: resolveProductImage(record, client),
       catalog_card: catalogCardUrl,
       in_stock: record.in_stock !== false,
+      is_active: record.is_active !== false,
       items_included: parseItemsIncluded(record.items_included),
       live_discount: record.live_discount !== undefined && record.live_discount !== null && record.live_discount !== '' ? Number(record.live_discount) : null,
       order: record.order !== undefined && record.order !== null ? Number(record.order) : 0,
@@ -1177,11 +1184,10 @@ export async function fetchProducts() {
   }
 
   if (liveProducts && liveProducts.length > 0) {
-    // Ordenar productos:
-    // 1. Si tienen número de orden explícito (1, 2, 3...), se respeta exactamente ese número.
-    // 2. Si es un producto nuevo o sin orden asignado (0 o null), se posiciona en el lugar #1 (al inicio).
-    // 3. En caso de empate, el producto más recientemente creado va primero.
-    liveProducts.sort((a, b) => {
+    // Filtrar solo productos activos (visibles) para los clientes en la tienda pública
+    const publicProducts = liveProducts.filter(p => p.is_active !== false)
+
+    publicProducts.sort((a, b) => {
       const orderA = (a.order !== null && a.order !== undefined && a.order !== '') ? Number(a.order) : 0
       const orderB = (b.order !== null && b.order !== undefined && b.order !== '') ? Number(b.order) : 0
       if (orderA !== orderB) {
@@ -1194,13 +1200,13 @@ export async function fetchProducts() {
       return dateB - dateA
     })
 
-    // Merge any campaigns that don't have records in PocketBase yet from MOCK_PRODUCTS
-    const campaignsInLive = new Set(liveProducts.map(p => p.campaign || 'maquillaje'))
-    const missingCampaignMocks = MOCK_PRODUCTS.filter(p => !campaignsInLive.has(p.campaign))
-    return [...liveProducts, ...missingCampaignMocks]
+    // Merge any campaigns that don't have records in PocketBase yet from MOCK_PRODUCTS (only active ones)
+    const campaignsInLive = new Set(publicProducts.map(p => p.campaign || 'maquillaje'))
+    const missingCampaignMocks = MOCK_PRODUCTS.filter(p => p.is_active !== false && !campaignsInLive.has(p.campaign))
+    return [...publicProducts, ...missingCampaignMocks]
   }
 
-  return MOCK_PRODUCTS
+  return MOCK_PRODUCTS.filter(p => p.is_active !== false)
 }
 
 

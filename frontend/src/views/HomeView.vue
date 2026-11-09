@@ -63,6 +63,7 @@ const filteredProducts = computed(() => {
   // 1. If user is actively searching, search across all products from all campaigns
   if (query.length > 0) {
     return props.allProducts.filter(p => {
+      if (p.is_active === false) return false
       const matchName = p.name?.toLowerCase().includes(query)
       const matchCategory = p.category?.toLowerCase().includes(query)
       const matchDesc = p.description?.toLowerCase().includes(query)
@@ -71,9 +72,9 @@ const filteredProducts = computed(() => {
     })
   }
 
-  // 2. Otherwise filter by active campaign (maquillaje vs hotwheels)
+  // 2. Otherwise filter by active campaign
   let list = props.allProducts.filter(p => {
-    return (p.campaign || 'maquillaje') === campaignStore.activeCampaignId
+    return (p.campaign || 'maquillaje') === campaignStore.activeCampaignId && p.is_active !== false
   })
 
   // 3. Filter by category if one was selected in Occasions row

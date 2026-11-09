@@ -161,6 +161,7 @@ export const DEFAULT_CAMPAIGNS = [
   },
   {
     id: 'cumpleanos',
+    is_active: false,
     name: 'Colección Cumpleaños Mágico',
     navTitle: 'Cumpleaños',
     shortName: 'Cumpleaños',
@@ -330,6 +331,9 @@ export const useCampaignStore = defineStore('campaign', () => {
       })
       if (records && records.length > 0) {
         campaigns.value = records.map(mapCampaignRecord)
+        if (!campaigns.value.some(c => c.id === activeCampaignId.value)) {
+          activeCampaignId.value = campaigns.value[0]?.id || 'navidad'
+        }
         return
       }
     } catch (_) {}
@@ -343,6 +347,9 @@ export const useCampaignStore = defineStore('campaign', () => {
       })
       if (remoteRecords && remoteRecords.length > 0) {
         campaigns.value = remoteRecords.map(mapCampaignRecord)
+        if (!campaigns.value.some(c => c.id === activeCampaignId.value)) {
+          activeCampaignId.value = campaigns.value[0]?.id || 'navidad'
+        }
         return
       }
     } catch (_) {}
@@ -357,8 +364,8 @@ export const useCampaignStore = defineStore('campaign', () => {
     const findProductImage = (searchStr, fallback) => {
       if (!campProducts.length) return fallback
       const match = campProducts.find(p => 
-        p.id === searchStr || 
-        (p.name && p.name.toLowerCase().includes(searchStr.toLowerCase()))
+        p.is_active !== false &&
+        (p.id === searchStr || (p.name && p.name.toLowerCase().includes(searchStr.toLowerCase())))
       )
       return match?.image || fallback
     }
@@ -411,8 +418,9 @@ export const useCampaignStore = defineStore('campaign', () => {
       let catImage = cat.image
       if (campProducts.length > 0) {
         const catMatch = campProducts.find(p => 
-          (p.category && p.category.toLowerCase().includes(cat.filter.toLowerCase())) ||
-          (p.name && p.name.toLowerCase().includes(cat.filter.toLowerCase()))
+          p.is_active !== false &&
+          ((p.category && p.category.toLowerCase().includes(cat.filter.toLowerCase())) ||
+           (p.name && p.name.toLowerCase().includes(cat.filter.toLowerCase())))
         )
         if (catMatch?.image) {
           catImage = catMatch.image

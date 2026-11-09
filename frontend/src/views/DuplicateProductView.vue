@@ -180,6 +180,19 @@
           </button>
 
           <button
+            @click="activeToolTab = 'visibility'"
+            :class="[
+              'flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
+              activeToolTab === 'visibility'
+                ? 'bg-[#27172b] text-white ring-2 ring-[#caa35f]/50'
+                : 'bg-[#faf7fb] border border-[#eedee9] text-gray-600 hover:bg-[#f3edf5]'
+            ]"
+          >
+            <Eye class="w-4 h-4 text-[#caa35f]" />
+            <span>Visibilidad (Menús y Productos)</span>
+          </button>
+
+          <button
             @click="activeToolTab = 'duplicate'"
             :class="[
               'flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
@@ -849,6 +862,271 @@
             </div>
           </div>
         </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: VISIBILIDAD DE MENÚS Y PRODUCTOS     -->
+        <!-- ========================================== -->
+        <div v-if="activeToolTab === 'visibility'" class="space-y-8">
+          <!-- SECCIÓN 1: ACTIVAR U OCULTAR MENÚS DE LA TIENDA -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-[#eedee9] shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#f4eaf6] mb-6">
+              <div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f6eef8] border border-[#e8d5ec] text-xs font-semibold text-[#753d77] mb-2">
+                  <Layers class="w-3.5 h-3.5 text-[#caa35f]" />
+                  <span>Navegación de la Tienda</span>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-serif font-bold text-[#27172b]">
+                  Menús y Fechas Especiales
+                </h2>
+                <p class="text-xs text-gray-500 mt-1 max-w-2xl leading-relaxed">
+                  Activa o desactiva qué campañas aparecen a los clientes en la barra de navegación, el menú lateral y el pie de página. Si desactivas un menú (por ejemplo Cumpleaños), dejará de aparecer en la tienda inmediatamente hasta que lo vuelvas a activar.
+                </p>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <button
+                  @click="loadCampaignsAdmin"
+                  :disabled="isLoadingCampaigns"
+                  class="px-3.5 py-2 rounded-xl border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw class="w-3.5 h-3.5" :class="isLoadingCampaigns ? 'animate-spin text-[#caa35f]' : ''" />
+                  <span>Actualizar Menús</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Grid de Menús / Campañas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div
+                v-for="camp in adminCampaigns"
+                :key="camp.id"
+                :class="[
+                  'rounded-2xl p-4 border transition-all flex flex-col justify-between',
+                  camp.is_active
+                    ? 'bg-white border-[#eedee9] shadow-2xs hover:border-[#965e9b]/60'
+                    : 'bg-gray-50/90 border-gray-200 opacity-80'
+                ]"
+              >
+                <div>
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <span
+                        class="w-3 h-3 rounded-full shrink-0"
+                        :style="{ backgroundColor: camp.accent_color || '#965e9b' }"
+                      />
+                      <span class="text-xs font-bold text-[#27172b] truncate">
+                        {{ camp.name }}
+                      </span>
+                    </div>
+                    <span
+                      :class="[
+                        'text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 border',
+                        camp.is_active
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : 'bg-gray-200 text-gray-600 border-gray-300'
+                      ]"
+                    >
+                      {{ camp.is_active ? 'Visible en Web' : 'Menú Oculto' }}
+                    </span>
+                  </div>
+
+                  <p class="text-[11px] text-gray-500 mb-4 line-clamp-2 leading-relaxed">
+                    {{ camp.tagline || camp.description || 'Campaña especial de la tienda' }}
+                  </p>
+                </div>
+
+                <div class="pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+                  <span class="text-[10px] text-gray-400 font-mono">
+                    {{ camp.slug }}
+                  </span>
+
+                  <button
+                    @click="toggleCampaignActive(camp)"
+                    :disabled="savingCampaignId === camp.id"
+                    :class="[
+                      'px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50',
+                      camp.is_active
+                        ? 'bg-gray-100 hover:bg-amber-100 text-gray-700 hover:text-amber-900 border border-gray-200'
+                        : 'bg-[#15803d] hover:bg-[#166534] text-white shadow-xs'
+                    ]"
+                  >
+                    <RefreshCw v-if="savingCampaignId === camp.id" class="w-3.5 h-3.5 animate-spin" />
+                    <template v-else>
+                      <EyeOff v-if="camp.is_active" class="w-3.5 h-3.5" />
+                      <Eye v-else class="w-3.5 h-3.5" />
+                    </template>
+                    <span>{{ camp.is_active ? 'Ocultar Menú' : 'Activar Menú' }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 2: CONTROL DE VISIBILIDAD DE PRODUCTOS INDIVIDUALES -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-[#eedee9] shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#f4eaf6] mb-6">
+              <div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f6eef8] border border-[#e8d5ec] text-xs font-semibold text-[#753d77] mb-2">
+                  <Eye class="w-3.5 h-3.5 text-[#caa35f]" />
+                  <span>Catálogo de Productos</span>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-serif font-bold text-[#27172b]">
+                  Mostrar u Ocultar Productos en la Tienda
+                </h2>
+                <p class="text-xs text-gray-500 mt-1 max-w-2xl leading-relaxed">
+                  Oculta productos que aún no vas a vender (como muestras de Navidad) sin borrarlos. Los productos ocultos no se muestran en el catálogo, ni en el buscador, ni en la portada, pero se conservan intactos aquí para que puedas activarlos en cualquier momento con un solo clic.
+                </p>
+              </div>
+
+              <div class="flex items-center gap-3 shrink-0">
+                <div class="text-right">
+                  <div class="text-xs font-bold text-[#27172b]">
+                    {{ visibleProductsCount }} Visibles • {{ hiddenProductsCount }} Ocultos
+                  </div>
+                  <span class="text-[10px] text-gray-400">Total: {{ products.length }} productos cargados</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filtros de Colección y Búsqueda -->
+            <div class="bg-[#faf7fb] rounded-2xl p-4 border border-[#eedee9] mb-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+              <!-- Selector de Colección -->
+              <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+                <button
+                  v-for="camp in campaignsList"
+                  :key="camp.id"
+                  @click="visibilityFilterCampaign = camp.id"
+                  :class="[
+                    'px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer',
+                    visibilityFilterCampaign === camp.id
+                      ? 'bg-[#27172b] text-white shadow-xs'
+                      : 'bg-white border border-[#eedee9] text-gray-600 hover:bg-[#f3edf5]'
+                  ]"
+                >
+                  {{ camp.name }}
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <!-- Filtro Estado: Todos, Visibles, Ocultos -->
+                <select
+                  v-model="visibilityFilterStatus"
+                  class="text-xs font-medium px-3 py-2 rounded-xl border border-gray-200 bg-white focus:outline-none cursor-pointer"
+                >
+                  <option value="all">Todos los Estados</option>
+                  <option value="visible">Solo Visibles en Web</option>
+                  <option value="hidden">Solo Ocultos</option>
+                </select>
+
+                <!-- Buscador -->
+                <div class="relative min-w-[200px]">
+                  <Search class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    v-model="visibilitySearchQuery"
+                    placeholder="Buscar por nombre..."
+                    class="w-full text-xs pl-8 pr-3 py-2 rounded-xl border border-gray-200 bg-white focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Lista de Productos con Acciones Rápidas -->
+            <div v-if="filteredVisibilityProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div
+                v-for="prod in filteredVisibilityProducts"
+                :key="prod.id"
+                :class="[
+                  'rounded-2xl border p-4 transition-all flex flex-col justify-between',
+                  prod.is_active !== false
+                    ? 'bg-white border-[#eedee9] shadow-2xs hover:border-[#caa35f]/60'
+                    : 'bg-gray-50/90 border-gray-200 opacity-80'
+                ]"
+              >
+                <div class="flex gap-3 mb-3">
+                  <img
+                    :src="prod.displayImage || '/products/box_basico_centered.webp'"
+                    :alt="prod.name"
+                    class="w-16 h-20 rounded-xl object-contain bg-[#faf7fb] border border-[#eedee9] p-1 shrink-0"
+                  />
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                      <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 shrink-0">
+                        {{ getCampaignName(prod.campaign) }}
+                      </span>
+                      <span
+                        :class="[
+                          'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 border',
+                          prod.is_active !== false
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            : 'bg-amber-50 text-amber-800 border-amber-200'
+                        ]"
+                      >
+                        {{ prod.is_active !== false ? 'Visible en Web' : 'Oculto' }}
+                      </span>
+                    </div>
+
+                    <h4 class="text-xs font-bold text-[#27172b] line-clamp-2 leading-snug">
+                      {{ prod.name }}
+                    </h4>
+                    <div class="text-xs font-bold text-[#27172b] mt-1">
+                      S/ {{ Number(prod.price).toFixed(2) }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+                  <!-- Botón de Stock: Agotado / En Stock -->
+                  <button
+                    @click="toggleProductStock(prod)"
+                    :disabled="savingStockProdId === prod.id"
+                    :class="[
+                      'px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer',
+                      prod.in_stock !== false
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200'
+                        : 'bg-red-50 text-red-700 border-red-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200'
+                    ]"
+                    :title="prod.in_stock !== false ? 'Clic para marcar como Agotado' : 'Clic para marcar como En Stock'"
+                  >
+                    {{ prod.in_stock !== false ? 'En Stock' : 'Agotado' }}
+                  </button>
+
+                  <!-- Botón Principal: Ocultar / Mostrar en Tienda -->
+                  <button
+                    @click="toggleProductActive(prod)"
+                    :disabled="savingProductActiveId === prod.id"
+                    :class="[
+                      'px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50',
+                      prod.is_active !== false
+                        ? 'bg-gray-100 hover:bg-amber-100 text-gray-700 hover:text-amber-900 border border-gray-200'
+                        : 'bg-[#15803d] hover:bg-[#166534] text-white shadow-xs'
+                    ]"
+                  >
+                    <RefreshCw v-if="savingProductActiveId === prod.id" class="w-3.5 h-3.5 animate-spin" />
+                    <template v-else>
+                      <EyeOff v-if="prod.is_active !== false" class="w-3.5 h-3.5" />
+                      <Eye v-else class="w-3.5 h-3.5" />
+                    </template>
+                    <span>{{ prod.is_active !== false ? 'Ocultar' : 'Hacer Visible' }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else class="text-center py-12 bg-[#faf7fb] rounded-2xl border border-[#eedee9]">
+              <EyeOff class="w-8 h-8 text-gray-300 mx-auto mb-2" />
+              <p class="text-xs font-semibold text-gray-600">No hay productos que coincidan con el filtro seleccionado</p>
+              <button
+                @click="visibilityFilterCampaign = 'all'; visibilityFilterStatus = 'all'; visibilitySearchQuery = ''"
+                class="mt-3 px-4 py-1.5 rounded-full bg-[#27172b] text-white text-xs font-semibold hover:bg-[#3d2444] transition-colors cursor-pointer"
+              >
+                Limpiar Filtros
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Duplicate Confirmation Modal -->
@@ -1052,7 +1330,7 @@ import {
   ArrowRight, RefreshCw, AlertCircle, Home, CheckCircle2,
   Package, Tag, DollarSign, Layers, PlusCircle, ArrowUpRight,
   Move, GripVertical, ChevronUp, ChevronDown, Save, Lock, LogOut, Zap,
-  Flame, Clock, Play, Square, Plus
+  Flame, Clock, Play, Square, Plus, Eye, EyeOff
 } from 'lucide-vue-next'
 import { useSiteSettingsStore } from '../stores/siteSettings'
 
@@ -1328,10 +1606,13 @@ async function loadProducts() {
         ...r,
         order: r.order !== undefined && r.order !== null ? Number(r.order) : 1,
         live_discount: r.live_discount !== undefined && r.live_discount !== null && r.live_discount !== '' ? Number(r.live_discount) : 0,
+        in_stock: r.in_stock !== false,
+        is_active: r.is_active !== false,
         displayImage: displayImg
       }
     })
 
+    loadCampaignsAdmin()
     syncReorderList()
   } catch (err) {
     console.error('Error loading products:', err)
@@ -1471,6 +1752,118 @@ function selectReorderCampaign(campId) {
   hasUnsavedOrder.value = false
   syncReorderList()
 }
+
+
+// Visibility State & Functions
+const adminCampaigns = ref([])
+const isLoadingCampaigns = ref(false)
+const savingCampaignId = ref(null)
+
+const visibilityFilterCampaign = ref('navidad')
+const visibilityFilterStatus = ref('all')
+const visibilitySearchQuery = ref('')
+const savingProductActiveId = ref(null)
+const savingStockProdId = ref(null)
+
+async function loadCampaignsAdmin() {
+  if (!currentPbClient.value || !isAuthenticated.value) return
+  isLoadingCampaigns.value = true
+  try {
+    const records = await currentPbClient.value.collection('campaigns').getFullList({ sort: 'order' })
+    adminCampaigns.value = records.map(r => ({
+      ...r,
+      is_active: r.is_active !== false
+    }))
+  } catch (err) {
+    console.error('Error loading admin campaigns:', err)
+  } finally {
+    isLoadingCampaigns.value = false
+  }
+}
+
+async function toggleCampaignActive(camp) {
+  if (!currentPbClient.value || savingCampaignId.value) return
+  savingCampaignId.value = camp.id
+  const newStatus = !camp.is_active
+  try {
+    await currentPbClient.value.collection('campaigns').update(camp.id, {
+      is_active: newStatus
+    })
+    camp.is_active = newStatus
+  } catch (err) {
+    console.error('Error toggling campaign active status:', err)
+    alert('Error al actualizar visibilidad del menú: ' + (err.message || 'Error'))
+  } finally {
+    savingCampaignId.value = null
+  }
+}
+
+async function toggleProductActive(prod) {
+  if (!currentPbClient.value || savingProductActiveId.value) return
+  savingProductActiveId.value = prod.id
+  const newStatus = prod.is_active === false ? true : false
+  try {
+    await currentPbClient.value.collection('products').update(prod.id, {
+      is_active: newStatus
+    })
+    prod.is_active = newStatus
+  } catch (err) {
+    console.error('Error toggling product active status:', err)
+    alert('Error al actualizar visibilidad del producto: ' + (err.message || 'Error'))
+  } finally {
+    savingProductActiveId.value = null
+  }
+}
+
+async function toggleProductStock(prod) {
+  if (!currentPbClient.value || savingStockProdId.value) return
+  savingStockProdId.value = prod.id
+  const newStock = prod.in_stock === false ? true : false
+  try {
+    await currentPbClient.value.collection('products').update(prod.id, {
+      in_stock: newStock
+    })
+    prod.in_stock = newStock
+  } catch (err) {
+    console.error('Error toggling product stock:', err)
+    alert('Error al actualizar stock del producto: ' + (err.message || 'Error'))
+  } finally {
+    savingStockProdId.value = null
+  }
+}
+
+const filteredVisibilityProducts = computed(() => {
+  let list = products.value
+
+  if (visibilityFilterCampaign.value !== 'all') {
+    list = list.filter(p => (p.campaign || '').toLowerCase() === visibilityFilterCampaign.value.toLowerCase())
+  }
+
+  if (visibilityFilterStatus.value === 'visible') {
+    list = list.filter(p => p.is_active !== false)
+  } else if (visibilityFilterStatus.value === 'hidden') {
+    list = list.filter(p => p.is_active === false)
+  }
+
+  if (visibilitySearchQuery.value.trim()) {
+    const q = visibilitySearchQuery.value.toLowerCase().trim()
+    list = list.filter(p => 
+      (p.name && p.name.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q))
+    )
+  }
+
+  return list
+})
+
+const visibleProductsCount = computed(() => {
+  return products.value.filter(p => p.is_active !== false).length
+})
+
+const hiddenProductsCount = computed(() => {
+  return products.value.filter(p => p.is_active === false).length
+})
+
 
 function syncReorderList() {
   reorderProductList.value = products.value
