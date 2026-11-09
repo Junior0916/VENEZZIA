@@ -316,56 +316,37 @@
         </div>
       </div>
 
-      <!-- Tier 2: Dedicated Campaign Navigation Ribbon (Guarantees zero overlap with search bar) -->
+      <!-- Tier 2: Dedicated Campaign Navigation Ribbon (Estilo Rosatel: Menú Desplegable + Accesos Rápidos) -->
       <div class="hidden md:flex items-center justify-between pt-2.5 mt-2 border-t border-[#eedee9]/60">
-        <!-- Left: Campaign Navigation Pills & Ocasiones Dropdown -->
-        <nav class="flex items-center gap-1.5 lg:gap-2 flex-wrap">
+        <!-- Left: Botón Menú Estilo Rosatel + Accesos Rápidos Principales -->
+        <nav class="flex items-center gap-2 flex-wrap">
+          <!-- Botón Menú Estilo Rosatel (Abre Panel Lateral Completo) -->
           <button
-            v-for="camp in campaignStore.campaigns"
+            @click="openDrawer"
+            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold text-[#27172b] bg-white border border-[#965e9b]/50 hover:border-[#965e9b] hover:bg-[#faf4f9] hover:text-[#965e9b] shadow-2xs transition-all duration-200 cursor-pointer shrink-0 group active:scale-95"
+            title="Ver todas las colecciones y fechas especiales"
+          >
+            <Menu class="w-4 h-4 text-[#965e9b] group-hover:scale-110 transition-transform" />
+            <span>Menú</span>
+          </button>
+
+          <!-- Píldoras Rápidas Destacadas (Sin saturar la barra) -->
+          <button
+            v-for="camp in featuredRibbonCampaigns"
             :key="camp.id"
             @click="selectCampaign(camp.id)"
             :class="[
-              'px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer flex items-center shrink-0',
+              'px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer flex items-center gap-1.5 shrink-0',
               getCampaignBtnClasses(camp.id)
             ]"
           >
+            <span v-if="camp.id === 'navidad'" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span>{{ camp.navTitle || camp.shortName }}</span>
           </button>
 
-          <!-- Dropdown: Todas las Ocasiones (Clean Luxury Style, No AI Emojis) -->
-          <div class="relative group">
-            <button
-              class="px-3 py-1.5 rounded-full text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 transition-colors flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>Ocasiones</span>
-              <ChevronDown class="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform duration-200" />
-            </button>
-
-            <!-- Dropdown Menu -->
-            <div class="absolute left-0 mt-1 w-64 bg-white rounded-2xl shadow-xl border border-[#eedee9] py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50">
-              <div class="px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b border-gray-100">
-                Selecciona una fecha especial
-              </div>
-              <button
-                v-for="camp in campaignStore.campaigns"
-                :key="camp.id"
-                @click="selectCampaign(camp.id)"
-                class="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 hover:bg-[#f6eef8] hover:text-[#965e9b] flex items-center justify-between transition-colors cursor-pointer"
-              >
-                <div class="flex items-center gap-2.5">
-                  <span class="w-2.5 h-2.5 rounded-full shrink-0" :class="getCampaignDotClass(camp.id)"></span>
-                  <span class="font-medium">{{ camp.name }}</span>
-                </div>
-                <span v-if="campaignStore.activeCampaignId === camp.id" class="text-[10px] font-bold text-[#caa35f]">
-                  Activo
-                </span>
-              </button>
-            </div>
-          </div>
-
           <span class="text-[#e2cee0] mx-0.5">|</span>
 
-          <!-- Delivery Guide Button (Never Overlapped) -->
+          <!-- Delivery Guide Button -->
           <button
             @click="navigateToSection('envios')"
             class="px-3 py-1.5 rounded-full text-xs font-medium text-gray-700 hover:text-[#965e9b] hover:bg-[#f6eef8] transition-colors cursor-pointer"
@@ -436,10 +417,20 @@
           </div>
         </div>
 
-        <!-- Mobile Campaign Switcher Pills -->
+        <!-- Mobile Campaign Switcher Pills (Estilo Rosatel: Menú + Destacados) -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <!-- Botón Menú Móvil -->
           <button
-            v-for="camp in campaignStore.campaigns"
+            @click="openDrawer"
+            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold text-[#27172b] bg-white border border-[#965e9b]/50 shadow-2xs hover:bg-[#faf4f9] shrink-0 cursor-pointer active:scale-95"
+            aria-label="Abrir menú de colecciones"
+          >
+            <Menu class="w-3.5 h-3.5 text-[#965e9b]" />
+            <span>Menú</span>
+          </button>
+
+          <button
+            v-for="camp in featuredRibbonCampaigns"
             :key="camp.id"
             @click="selectCampaign(camp.id)"
             :class="[
@@ -459,12 +450,230 @@
         </div>
       </div>
     </div>
+
+    <!-- ============================================================ -->
+    <!-- PANEL LATERAL DESPLEGABLE ESTILO ROSATEL (OFF-CANVAS DRAWER)  -->
+    <!-- ============================================================ -->
+    <teleport to="body">
+      <!-- Backdrop Dimmer Overlay -->
+      <transition
+        enter-active-class="transition-opacity duration-300 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition-opacity duration-200 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="isDrawerOpen"
+          class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50"
+          @click="closeDrawer"
+          aria-hidden="true"
+        />
+      </transition>
+
+      <!-- Sliding Drawer Sheet -->
+      <transition
+        enter-active-class="transition-transform duration-300 ease-out"
+        enter-from-class="-translate-x-full"
+        enter-to-class="translate-x-0"
+        leave-active-class="transition-transform duration-200 ease-in"
+        leave-from-class="translate-x-0"
+        leave-to-class="-translate-x-full"
+      >
+        <aside
+          v-if="isDrawerOpen"
+          class="fixed inset-y-0 left-0 w-full max-w-sm sm:max-w-md bg-white shadow-2xl z-50 flex flex-col justify-between overflow-hidden border-r border-[#eedee9]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menú de Navegación de Colecciones"
+        >
+          <!-- Header del Drawer -->
+          <div class="p-5 border-b border-[#f4eaf6] bg-[#faf7fb] flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <img src="/marca_lila.webp" alt="Venezzia Detalles" class="h-8 w-auto object-contain" />
+              <img src="/isotipo_lila.webp" alt="Venezzia Isotipo" class="h-7 w-auto object-contain" />
+            </div>
+            <button
+              @click="closeDrawer"
+              class="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-white border border-transparent hover:border-[#eedee9] transition-all cursor-pointer"
+              aria-label="Cerrar menú"
+            >
+              <X class="w-5 h-5" />
+            </button>
+          </div>
+
+          <!-- Cuerpo Scrollable del Drawer -->
+          <div class="flex-1 overflow-y-auto p-5 space-y-6">
+            <!-- Banner de TikTok Live en el Drawer (si está activo) -->
+            <div
+              v-if="siteSettingsStore.isLiveOfferActive"
+              class="p-3.5 rounded-2xl bg-gradient-to-r from-[#180010] via-[#27172b] to-[#0f051d] text-white border border-[#ff0050]/40 shadow-sm"
+            >
+              <div class="flex items-center justify-between mb-1">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#ff0050] text-white text-[9px] font-black uppercase tracking-wider animate-pulse">
+                  <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                  <span>EN VIVO</span>
+                </span>
+                <span class="text-[11px] font-mono font-bold text-[#00f2fe]">
+                  {{ siteSettingsStore.formattedLiveTimeLeft }}
+                </span>
+              </div>
+              <p class="text-xs font-semibold leading-tight text-white/95 mt-1">
+                {{ siteSettingsStore.liveBannerText || '¡Descuentos flash activos en TikTok Live!' }}
+              </p>
+            </div>
+
+            <!-- Colecciones y Catálogos -->
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">
+                  Todas las Colecciones
+                </span>
+                <span class="text-[10px] text-gray-400 font-medium">
+                  {{ campaignStore.campaigns.length }} fechas especiales
+                </span>
+              </div>
+
+              <div class="space-y-2.5">
+                <button
+                  v-for="camp in campaignStore.campaigns"
+                  :key="camp.id"
+                  @click="handleDrawerSelect(camp.id)"
+                  :class="[
+                    'w-full text-left p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-center justify-between group',
+                    campaignStore.activeCampaignId === camp.id
+                      ? 'bg-[#faf4f9] border-[#965e9b] shadow-xs ring-1 ring-[#965e9b]/20'
+                      : 'bg-white border-[#eedee9]/80 hover:border-[#caa35f] hover:bg-[#fdfbfd]'
+                  ]"
+                >
+                  <div class="flex items-center gap-3 min-w-0">
+                    <span
+                      class="w-3.5 h-3.5 rounded-full shrink-0 ring-4"
+                      :class="[
+                        getCampaignDotClass(camp.id),
+                        campaignStore.activeCampaignId === camp.id ? 'ring-purple-100' : 'ring-transparent'
+                      ]"
+                    />
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs sm:text-sm font-bold text-[#27172b] group-hover:text-[#965e9b] transition-colors truncate">
+                          {{ camp.name }}
+                        </span>
+                        <span
+                          v-if="camp.id === 'navidad'"
+                          class="px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 shrink-0"
+                        >
+                          Nuevo
+                        </span>
+                      </div>
+                      <span class="text-[11px] text-gray-500 block truncate mt-0.5">
+                        {{ camp.badge || camp.tagline }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="shrink-0 ml-2">
+                    <span
+                      v-if="campaignStore.activeCampaignId === camp.id"
+                      class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#965e9b] text-white text-[10px] font-bold"
+                    >
+                      <Check class="w-3 h-3" />
+                      <span>Activo</span>
+                    </span>
+                    <span
+                      v-else
+                      class="text-gray-300 group-hover:text-[#965e9b] group-hover:translate-x-0.5 transition-all text-xs"
+                    >
+                      →
+                    </span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Información y Servicios -->
+            <div class="pt-2 border-t border-[#f4eaf6]">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 block mb-3">
+                Información & Servicios
+              </span>
+              <div class="space-y-1.5">
+                <button
+                  @click="handleDrawerNavigate('envios')"
+                  class="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-[#faf4f9] text-xs font-semibold text-gray-700 hover:text-[#965e9b] flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <div class="flex items-center gap-2.5">
+                    <Truck class="w-4 h-4 text-[#caa35f]" />
+                    <span>Tarifas y Cobertura de Envíos</span>
+                  </div>
+                  <span class="text-gray-300 text-xs">→</span>
+                </button>
+
+                <button
+                  @click="handleDrawerNavigate('inicio')"
+                  class="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-[#faf4f9] text-xs font-semibold text-gray-700 hover:text-[#965e9b] flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-sm">✨</span>
+                    <span>Portada Principal (Inicio)</span>
+                  </div>
+                  <span class="text-gray-300 text-xs">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer del Drawer -->
+          <div class="p-5 border-t border-[#f4eaf6] bg-[#faf7fb] space-y-3">
+            <a
+              :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera consultar por sus catálogos')"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="w-full py-3 px-4 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+            >
+              <IconWhatsApp customClass="w-4 h-4 text-white" />
+              <span>Atención Directa: {{ siteSettingsStore.formattedPhone }}</span>
+            </a>
+
+            <div class="flex items-center justify-center gap-4 text-gray-400 pt-1">
+              <a
+                :href="siteSettingsStore.whatsappLink('Hola Venezzia Detalles, quisiera hacer un pedido')"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-[#25D366] hover:scale-115 transition-transform"
+                title="WhatsApp"
+              >
+                <IconWhatsApp customClass="w-4 h-4" />
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-[#E4405F] hover:scale-115 transition-transform"
+                title="Instagram"
+              >
+                <IconInstagram customClass="w-4 h-4" />
+              </a>
+              <a
+                href="https://www.tiktok.com/@venezzia.detalles"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-900 hover:text-black hover:scale-115 transition-transform"
+                title="TikTok"
+              >
+                <IconTikTok customClass="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        </aside>
+      </transition>
+    </teleport>
   </header>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { ChevronDown, Search, ShoppingBag, X, Truck, Clock } from 'lucide-vue-next'
+import { ChevronDown, Search, ShoppingBag, X, Truck, Clock, Menu, Check } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import IconInstagram from './icons/IconInstagram.vue'
 import IconTikTok from './icons/IconTikTok.vue'
@@ -504,6 +713,7 @@ function handleClickOutside(e) {
 function handleGlobalKeydown(e) {
   if (e.key === 'Escape') {
     searchStore.closeDropdown()
+    closeDrawer()
   }
 }
 
@@ -515,6 +725,9 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('click', handleClickOutside)
   window.removeEventListener('keydown', handleGlobalKeydown)
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
 })
 
 const searchQuery = computed({
@@ -624,6 +837,47 @@ function clearSearch() {
 
 const router = useRouter()
 const route = useRoute()
+
+const isDrawerOpen = ref(false)
+
+function openDrawer() {
+  isDrawerOpen.value = true
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = 'hidden'
+  }
+}
+
+function closeDrawer() {
+  isDrawerOpen.value = false
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+}
+
+async function handleDrawerSelect(campaignId) {
+  closeDrawer()
+  await selectCampaign(campaignId)
+}
+
+async function handleDrawerNavigate(sectionId) {
+  closeDrawer()
+  await navigateToSection(sectionId)
+}
+
+// Acceso rápido en la barra: Top 3 destacadas (Navidad, Hot Wheels, Maquillaje)
+// y si el usuario tiene activa Graduación o Cumpleaños, se suma para que siempre vea su selección activa.
+const featuredRibbonCampaigns = computed(() => {
+  const all = campaignStore.campaigns
+  const priorityIds = ['navidad', 'hotwheels', 'maquillaje']
+  const result = all.filter(c => priorityIds.includes(c.id))
+  
+  const activeCamp = all.find(c => c.id === campaignStore.activeCampaignId)
+  if (activeCamp && !result.some(c => c.id === activeCamp.id)) {
+    result.push(activeCamp)
+  }
+  return result
+})
+
 
 async function navigateToSection(sectionId) {
   searchStore.closeDropdown()
