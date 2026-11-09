@@ -340,7 +340,6 @@
               getCampaignBtnClasses(camp.id)
             ]"
           >
-            <span v-if="camp.id === 'navidad'" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span>{{ camp.navTitle || camp.shortName }}</span>
           </button>
 
@@ -614,7 +613,7 @@
                   class="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-[#faf4f9] text-xs font-semibold text-gray-700 hover:text-[#965e9b] flex items-center justify-between transition-colors cursor-pointer"
                 >
                   <div class="flex items-center gap-2.5">
-                    <span class="text-sm">✨</span>
+                    <Home class="w-4 h-4 text-[#caa35f]" />
                     <span>Portada Principal (Inicio)</span>
                   </div>
                   <span class="text-gray-300 text-xs">→</span>
@@ -673,7 +672,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { ChevronDown, Search, ShoppingBag, X, Truck, Clock, Menu, Check } from 'lucide-vue-next'
+import { ChevronDown, Search, ShoppingBag, X, Truck, Clock, Menu, Check, Home } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import IconInstagram from './icons/IconInstagram.vue'
 import IconTikTok from './icons/IconTikTok.vue'

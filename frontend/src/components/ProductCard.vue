@@ -43,7 +43,7 @@
         v-if="hasLiveDiscount && product.in_stock !== false"
         class="absolute top-2.5 right-2.5 z-20 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-[#ff0050] text-white shadow-md flex items-center gap-1 border border-white/60 animate-pulse"
       >
-        <span>🔥 LIVE -S/&nbsp;{{ liveDiscount }}</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span><span>EN VIVO -S/&nbsp;{{ liveDiscount }}</span>
       </div>
 
       <!-- Promo Badge if original_price exists and no live promo -->

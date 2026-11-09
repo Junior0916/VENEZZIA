@@ -76,7 +76,7 @@
                       v-if="item.product.liveDiscount"
                       class="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-[#ffe4e6] text-[#be123c] border border-[#fecdd3]"
                     >
-                      🔥 Live -S/&nbsp;{{ item.product.liveDiscount }}
+                      <span class="w-1.5 h-1.5 rounded-full bg-[#e11d48] inline-block mr-1"></span>Live -S/&nbsp;{{ item.product.liveDiscount }}
                     </span>
                   </div>
 
@@ -607,7 +607,7 @@ const whatsappCartUrl = computed(() => {
 
   cartStore.items.forEach(item => {
     const p = item.product
-    const liveTag = p.liveDiscount ? ` (🔥 Descuento TikTok Live: -S/ ${p.liveDiscount})` : ''
+    const liveTag = p.liveDiscount ? ` (Descuento TikTok Live: -S/ ${p.liveDiscount})` : ''
     lines.push(`- ${item.quantity}x ${p.name}${liveTag} — S/ ${(p.price * item.quantity).toFixed(2)}`)
     lines.push(`  ↳ Ficha: ${window.location.origin}/?prod=${p.id}`)
   })

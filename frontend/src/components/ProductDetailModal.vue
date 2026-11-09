@@ -119,7 +119,7 @@
                 v-if="hasLiveDiscount && product.in_stock !== false"
                 class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#ff0050] text-white shadow-2xs flex items-center gap-1 animate-pulse"
               >
-                <span>🔥 OFERTA LIVE -S/&nbsp;{{ liveDiscount }}</span>
+                <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span><span>OFERTA EN VIVO -S/&nbsp;{{ liveDiscount }}</span>
               </span>
               <span
                 v-else-if="product.original_price"
@@ -656,7 +656,7 @@ const whatsappUrl = computed(() => {
 
   if (hasLiveDiscount.value) {
     lines.push(`*Precio Regular:* S/ ${Number(props.product.price).toFixed(2)}`)
-    lines.push(`🔥 *Descuento TikTok Live:* -S/ ${liveDiscount.value.toFixed(2)}`)
+    lines.push(`*Descuento TikTok Live:* -S/ ${liveDiscount.value.toFixed(2)}`)
     lines.push(`*Precio con Descuento Live:* S/ ${(Number(props.product.price) - liveDiscount.value).toFixed(2)}`)
   } else {
     lines.push(`*Precio:* S/ ${Number(props.product.price).toFixed(2)}`)

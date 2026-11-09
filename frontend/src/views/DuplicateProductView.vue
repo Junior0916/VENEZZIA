@@ -157,7 +157,7 @@
           >
             <span v-if="siteSettingsStore.isLiveOfferActive" class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
             <Flame v-else class="w-4 h-4 text-[#ff0050]" />
-            <span>🔴 Dinámica TikTok Live Flash (Temporizador)</span>
+            <span>Dinámica TikTok Live Flash (Temporizador)</span>
             <span
               v-if="siteSettingsStore.isLiveOfferActive"
               class="px-2 py-0.5 rounded-full bg-black/30 text-white font-mono text-[10px] ml-1"
@@ -176,7 +176,7 @@
             ]"
           >
             <Move class="w-4 h-4 text-[#caa35f]" />
-            <span>🖐️ Organizar Orden (Arrastrar y Soltar)</span>
+            <span>Organizar Orden (Arrastrar y Soltar)</span>
           </button>
 
           <button
@@ -189,7 +189,7 @@
             ]"
           >
             <Copy class="w-4 h-4 text-[#caa35f]" />
-            <span>📋 Duplicador de Productos</span>
+            <span>Duplicador de Productos</span>
           </button>
         </div>
       </div>
@@ -362,7 +362,7 @@
                     ]"
                   >
                     {{ mins }} min
-                    <span v-if="mins === 15" class="block text-[9px] text-[#caa35f] font-normal">★ Favorito</span>
+                    <span v-if="mins === 15" class="block text-[9px] text-[#caa35f] font-normal">Recomendado</span>
                   </button>
                 </div>
 
@@ -445,8 +445,8 @@
                 </p>
               </div>
               <div class="text-xs font-semibold text-[#caa35f] bg-[#fffaf2] px-3 py-1.5 rounded-xl border border-[#eedee9]">
-                <span v-if="selectedLiveCampaign === 'hotwheels'">💡 Box Básico: -S/ 5.00 | Otros Box: -S/ 10.00</span>
-                <span v-else>💡 Asigna el descuento en soles (S/) que desees a cada producto</span>
+                <span v-if="selectedLiveCampaign === 'hotwheels'">Box Básico: -S/ 5.00 | Otros Box: -S/ 10.00</span>
+                <span v-else>Asigna el descuento en soles (S/) que desees a cada producto</span>
               </div>
             </div>
 
@@ -548,7 +548,7 @@
               >
                 <RefreshCw v-if="isSavingOrder" class="w-3.5 h-3.5 animate-spin text-[#caa35f]" />
                 <Save v-else class="w-3.5 h-3.5 text-[#caa35f]" />
-                <span>{{ isSavingOrder ? 'Guardando en PocketBase...' : hasUnsavedOrder ? '💾 Guardar Nuevo Orden' : 'Orden Guardado' }}</span>
+                <span>{{ isSavingOrder ? 'Guardando en PocketBase...' : hasUnsavedOrder ? 'Guardar Nuevo Orden' : 'Orden Guardado' }}</span>
               </button>
 
               <button
@@ -615,7 +615,7 @@
                       #{{ index + 1 }}
                     </span>
                     <span v-if="index === 0" class="text-[10px] font-bold text-[#caa35f] uppercase tracking-wider">
-                      ★ Primer Lugar
+                      #1 Primer Lugar
                     </span>
                     <span
                       v-if="prod.in_stock === false"
@@ -721,7 +721,7 @@
                 class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#caa35f] text-[#27172b] text-xs font-bold shadow-sm hover:bg-[#b8914c] transition-all cursor-grab active:cursor-grabbing border border-[#caa35f]"
               >
                 <Sparkles class="w-4 h-4" />
-                <span>⚡ Duplicar en PocketBase</span>
+                <span>Duplicar en PocketBase</span>
               </a>
               <button
                 @click="copyBookmarkletCode"
@@ -1563,7 +1563,7 @@ async function saveCustomOrder() {
     }
 
     hasUnsavedOrder.value = false
-    alert('✅ ¡Nuevo orden guardado con éxito! La tienda web ya se ha actualizado con las nuevas posiciones.')
+    alert('¡Nuevo orden guardado con éxito! La tienda web ya se ha actualizado con las nuevas posiciones.')
     await loadProducts()
   } catch (err) {
     console.error('Error saving order:', err)
@@ -1661,7 +1661,7 @@ async function executeDuplication() {
 }
 
 // Bookmarklet Code that runs directly inside PocketBase Admin
-const bookmarkletRawCode = `javascript:(async function(){try{if(!window.location.href.includes('/_/')){alert('Por favor abre esta herramienta mientras estes dentro de PocketBase Admin (https://admin.venezzia.shop/_/)');return;}let token='';const cookieMatch=document.cookie.match(/pb_auth=([^;]+)/);if(cookieMatch){try{token=JSON.parse(decodeURIComponent(cookieMatch[1])).token;}catch(_){}}if(!token){for(let i=0;i<localStorage.length;i++){try{const val=JSON.parse(localStorage.getItem(localStorage.key(i)));if(val&&val.token){token=val.token;break;}}catch(_){}}}if(!token){alert('No se detecto sesion de PocketBase. Por favor inicia sesion primero.');return;}let recordId='';const hash=window.location.hash;const urlParams=new URLSearchParams(hash.includes('?')?hash.split('?')[1]:'');recordId=urlParams.get('recordId')||'';if(!recordId){const idInput=document.querySelector('input[readonly][value]');if(idInput&&idInput.value&&idInput.value.length>=15){recordId=idInput.value;}}if(!recordId){recordId=prompt('Ingresa el ID del producto que deseas duplicar:');if(!recordId)return;}const toast=document.createElement('div');toast.style.cssText='position:fixed;top:20px;right:20px;background:#27172b;color:#fff;padding:16px 24px;border-radius:12px;font-family:sans-serif;font-size:14px;z-index:999999;box-shadow:0 10px 30px rgba(0,0,0,0.3);border:2px solid #caa35f;';toast.innerHTML='⏳ Obteniendo producto y duplicando imagen...';document.body.appendChild(toast);const recRes=await fetch('/api/collections/products/records/'+recordId,{headers:{Authorization:token}});if(!recRes.ok){toast.remove();alert('Error al obtener el producto con ID: '+recordId);return;}const orig=await recRes.json();const newName=prompt('Nombre para el nuevo producto duplicado:',orig.name+' (Copia)');if(!newName){toast.remove();return;}const formData=new FormData();formData.append('name',newName);formData.append('campaign',orig.campaign||'maquillaje');formData.append('description',orig.description||'');formData.append('price',String(orig.price));if(orig.compare_at_price)formData.append('compare_at_price',String(orig.compare_at_price));formData.append('category',orig.category||'General');formData.append('in_stock',String(orig.in_stock));formData.append('order','1');if(orig.items_included)formData.append('items_included',orig.items_included);if(orig.image){toast.innerHTML='⏳ Copiando imagen del producto...';const imgUrl='/api/files/'+orig.collectionId+'/'+orig.id+'/'+orig.image;const imgRes=await fetch(imgUrl);const imgBlob=await imgRes.blob();formData.append('image',imgBlob,orig.image);}toast.innerHTML='⏳ Guardando nuevo producto en PocketBase...';const createRes=await fetch('/api/collections/products/records',{method:'POST',headers:{Authorization:token},body:formData});if(!createRes.ok){const errData=await createRes.json();toast.remove();alert('Error al duplicar: '+(errData.message||'Error'));return;}const newRec=await createRes.json();toast.style.background='#15803d';toast.innerHTML='✅ ¡Producto duplicado con exito!<br>Abriendo nueva copia...';setTimeout(()=>{toast.remove();window.location.hash='#/collections?collectionId='+orig.collectionId+'&recordId='+newRec.id;window.location.reload();},1200);}catch(e){alert('Error al duplicar: '+e.message);}})();`
+const bookmarkletRawCode = `javascript:(async function(){try{if(!window.location.href.includes('/_/')){alert('Por favor abre esta herramienta mientras estes dentro de PocketBase Admin (https://admin.venezzia.shop/_/)');return;}let token='';const cookieMatch=document.cookie.match(/pb_auth=([^;]+)/);if(cookieMatch){try{token=JSON.parse(decodeURIComponent(cookieMatch[1])).token;}catch(_){}}if(!token){for(let i=0;i<localStorage.length;i++){try{const val=JSON.parse(localStorage.getItem(localStorage.key(i)));if(val&&val.token){token=val.token;break;}}catch(_){}}}if(!token){alert('No se detecto sesion de PocketBase. Por favor inicia sesion primero.');return;}let recordId='';const hash=window.location.hash;const urlParams=new URLSearchParams(hash.includes('?')?hash.split('?')[1]:'');recordId=urlParams.get('recordId')||'';if(!recordId){const idInput=document.querySelector('input[readonly][value]');if(idInput&&idInput.value&&idInput.value.length>=15){recordId=idInput.value;}}if(!recordId){recordId=prompt('Ingresa el ID del producto que deseas duplicar:');if(!recordId)return;}const toast=document.createElement('div');toast.style.cssText='position:fixed;top:20px;right:20px;background:#27172b;color:#fff;padding:16px 24px;border-radius:12px;font-family:sans-serif;font-size:14px;z-index:999999;box-shadow:0 10px 30px rgba(0,0,0,0.3);border:2px solid #caa35f;';toast.innerHTML='Obteniendo producto y duplicando imagen...';document.body.appendChild(toast);const recRes=await fetch('/api/collections/products/records/'+recordId,{headers:{Authorization:token}});if(!recRes.ok){toast.remove();alert('Error al obtener el producto con ID: '+recordId);return;}const orig=await recRes.json();const newName=prompt('Nombre para el nuevo producto duplicado:',orig.name+' (Copia)');if(!newName){toast.remove();return;}const formData=new FormData();formData.append('name',newName);formData.append('campaign',orig.campaign||'maquillaje');formData.append('description',orig.description||'');formData.append('price',String(orig.price));if(orig.compare_at_price)formData.append('compare_at_price',String(orig.compare_at_price));formData.append('category',orig.category||'General');formData.append('in_stock',String(orig.in_stock));formData.append('order','1');if(orig.items_included)formData.append('items_included',orig.items_included);if(orig.image){toast.innerHTML='Copiando imagen del producto...';const imgUrl='/api/files/'+orig.collectionId+'/'+orig.id+'/'+orig.image;const imgRes=await fetch(imgUrl);const imgBlob=await imgRes.blob();formData.append('image',imgBlob,orig.image);}toast.innerHTML='Guardando nuevo producto en PocketBase...';const createRes=await fetch('/api/collections/products/records',{method:'POST',headers:{Authorization:token},body:formData});if(!createRes.ok){const errData=await createRes.json();toast.remove();alert('Error al duplicar: '+(errData.message||'Error'));return;}const newRec=await createRes.json();toast.style.background='#15803d';toast.innerHTML='¡Producto duplicado con éxito!<br>Abriendo nueva copia...';setTimeout(()=>{toast.remove();window.location.hash='#/collections?collectionId='+orig.collectionId+'&recordId='+newRec.id;window.location.reload();},1200);}catch(e){alert('Error al duplicar: '+e.message);}})();`
 
 const bookmarkletHref = computed(() => bookmarkletRawCode)
 
