@@ -207,9 +207,14 @@ routerAdd("POST", "/api/culqi/charge", (e) => {
                     record.set("items", JSON.stringify(formattedItems.length ? formattedItems : (orderInfo.items || [])));
 
                     record.set("total", amount / 100);
+                    record.set("advance", amount / 100);
+                    record.set("delivery_cost", 0);
                     record.set("currency", "PEN");
                     record.set("culqi_charge_id", String(culqiRes.id || ""));
                     record.set("status", "paid");
+                    record.set("payment_method", "culqi");
+                    if (orderInfo.customer_notes) record.set("notes", String(orderInfo.customer_notes));
+                    if (orderInfo.location_url) record.set("location_url", String(orderInfo.location_url));
 
                     $app.save(record);
                     savedRecordId = record.id;
@@ -226,9 +231,11 @@ routerAdd("POST", "/api/culqi/charge", (e) => {
                         fallbackRecord.set("customer_address", String(orderInfo.customer_address || ""));
                         fallbackRecord.set("items", JSON.stringify(orderInfo.items || []));
                         fallbackRecord.set("total", amount / 100);
+                        fallbackRecord.set("advance", amount / 100);
                         fallbackRecord.set("currency", "PEN");
                         fallbackRecord.set("culqi_charge_id", String(culqiRes.id || ""));
                         fallbackRecord.set("status", "paid");
+                        fallbackRecord.set("payment_method", "culqi");
 
                         $app.save(fallbackRecord);
                         savedRecordId = fallbackRecord.id;

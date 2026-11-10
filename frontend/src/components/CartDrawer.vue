@@ -709,6 +709,7 @@ import DistrictAutocomplete from './DistrictAutocomplete.vue'
 import peruLocations from '../data/peruLocations.json'
 import { useCartStore } from '../stores/cart'
 import { openCulqiCheckout, sendChargeToBackend } from '../services/culqi'
+import { createOrder } from '../services/orders'
 import { useSiteSettingsStore } from '../stores/siteSettings'
 
 const cartStore = useCartStore()
@@ -953,11 +954,45 @@ function validateForm({ requireEmail = true } = {}) {
   return true
 }
 
+function saveOrderToBackendSafely() {
+  try {
+    const formattedAddress = [customer.city, customer.address].filter(Boolean).join(', ')
+    createOrder({
+      customer_name: customer.name || 'Cliente WhatsApp',
+      customer_email: customer.email || '',
+      customer_phone: customer.phone || '',
+      customer_address: formattedAddress,
+      notes: customer.notes || '',
+      location_url: customer.mapUrl || '',
+      items: cartStore.items.map(item => ({
+        id: item.product?.id || '',
+        name: item.product?.addon ? `${item.product.name} (+ ${item.product.addon})` : (item.product?.name || 'Detalle Floral'),
+        price: Number(item.product?.price || 0),
+        quantity: Number(item.quantity || 1),
+        subtotal: Number(((item.product?.price || 0) * (item.quantity || 1)).toFixed(2)),
+        image: item.product?.image || ''
+      })),
+      total: cartStore.totalAmount,
+      advance: 0,
+      delivery_cost: 0,
+      payment_method: 'whatsapp',
+      status: 'pending'
+    }).catch(err => {
+      console.warn('No se pudo guardar el pedido en segundo plano:', err)
+    })
+  } catch (err) {
+    console.warn('Error al preparar guardado de pedido:', err)
+  }
+}
+
 function handleWhatsAppOrder() {
   paymentCancelNotice.value = ''
   if (!validateForm({ requireEmail: false })) {
     return
   }
+
+  // Guardar pedido automáticamente en el backend como PENDIENTE DE PAGO
+  saveOrderToBackendSafely()
 
   // Abrir WhatsApp con el pedido y los datos validados
   window.open(whatsappCartUrl.value, '_blank')
@@ -1053,6 +1088,7 @@ function closeRejectModal() {
 
 function closeRejectModalAndOpenWhatsApp() {
   showRejectModal.value = false
+  saveOrderToBackendSafely()
   window.open(whatsappCartUrl.value, '_blank')
 }
 

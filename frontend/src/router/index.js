@@ -42,6 +42,12 @@ const routes = [
     alias: ['/duplicar', '/admin/duplicar', '/duplicador', '/clonar-producto']
   },
   {
+    path: '/pedidos',
+    name: 'pedidos',
+    component: () => import('../views/OrdersView.vue'),
+    alias: ['/admin/pedidos', '/sistema/pedidos', '/lista-pedidos']
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/'
   }
