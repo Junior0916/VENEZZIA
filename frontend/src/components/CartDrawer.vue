@@ -27,11 +27,11 @@
     >
       <div
         v-if="cartStore.isOpen"
-        class="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10"
+        class="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto max-w-full flex pl-0 sm:pl-10 z-50 w-full sm:w-auto"
       >
-        <div class="w-screen max-w-md bg-white shadow-2xl flex flex-col">
+        <div class="w-full sm:w-screen sm:max-w-md bg-white shadow-2xl flex flex-col h-full max-h-[100dvh] overflow-hidden">
           <!-- Header -->
-          <div class="p-5 sm:p-6 border-b border-[#eedee9] flex items-center justify-between bg-[#faf5fb]">
+          <div class="p-4 sm:p-6 border-b border-[#eedee9] flex items-center justify-between bg-[#faf5fb] shrink-0">
             <div class="flex items-center gap-2.5">
               <ShoppingBag class="w-5 h-5 text-[#caa35f]" />
               <h2 class="text-base sm:text-lg font-serif font-bold text-[#27172b]">Bolsa de Compras</h2>
@@ -48,7 +48,7 @@
           </div>
 
           <!-- Body -->
-          <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
+          <div ref="scrollContainerRef" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 sm:space-y-6 overscroll-contain">
             <!-- Items list -->
             <div v-if="cartStore.items.length > 0" class="divide-y divide-[#f2e6f0]">
               <div
@@ -120,7 +120,13 @@
             </div>
 
             <!-- Customer Shipping Info Form -->
-            <div ref="shippingFormRef" v-if="cartStore.items.length > 0" class="pt-4 border-t border-[#f2e6f0] space-y-3">
+            <div
+              ref="shippingFormRef"
+              v-if="cartStore.items.length > 0"
+              class="pt-4 border-t border-[#f2e6f0] space-y-3"
+              @focusin="handleInputFocus"
+              @focusout="handleInputBlur"
+            >
               <!-- WhatsApp Preferred Option Banner -->
               <div
                 v-if="cartStore.preferredMethod === 'whatsapp'"
@@ -156,7 +162,7 @@
                   v-model="customer.name"
                   type="text"
                   placeholder="Ej. María Sánchez"
-                  class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
+                  class="w-full text-base sm:text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
                 />
               </div>
 
@@ -166,7 +172,7 @@
                   v-model="customer.email"
                   type="email"
                   placeholder="ejemplo@correo.com"
-                  class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
+                  class="w-full text-base sm:text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
                 />
               </div>
 
@@ -182,7 +188,7 @@
                     maxlength="16"
                     placeholder="984 165 198"
                     :class="[
-                      'w-full text-xs px-3.5 py-2.5 rounded-xl border bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 transition-all',
+                      'w-full text-base sm:text-xs px-3.5 py-2.5 rounded-xl border bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 transition-all',
                       phoneError
                         ? 'border-rose-400 focus:ring-rose-200 text-rose-900 bg-rose-50/20'
                         : 'border-[#eedee9] focus:ring-[#caa35f]/20 focus:border-[#caa35f]'
@@ -218,7 +224,7 @@
                   v-model="customer.address"
                   type="text"
                   placeholder="Av. Pardo 123, Dpto 502"
-                  class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
+                  class="w-full text-base sm:text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
                 />
 
                 <!-- GPS Link Badge if selected -->
@@ -258,14 +264,76 @@
                   v-model="customer.notes"
                   rows="2"
                   placeholder="Escribe el mensaje especial para el destinatario..."
-                  class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
+                  class="w-full text-base sm:text-xs px-3.5 py-2.5 rounded-xl border border-[#eedee9] bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/20 focus:border-[#caa35f]"
                 ></textarea>
+              </div>
+
+              <!-- In-flow Action Buttons when Keyboard is Active on Mobile -->
+              <div v-if="isInputFocused" class="pt-4 border-t border-[#eedee9] space-y-3 sm:hidden">
+                <div class="space-y-1.5 text-xs text-gray-600">
+                  <div class="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>{{ cartStore.formattedTotal }}</span>
+                  </div>
+                  <div class="flex justify-between text-emerald-700 font-semibold">
+                    <span>Envío</span>
+                    <span>Coordinación directa</span>
+                  </div>
+                  <div class="flex justify-between text-base font-bold text-gray-900 pt-1 border-t border-[#eedee9]">
+                    <span>Total a Pagar</span>
+                    <span class="text-[#27172b] font-bold text-lg">{{ cartStore.formattedTotal }}</span>
+                  </div>
+                </div>
+
+                <!-- Error message if any -->
+                <div v-if="errorMessage" class="text-xs text-rose-700 bg-rose-50 p-3 rounded-xl border border-rose-200 leading-relaxed space-y-1">
+                  <div class="flex items-start gap-2">
+                    <AlertCircle class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                    <span>{{ errorMessage }}</span>
+                  </div>
+                </div>
+
+                <!-- Order via WhatsApp -->
+                <button
+                  type="button"
+                  @click="handleWhatsAppOrder"
+                  :class="[
+                    'w-full py-3.5 px-4 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs uppercase tracking-wider active:scale-[0.99] transition-all shadow-md shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer',
+                    cartStore.preferredMethod === 'whatsapp' ? 'ring-4 ring-emerald-300 ring-offset-2' : ''
+                  ]"
+                >
+                  <IconWhatsApp customClass="w-4 h-4 text-white" />
+                  <span>Coordinar Pedido por WhatsApp</span>
+                  <span
+                    v-if="cartStore.preferredMethod === 'whatsapp'"
+                    class="text-[10px] bg-white/25 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider text-emerald-950"
+                  >
+                    Seleccionado
+                  </span>
+                </button>
+
+                <!-- Or Pay with Card/Culqi -->
+                <button
+                  @click="handleCheckout"
+                  :disabled="processing"
+                  class="w-full py-3.5 px-4 rounded-full bg-gradient-to-r from-[#27172b] to-[#401f46] hover:from-[#caa35f] hover:to-[#b0873b] hover:text-[#27172b] text-white font-bold text-xs uppercase tracking-wider active:scale-[0.99] transition-all shadow-md shadow-purple-950/20 border border-[#caa35f]/50 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Loader2 v-if="processing" class="w-4 h-4 animate-spin" />
+                  <Lock v-else class="w-4 h-4 text-[#caa35f]" />
+                  <span>{{ processing ? 'Procesando pago...' : `Pagar con Tarjeta / Culqi` }}</span>
+                </button>
               </div>
             </div>
           </div>
 
-          <!-- Footer Summary & Checkout Button -->
-          <div v-if="cartStore.items.length > 0" class="p-5 sm:p-6 border-t border-[#eedee9] bg-[#faf5fb] space-y-4">
+          <!-- Footer Summary & Checkout Button (Collapses while typing on mobile to prevent viewport obstruction) -->
+          <div
+            v-if="cartStore.items.length > 0"
+            :class="[
+              'p-4 sm:p-6 border-t border-[#eedee9] bg-[#faf5fb] space-y-3 sm:space-y-4 shrink-0 transition-all duration-200',
+              isInputFocused ? 'hidden sm:block' : 'block'
+            ]"
+          >
             <div class="space-y-1.5 text-xs text-gray-600">
               <div class="flex justify-between">
                 <span>Subtotal</span>
@@ -609,6 +677,23 @@ const errorMessage = ref('')
 const phoneError = ref('')
 const phoneInputRef = ref(null)
 const shippingFormRef = ref(null)
+const scrollContainerRef = ref(null)
+const isInputFocused = ref(false)
+let blurTimeout = null
+
+function handleInputFocus(e) {
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+    if (blurTimeout) clearTimeout(blurTimeout)
+    isInputFocused.value = true
+  }
+}
+
+function handleInputBlur(e) {
+  if (blurTimeout) clearTimeout(blurTimeout)
+  blurTimeout = setTimeout(() => {
+    isInputFocused.value = false
+  }, 180)
+}
 const isMapModalOpen = ref(false)
 const orderCompleted = ref(false)
 const lastChargeId = ref('')
@@ -909,24 +994,32 @@ function closeRejectModalAndOpenWhatsApp() {
   window.open(whatsappCartUrl.value, '_blank')
 }
 
-// Auto-scroll to shipping form if preferred method is WhatsApp
+// Auto-scroll to shipping form if preferred method is WhatsApp (scoped to scroll container)
 watch(
   () => [cartStore.isOpen, cartStore.preferredMethod],
   ([isOpen, method]) => {
     if (isOpen && method === 'whatsapp') {
       setTimeout(() => {
-        shippingFormRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 200)
+        if (scrollContainerRef.value && shippingFormRef.value) {
+          const topPos = shippingFormRef.value.offsetTop - 15
+          scrollContainerRef.value.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' })
+        }
+      }, 150)
     }
   }
 )
 
-// Lock body scrolling when cart is open
+// Lock body scrolling and prevent window displacement on iOS when cart is open
 watch(
   () => cartStore.isOpen,
   (val) => {
     if (typeof document !== 'undefined') {
       document.body.style.overflow = val ? 'hidden' : ''
+      if (val) {
+        window.scrollTo(0, 0)
+      } else {
+        isInputFocused.value = false
+      }
     }
   }
 )

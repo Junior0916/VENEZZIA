@@ -14,7 +14,7 @@
         autocomplete="off"
         spellcheck="false"
         :class="[
-          'w-full text-xs px-3.5 py-2.5 rounded-xl border bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 transition-all pr-8',
+          'w-full text-base sm:text-xs px-3.5 py-2.5 rounded-xl border bg-[#fbf7fc] focus:bg-white focus:outline-none focus:ring-2 transition-all pr-8',
           hasError
             ? 'border-rose-400 focus:ring-rose-200 text-rose-900 bg-rose-50/20'
             : 'border-[#eedee9] focus:ring-[#caa35f]/20 focus:border-[#caa35f] text-gray-800'
@@ -349,7 +349,16 @@ function scrollHighlightedIntoView() {
     const items = listRef.value.querySelectorAll('li[role="option"]')
     const el = items[highlightedIndex.value]
     if (el) {
-      el.scrollIntoView({ block: 'nearest' })
+      const elTop = el.offsetTop
+      const elHeight = el.offsetHeight
+      const listTop = listRef.value.scrollTop
+      const listHeight = listRef.value.clientHeight
+
+      if (elTop < listTop) {
+        listRef.value.scrollTop = elTop
+      } else if (elTop + elHeight > listTop + listHeight) {
+        listRef.value.scrollTop = elTop + elHeight - listHeight
+      }
     }
   })
 }
