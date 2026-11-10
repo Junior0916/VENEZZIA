@@ -155,15 +155,13 @@ routerAdd("GET", "/api/venezzia/orders", (e) => {
             const balance = Math.max(0, Number((finalTotal - effectiveAdvance).toFixed(2)));
 
             // 5. Determinar estado inteligente (Distinción de casos reales):
-            // - Si status === 'delivered': ENTREGADO (se respeta estado final).
-            // - Si balance <= 0: PAGADO (100% cancelado).
-            // - Si balance > 0:
-            //     * Si effectiveAdvance >= productsTotal y deliveryCost > 0: DELIVERY PENDIENTE
-            //       (¡El arreglo floral ya está pagado! Solo falta cobrar el envío).
-            //     * Si effectiveAdvance > 0: CON ADELANTO (abono parcial del producto).
-            //     * Si effectiveAdvance === 0: PENDIENTE DE PAGO.
+            // Si tiene marca [ENTREGADO] o status === 'delivered': ENTREGADO (se respeta estado final)
+            const isDelivered = (status === "delivered") || (notes && notes.includes("[ENTREGADO]"));
+
             let computedStatus = status;
-            if (status !== "delivered") {
+            if (isDelivered) {
+                computedStatus = "delivered";
+            } else {
                 if (balance <= 0 && finalTotal > 0) {
                     computedStatus = "paid";
                 } else if (balance > 0) {
@@ -176,6 +174,8 @@ routerAdd("GET", "/api/venezzia/orders", (e) => {
                     }
                 }
             }
+
+            const cleanNotes = notes.replace(/\[ENTREGADO\]/g, "").trim();
 
             const parsed = {
                 id: r.id,
@@ -197,7 +197,7 @@ routerAdd("GET", "/api/venezzia/orders", (e) => {
                 raw_status: status,
                 payment_method: paymentMethod,
                 culqi_charge_id: culqiChargeId,
-                notes: notes,
+                notes: cleanNotes,
                 location_url: locationUrl,
                 hidden: isHidden
             };
@@ -398,6 +398,8 @@ routerAdd("POST", "/api/venezzia/orders/update", (e) => {
         const curAdvance = record.getFloat("advance") || 0;
         const fullTotal = curTotal + curDelivery;
 
+        let isDeliveredAction = false;
+
         if (body.status !== undefined) {
             let st = String(body.status).toLowerCase().trim();
             if (st === "hidden") {
@@ -405,8 +407,10 @@ routerAdd("POST", "/api/venezzia/orders/update", (e) => {
                 st = "pending";
             } else if (st === "delivery_pending" || st === "partial") {
                 st = "pending";
-            } else if (st !== "paid" && st !== "delivered" && st !== "cancelled") {
-                st = "pending";
+            }
+
+            if (st === "delivered") {
+                isDeliveredAction = true;
             }
 
             record.set("status", st);
@@ -424,12 +428,37 @@ routerAdd("POST", "/api/venezzia/orders/update", (e) => {
 
         if (body.total !== undefined) record.set("total", parseFloat(body.total) || 0);
         if (body.hidden !== undefined) record.set("hidden", Boolean(body.hidden));
-        if (body.notes !== undefined) record.set("notes", String(body.notes));
+
+        let currentNotes = body.notes !== undefined ? String(body.notes) : (record.getString("notes") || "");
+        if (isDeliveredAction) {
+            if (!currentNotes.includes("[ENTREGADO]")) {
+                currentNotes = (currentNotes ? currentNotes + " " : "") + "[ENTREGADO]";
+            }
+        } else if (body.status !== undefined && body.status !== "delivered") {
+            currentNotes = currentNotes.replace(/\[ENTREGADO\]/g, "").trim();
+        }
+        record.set("notes", currentNotes);
+
         if (body.customer_address !== undefined) record.set("customer_address", String(body.customer_address));
         if (body.customer_phone !== undefined) record.set("customer_phone", String(body.customer_phone));
         if (body.customer_name !== undefined) record.set("customer_name", String(body.customer_name));
 
-        $app.save(record);
+        try {
+            $app.save(record);
+        } catch (saveErr) {
+            const errStr = saveErr.toString();
+            // Si la base de datos de PocketBase rechaza 'delivered' por restricción de Select antiguo
+            if (errStr.includes("status: Invalid value") || errStr.includes("delivered")) {
+                // Se marca internamente con status válido y bandera en notes para garantizar éxito
+                record.set("status", "paid");
+                if (!currentNotes.includes("[ENTREGADO]")) {
+                    record.set("notes", (currentNotes ? currentNotes + " " : "") + "[ENTREGADO]");
+                }
+                $app.save(record);
+            } else {
+                throw saveErr;
+            }
+        }
 
         return e.json(200, {
             status: "success",
