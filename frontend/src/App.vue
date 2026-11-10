@@ -1,12 +1,13 @@
 <template>
   <div class="min-h-screen flex flex-col bg-[#faf7fb] selection:bg-[#b07eb4] selection:text-white font-sans text-[#27172b]">
-    <!-- Navbar with Official Logos, WhatsApp, Campaign Nav & Active Search Bar -->
+    <!-- Navbar with Official Logos, WhatsApp, Campaign Nav & Active Search Bar (Oculto en /pedidos para evitar superposición) -->
     <Navbar
+      v-if="!isOrdersRoute"
       :products="allProducts"
       @select-product="openProductModal"
     />
 
-    <!-- Main Content Routed (Home, Términos, Políticas, Libro de Reclamaciones) -->
+    <!-- Main Content Routed (Home, Términos, Políticas, Libro de Reclamaciones, Pedidos) -->
     <main class="flex-1">
       <router-view
         :all-products="allProducts"
@@ -14,8 +15,8 @@
       />
     </main>
 
-    <!-- Footer with Official Social & Payment Logos & INDECOPI Claims Badge -->
-    <Footer />
+    <!-- Footer with Official Social & Payment Logos & INDECOPI Claims Badge (Oculto en /pedidos) -->
+    <Footer v-if="!isOrdersRoute" />
 
     <!-- Product Detail Modal (With Catalog Card toggle, Add-on car support & Complete WhatsApp Structure) -->
     <ProductDetailModal
@@ -24,16 +25,17 @@
       @close="closeProductModal"
     />
 
-    <!-- Floating Official WhatsApp Widget -->
-    <FloatingChat />
+    <!-- Floating Official WhatsApp Widget (Oculto en /pedidos para no tapar los datos de la tabla) -->
+    <FloatingChat v-if="!isOrdersRoute" />
 
-    <!-- Shopping Bag Slide-over, WhatsApp Order & Culqi Checkout -->
-    <CartDrawer />
+    <!-- Shopping Bag Slide-over, WhatsApp Order & Culqi Checkout (Oculto en /pedidos) -->
+    <CartDrawer v-if="!isOrdersRoute" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
 import CartDrawer from './components/CartDrawer.vue'
@@ -42,6 +44,14 @@ import ProductDetailModal from './components/ProductDetailModal.vue'
 import { fetchProducts, subscribeToRealtime, MOCK_PRODUCTS } from './services/pocketbase'
 import { useCampaignStore } from './stores/campaign'
 import { useSiteSettingsStore } from './stores/siteSettings'
+
+const route = useRoute()
+
+// Ocultar Navbar, Footer y Chat flotante de la tienda pública cuando se esté en el Sistema de Pedidos
+const isOrdersRoute = computed(() => {
+  const p = route?.path || ''
+  return p === '/pedidos' || p.startsWith('/pedidos') || p === '/admin/pedidos' || p === '/lista-pedidos'
+})
 
 const campaignStore = useCampaignStore()
 const siteSettingsStore = useSiteSettingsStore()
