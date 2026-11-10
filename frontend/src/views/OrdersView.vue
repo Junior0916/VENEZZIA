@@ -165,6 +165,7 @@
               <option value="active">TODOS ACTIVOS (Sin Ocultos)</option>
               <option value="pending">PENDIENTE DE PAGO</option>
               <option value="partial">CON ADELANTO (PAGO PARCIAL)</option>
+              <option value="delivery_pending">DELIVERY PENDIENTE (SOLO SALDO DE ENVÍO)</option>
               <option value="paid">PAGADO (100%)</option>
               <option value="delivered">ENTREGADO</option>
               <option value="hidden">OCULTOS / ARCHIVADOS</option>
@@ -257,6 +258,22 @@
         >
           <span>CON ADELANTO</span>
           <span class="bg-white/25 px-2 py-0.5 rounded text-[11px] font-extrabold">{{ stats.partial }}</span>
+        </button>
+
+        <!-- DELIVERY PENDIENTE -->
+        <button
+          @click="toggleStatusFilter('delivery_pending')"
+          :class="[
+            'px-3.5 py-1.5 rounded-md font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shadow-xs',
+            filters.status === 'delivery_pending'
+              ? 'bg-[#d97706] text-white ring-2 ring-[#d97706] ring-offset-1'
+              : 'bg-[#d97706]/90 hover:bg-[#d97706] text-white'
+          ]"
+          title="Pedidos con arreglos florales pagados, pero con costo de delivery pendiente de abono"
+        >
+          <Truck class="w-3.5 h-3.5" />
+          <span>DELIVERY PENDIENTE</span>
+          <span class="bg-white/25 px-2 py-0.5 rounded text-[11px] font-extrabold">{{ stats.delivery_pending }}</span>
         </button>
 
         <!-- PAGADOS -->
@@ -561,40 +578,50 @@
 
                   <!-- ESTADO BADGE -->
                   <td class="py-2.5 px-3 text-center whitespace-nowrap">
-                    <!-- PAGADO -->
+                    <!-- OCULTO / ARCHIVADO -->
                     <span
-                      v-if="order.status === 'paid' && !order.hidden"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-100 text-emerald-800 text-[10px] font-extrabold tracking-wider uppercase border border-emerald-300"
+                      v-if="order.hidden"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-gray-200 text-gray-700 text-[10px] font-extrabold tracking-wider uppercase border border-gray-300"
                     >
-                      <CheckCircle2 class="w-3 h-3 text-emerald-700" />
-                      <span>PAGADO</span>
-                    </span>
-
-                    <!-- CON ADELANTO (PAGO PARCIAL) -->
-                    <span
-                      v-else-if="order.advance > 0 && order.balance > 0 && !order.hidden"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-amber-100 text-amber-800 text-[10px] font-extrabold tracking-wider uppercase border border-amber-300"
-                    >
-                      <Clock class="w-3 h-3 text-amber-700" />
-                      <span>ADELANTO</span>
+                      <EyeOff class="w-3 h-3 text-gray-600" />
+                      <span>OCULTO</span>
                     </span>
 
                     <!-- ENTREGADO -->
                     <span
-                      v-else-if="order.status === 'delivered' && !order.hidden"
+                      v-else-if="order.status === 'delivered'"
                       class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-blue-100 text-blue-800 text-[10px] font-extrabold tracking-wider uppercase border border-blue-300"
                     >
                       <Truck class="w-3 h-3 text-blue-700" />
                       <span>ENTREGADO</span>
                     </span>
 
-                    <!-- OCULTO / ARCHIVADO -->
+                    <!-- DELIVERY PENDIENTE (Productos pagados, delivery pendiente de cobro) -->
                     <span
-                      v-else-if="order.hidden"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-gray-200 text-gray-700 text-[10px] font-extrabold tracking-wider uppercase border border-gray-300"
+                      v-else-if="order.status === 'delivery_pending' || (order.advance >= order.products_total && order.delivery_cost > 0 && order.balance > 0)"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-amber-100 text-amber-900 text-[10px] font-extrabold tracking-wider uppercase border border-amber-300 shadow-2xs"
+                      :title="`Productos 100% pagados. Saldo pendiente por delivery: S/ ${order.balance.toFixed(2)}`"
                     >
-                      <EyeOff class="w-3 h-3 text-gray-600" />
-                      <span>OCULTO</span>
+                      <Truck class="w-3 h-3 text-amber-700" />
+                      <span>DELIVERY PEND.</span>
+                    </span>
+
+                    <!-- PAGADO (100% CANCELADO, SALDO 0) -->
+                    <span
+                      v-else-if="(order.status === 'paid' || order.balance <= 0) && order.total > 0"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-100 text-emerald-800 text-[10px] font-extrabold tracking-wider uppercase border border-emerald-300"
+                    >
+                      <CheckCircle2 class="w-3 h-3 text-emerald-700" />
+                      <span>PAGADO</span>
+                    </span>
+
+                    <!-- CON ADELANTO (PAGO PARCIAL DE PRODUCTOS) -->
+                    <span
+                      v-else-if="order.advance > 0 && order.balance > 0"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-amber-50 text-amber-800 text-[10px] font-extrabold tracking-wider uppercase border border-amber-300"
+                    >
+                      <Clock class="w-3 h-3 text-amber-700" />
+                      <span>ADELANTO</span>
                     </span>
 
                     <!-- PENDIENTE DE PAGO -->
@@ -900,6 +927,23 @@
                               </span>
                             </div>
                           </div>
+
+                          <!-- Botón rápido directo si solo resta pagar el delivery -->
+                          <div
+                            v-if="order.delivery_cost > 0 && order.advance >= order.products_total && order.balance > 0"
+                            class="pt-1"
+                          >
+                            <button
+                              type="button"
+                              @click="payDeliveryAndClearBalance(order)"
+                              :disabled="isSavingFinancials[order.id]"
+                              class="w-full py-2 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                              title="Registrar pago del delivery por Yape/Plin y pasar a PAGADO"
+                            >
+                              <Truck class="w-3.5 h-3.5" />
+                              <span>Cobrar Delivery (+S/ {{ order.balance.toFixed(2) }}) → Marcar PAGADO</span>
+                            </button>
+                          </div>
                         </div>
 
                         <!-- CARD 3: ACCIONES RÁPIDAS DE ESTADO Y COMUNICACIÓN -->
@@ -960,7 +1004,7 @@
                               <span>Escribir por WhatsApp</span>
                             </a>
                             <p class="text-[10px] text-gray-400 text-center mt-1">
-                              {{ (order.status === 'paid' || order.balance <= 0) ? 'Mensaje configurado: Consulta de método de delivery' : 'Mensaje configurado: Saldo pendiente y anticipo' }}
+                              {{ (order.advance >= order.products_total && order.delivery_cost > 0 && order.balance > 0) ? 'Mensaje: Saldo pendiente por delivery' : (order.balance <= 0 ? 'Mensaje: Pedido 100% Pagado' : 'Mensaje: Saldo pendiente y anticipo') }}
                             </p>
                           </div>
 
@@ -1264,7 +1308,8 @@
               class="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs font-semibold focus:border-blue-500 focus:outline-none"
             >
               <option value="pending">PENDIENTE DE PAGO</option>
-              <option value="paid">PAGADO</option>
+              <option value="delivery_pending">DELIVERY PENDIENTE (SOLO SALDO DE ENVÍO)</option>
+              <option value="paid">PAGADO (100%)</option>
               <option value="delivered">ENTREGADO</option>
               <option value="hidden">OCULTO / ARCHIVADO</option>
             </select>
@@ -1407,6 +1452,7 @@ const orders = ref([])
 const stats = reactive({
   pending: 0,
   partial: 0,
+  delivery_pending: 0,
   paid: 0,
   delivered: 0,
   hidden: 0,
@@ -1695,6 +1741,28 @@ async function saveFinancials(order) {
   }
 }
 
+// 1-Clic para cobrar el delivery acordado y dejar el pedido 100% pagado (saldo 0)
+async function payDeliveryAndClearBalance(order) {
+  const delivery = Number(editingDelivery[order.id] ?? order.delivery_cost)
+  const fullTotal = order.products_total + delivery
+  editingAdvance[order.id] = fullTotal
+
+  isSavingFinancials[order.id] = true
+  try {
+    await updateOrder({
+      id: order.id,
+      delivery_cost: delivery,
+      advance: fullTotal,
+      status: 'paid'
+    })
+    await loadOrders()
+  } catch (err) {
+    alert('Error al cobrar delivery: ' + err.message)
+  } finally {
+    isSavingFinancials[order.id] = false
+  }
+}
+
 // Soft-delete (Ocultar)
 async function handleHideOrder(order) {
   try {
@@ -1881,7 +1949,7 @@ function formatOrderTime(dateStr) {
   }
 }
 
-// Pre-fill WhatsApp message (Diferenciado para PAGADO vs PENDIENTE)
+// Pre-fill WhatsApp message (Diferenciado para DELIVERY PENDIENTE vs 100% PAGADO vs PENDIENTE)
 function buildWhatsAppLink(order) {
   const phone = (order.customer_phone || '').replace(/\D/g, '')
   const intlPhone = phone.startsWith('51') ? phone : (phone ? `51${phone}` : '')
@@ -1889,13 +1957,38 @@ function buildWhatsAppLink(order) {
   const cod = `VZ-${order.id.substring(0, 6).toUpperCase()}`
   let lines = []
 
-  const isPaid = order.status === 'paid' || (order.balance <= 0 && order.total > 0)
+  const isDeliveryPending = (order.advance >= order.products_total && order.delivery_cost > 0 && order.balance > 0)
+  const isFullyPaid = (order.balance <= 0 && order.total > 0)
 
-  if (isPaid) {
-    // 1. Mensaje para pedidos PAGADOS (Culqi o 100% abonado)
+  if (isDeliveryPending) {
+    // 1. Mensaje para pedidos con productos 100% pagados y solo delivery pendiente
     lines.push(`¡Hola ${order.customer_name}! Te saludamos de Venezzia Detalles. 🌸`)
     lines.push(``)
-    lines.push(`Confirmamos la recepción de tu compra: *Pedido ${cod}*`)
+    lines.push(`Confirmamos tu compra: *Pedido ${cod}*`)
+    lines.push(``)
+
+    if (order.items && order.items.length) {
+      lines.push(`*Detalle de tu detalle floral:*`)
+      order.items.forEach(it => {
+        lines.push(`- ${getItemQty(it)}x ${it.name || it.producto || 'Detalle Floral'}`)
+      })
+      lines.push(``)
+    }
+
+    lines.push(`*Productos:* S/ ${order.products_total.toFixed(2)} (✅ Pagado con éxito)`)
+    lines.push(`*Costo de Envío / Delivery:* S/ ${order.delivery_cost.toFixed(2)}`)
+    lines.push(`*Saldo pendiente por delivery:* S/ ${order.balance.toFixed(2)}`)
+    lines.push(``)
+    lines.push(`Para programar el despacho con nuestro motorizado a *${order.customer_address || 'tu dirección'}*, puedes cancelar los S/ ${order.balance.toFixed(2)} del delivery mediante Yape o Plin al *955 083 400*.`)
+    lines.push(``)
+    lines.push(`(O si prefieres enviar a tu propio motorizado o aplicativo como InDrive, indícanoslo para dejar el costo de delivery en S/ 0.00).`)
+    lines.push(``)
+    lines.push(`¡Quedamos atentos a tu confirmación para agendarlo! Muchas gracias. ✨`)
+  } else if (isFullyPaid) {
+    // 2. Mensaje para pedidos 100% PAGADOS (Productos + Delivery si correspondía)
+    lines.push(`¡Hola ${order.customer_name}! Te saludamos de Venezzia Detalles. 🌸`)
+    lines.push(``)
+    lines.push(`Confirmamos la recepción de tu compra: *Pedido ${cod}* (100% CANCELADO)`)
     lines.push(``)
 
     if (order.items && order.items.length) {
@@ -1906,16 +1999,13 @@ function buildWhatsAppLink(order) {
       lines.push(``)
     }
 
-    lines.push(`*Total Pagado:* S/ ${order.total.toFixed(2)} (Pago confirmado)`)
+    lines.push(`*Total Pagado:* S/ ${order.total.toFixed(2)} (Pago confirmado ✅)`)
+    lines.push(``)
 
-    if (order.delivery_cost > 0 && order.balance > 0) {
-      lines.push(`*Costo de Delivery:* S/ ${order.delivery_cost.toFixed(2)}`)
-      lines.push(`*Saldo pendiente por delivery:* S/ ${order.balance.toFixed(2)}`)
-      lines.push(``)
-      lines.push(`Para la entrega de tu detalle:`)
-      lines.push(`¿Deseas que coordinemos el envío con nuestro motorizado, o prefieres enviar a tu propio motorizado / por aplicativo como InDrive?`)
+    if (order.delivery_cost > 0) {
+      lines.push(`*Dirección de entrega:* ${order.customer_address || 'A coordinar'}`)
+      lines.push(`Tu envío con motorizado ya está confirmado y en programación.`)
     } else {
-      lines.push(``)
       lines.push(`Para coordinar la entrega de tu detalle:`)
       lines.push(`¿Prefieres pasar a recogerlo / enviar a tu propio motorizado, o deseas que te lo enviemos con nuestro motorizado / por aplicativo (ej. InDrive)?`)
     }
@@ -1923,7 +2013,7 @@ function buildWhatsAppLink(order) {
     lines.push(``)
     lines.push(`¡Quedamos atentos a tu confirmación para agendarlo! Muchas gracias. ✨`)
   } else {
-    // 2. Mensaje para pedidos PENDIENTES de pago (Coordinación WhatsApp)
+    // 3. Mensaje para pedidos PENDIENTES o con ADELANTO PARCIAL
     lines.push(`¡Hola ${order.customer_name}! Te saludamos de Venezzia Detalles. 🌸`)
     lines.push(``)
     lines.push(`Te escribimos para coordinar los detalles de tu *Pedido ${cod}*:`)
@@ -1946,7 +2036,7 @@ function buildWhatsAppLink(order) {
     }
 
     lines.push(``)
-    lines.push(`¿Cómo coordinamos el anticipo y horario de despacho? ¡Muchas gracias!`)
+    lines.push(`¿Cómo coordinamos el anticipo y horario de despacho? Puedes yaparnos o plinearnos al *955 083 400*. ¡Muchas gracias!`)
   }
 
   const text = encodeURIComponent(lines.join('\n'))

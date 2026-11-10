@@ -154,9 +154,27 @@ routerAdd("GET", "/api/venezzia/orders", (e) => {
             const finalTotal = Number((productsTotal + deliveryCost).toFixed(2));
             const balance = Math.max(0, Number((finalTotal - effectiveAdvance).toFixed(2)));
 
-            // Si ya no resta saldo y hay monto, marcar como paid
-            if (status === "pending" && balance <= 0 && finalTotal > 0) {
-                status = "paid";
+            // 5. Determinar estado inteligente (Distinción de casos reales):
+            // - Si status === 'delivered': ENTREGADO (se respeta estado final).
+            // - Si balance <= 0: PAGADO (100% cancelado).
+            // - Si balance > 0:
+            //     * Si effectiveAdvance >= productsTotal y deliveryCost > 0: DELIVERY PENDIENTE
+            //       (¡El arreglo floral ya está pagado! Solo falta cobrar el envío).
+            //     * Si effectiveAdvance > 0: CON ADELANTO (abono parcial del producto).
+            //     * Si effectiveAdvance === 0: PENDIENTE DE PAGO.
+            let computedStatus = status;
+            if (status !== "delivered") {
+                if (balance <= 0 && finalTotal > 0) {
+                    computedStatus = "paid";
+                } else if (balance > 0) {
+                    if (effectiveAdvance >= productsTotal && deliveryCost > 0) {
+                        computedStatus = "delivery_pending";
+                    } else if (effectiveAdvance > 0) {
+                        computedStatus = "partial";
+                    } else {
+                        computedStatus = "pending";
+                    }
+                }
             }
 
             const parsed = {
@@ -175,7 +193,8 @@ routerAdd("GET", "/api/venezzia/orders", (e) => {
                 advance: Number(effectiveAdvance.toFixed(2)),
                 balance: Number(balance.toFixed(2)),
                 currency: r.getString("currency") || "PEN",
-                status: status,
+                status: computedStatus,
+                raw_status: status,
                 payment_method: paymentMethod,
                 culqi_charge_id: culqiChargeId,
                 notes: notes,
@@ -196,6 +215,7 @@ routerAdd("GET", "/api/venezzia/orders", (e) => {
         // Contadores globales para KPIs
         let countPending = 0;
         let countPartial = 0;
+        let countDeliveryPending = 0;
         let countPaid = 0;
         let countDelivered = 0;
         let countHidden = 0;
@@ -207,13 +227,14 @@ routerAdd("GET", "/api/venezzia/orders", (e) => {
                 countHidden++;
             } else {
                 totalActive++;
-                if (p.status === "paid") {
-                    countPaid++;
-                } else if (p.status === "delivered") {
+                if (p.status === "delivered") {
                     countDelivered++;
-                } else if (p.advance > 0 && p.balance > 0) {
+                } else if (p.status === "paid" || p.balance <= 0) {
+                    countPaid++;
+                } else if (p.status === "delivery_pending") {
+                    countDeliveryPending++;
+                } else if (p.status === "partial") {
                     countPartial++;
-                    countPending++;
                 } else {
                     countPending++;
                 }
@@ -224,7 +245,8 @@ routerAdd("GET", "/api/venezzia/orders", (e) => {
         const filtered = allParsed.filter(o => {
             if (filterStatus === "active" && o.hidden) return false;
             if (filterStatus === "pending" && (o.status !== "pending" || o.hidden)) return false;
-            if (filterStatus === "partial" && (o.advance <= 0 || o.balance <= 0 || o.hidden)) return false;
+            if (filterStatus === "partial" && (o.status !== "partial" || o.hidden)) return false;
+            if (filterStatus === "delivery_pending" && (o.status !== "delivery_pending" || o.hidden)) return false;
             if (filterStatus === "paid" && (o.status !== "paid" || o.hidden)) return false;
             if (filterStatus === "delivered" && (o.status !== "delivered" || o.hidden)) return false;
             if (filterStatus === "hidden" && !o.hidden) return false;
@@ -260,6 +282,7 @@ routerAdd("GET", "/api/venezzia/orders", (e) => {
             stats: {
                 pending: countPending,
                 partial: countPartial,
+                delivery_pending: countDeliveryPending,
                 paid: countPaid,
                 delivered: countDelivered,
                 hidden: countHidden,
@@ -362,13 +385,21 @@ routerAdd("POST", "/api/venezzia/orders/update", (e) => {
         if (body.delivery_cost !== undefined) record.set("delivery_cost", parseFloat(body.delivery_cost) || 0);
         if (body.advance !== undefined) record.set("advance", parseFloat(body.advance) || 0);
 
+        const curTotal = record.getFloat("total") || 0;
+        const curDelivery = record.getFloat("delivery_cost") || 0;
+        const curAdvance = record.getFloat("advance") || 0;
+        const fullTotal = curTotal + curDelivery;
+
         if (body.status !== undefined) {
             record.set("status", String(body.status));
             // Si se marca como pagado y el adelanto no cubre el total, igualar al total
-            if (body.status === "paid" && (body.advance === undefined || parseFloat(body.advance) === 0)) {
-                const curTotal = record.getFloat("total") || 0;
-                const curDelivery = record.getFloat("delivery_cost") || 0;
-                record.set("advance", curTotal + curDelivery);
+            if (body.status === "paid" && curAdvance < fullTotal && fullTotal > 0) {
+                record.set("advance", fullTotal);
+            }
+        } else {
+            // Si no se envió status explícito, pero el adelanto cubre el 100% del total + delivery
+            if (curAdvance >= fullTotal && fullTotal > 0 && record.getString("status") !== "delivered") {
+                record.set("status", "paid");
             }
         }
 
