@@ -285,6 +285,32 @@
                   </div>
                 </div>
 
+                <!-- Payment Cancellation Notice -->
+                <div
+                  v-if="paymentCancelNotice"
+                  class="p-3 bg-amber-50/95 border border-amber-200/90 rounded-2xl flex items-start gap-2.5 text-xs text-amber-950 shadow-2xs animate-in fade-in"
+                >
+                  <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <Info class="w-3.5 h-3.5 text-amber-700" />
+                  </div>
+                  <div class="flex-1 leading-snug">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-xs text-amber-950">Pago con Culqi cancelado</span>
+                      <button
+                        type="button"
+                        @click="paymentCancelNotice = ''"
+                        class="text-amber-600 hover:text-amber-900 text-[10px] p-0.5 cursor-pointer"
+                        title="Cerrar aviso"
+                      >
+                        <X class="w-3 h-3" />
+                      </button>
+                    </div>
+                    <p class="text-[11px] text-amber-800 mt-0.5">
+                      {{ paymentCancelNotice }}
+                    </p>
+                  </div>
+                </div>
+
                 <!-- Error message if any -->
                 <div v-if="errorMessage" class="text-xs text-rose-700 bg-rose-50 p-3 rounded-xl border border-rose-200 leading-relaxed space-y-1">
                   <div class="flex items-start gap-2">
@@ -346,6 +372,32 @@
               <div class="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-[#eedee9]">
                 <span>Total a Pagar</span>
                 <span class="text-[#27172b] font-bold text-lg">{{ cartStore.formattedTotal }}</span>
+              </div>
+            </div>
+
+            <!-- Payment Cancellation Notice -->
+            <div
+              v-if="paymentCancelNotice"
+              class="p-3 bg-amber-50/95 border border-amber-200/90 rounded-2xl flex items-start gap-2.5 text-xs text-amber-950 shadow-2xs animate-in fade-in"
+            >
+              <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                <Info class="w-3.5 h-3.5 text-amber-700" />
+              </div>
+              <div class="flex-1 leading-snug">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-xs text-amber-950">Pago con Culqi cancelado</span>
+                  <button
+                    type="button"
+                    @click="paymentCancelNotice = ''"
+                    class="text-amber-600 hover:text-amber-900 text-[10px] p-0.5 cursor-pointer"
+                    title="Cerrar aviso"
+                  >
+                    <X class="w-3 h-3" />
+                  </button>
+                </div>
+                <p class="text-[11px] text-amber-800 mt-0.5">
+                  {{ paymentCancelNotice }}
+                </p>
               </div>
             </div>
 
@@ -648,7 +700,8 @@ import {
   RefreshCw,
   Loader2,
   MapPin,
-  ExternalLink
+  ExternalLink,
+  Info
 } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import LocationPickerModal from './LocationPickerModal.vue'
@@ -674,6 +727,7 @@ const customer = reactive({
 
 const processing = ref(false)
 const errorMessage = ref('')
+const paymentCancelNotice = ref('')
 const phoneError = ref('')
 const phoneInputRef = ref(null)
 const shippingFormRef = ref(null)
@@ -900,6 +954,7 @@ function validateForm({ requireEmail = true } = {}) {
 }
 
 function handleWhatsAppOrder() {
+  paymentCancelNotice.value = ''
   if (!validateForm({ requireEmail: false })) {
     return
   }
@@ -909,6 +964,7 @@ function handleWhatsAppOrder() {
 }
 
 async function handleCheckout() {
+  paymentCancelNotice.value = ''
   if (!validateForm({ requireEmail: true })) return
 
   processing.value = true
@@ -968,6 +1024,12 @@ async function handleCheckout() {
         errorMessage.value = msg
         rejectReason.value = msg
         showRejectModal.value = true
+      },
+      onClose: () => {
+        processing.value = false
+        cartStore.preferredMethod = null
+        paymentCancelNotice.value = 'El proceso de pago con tarjeta fue cancelado. Puedes volver a intentarlo o coordinar tu pedido por WhatsApp.'
+        errorMessage.value = ''
       }
     })
   } catch (err) {
@@ -1019,6 +1081,7 @@ watch(
         window.scrollTo(0, 0)
       } else {
         isInputFocused.value = false
+        paymentCancelNotice.value = ''
       }
     }
   }

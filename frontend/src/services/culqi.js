@@ -82,7 +82,8 @@ export async function openCulqiCheckout({
   amount,
   description = 'Pago de productos',
   onToken,
-  onError
+  onError,
+  onClose
 }) {
   try {
     await loadCulqiScript()
@@ -125,33 +126,109 @@ export async function openCulqiCheckout({
       }
     })
 
+    let isFinished = false
+    let isClosed = false
+
+    const triggerClose = () => {
+      if (isFinished || isClosed) return
+      isClosed = true
+      cleanup()
+      if (onClose) {
+        onClose()
+      }
+    }
+
+    const triggerToken = (token) => {
+      isFinished = true
+      cleanup()
+      if (onToken) {
+        onToken(token)
+      }
+    }
+
+    const triggerError = (err) => {
+      isFinished = true
+      cleanup()
+      if (onError) {
+        onError(err)
+      }
+    }
+
+    // 1. Function called by Culqi Checkout v4 when closed by user
+    window.closeCheckout = function () {
+      triggerClose()
+    }
+
+    // 2. postMessage listener from Culqi iframe
+    const messageListener = (event) => {
+      try {
+        const data = event.data
+        if (!data) return
+        if (
+          data === 'closeCheckout' ||
+          data === 'checkout_cerrado' ||
+          data === 'culqi_destroy_checkout' ||
+          (typeof data === 'string' && (data.includes('closeCheckout') || data.includes('checkout_cerrado'))) ||
+          (typeof data === 'object' && (data.type === 'closeCheckout' || data.action === 'close' || data.closeEvent))
+        ) {
+          triggerClose()
+        }
+      } catch (_) {}
+    }
+    window.addEventListener('message', messageListener)
+
+    // 3. Monitor DOM for #culqi-js removal or hide
+    let pollInterval = null
+    let hasSeenCulqi = false
+
+    pollInterval = setInterval(() => {
+      if (isFinished || isClosed) {
+        cleanup()
+        return
+      }
+
+      const culqiEl = document.getElementById('culqi-js') || document.querySelector('.culqi_checkout')
+      if (culqiEl) {
+        hasSeenCulqi = true
+        const style = window.getComputedStyle(culqiEl)
+        if (style.display === 'none' || style.visibility === 'hidden') {
+          triggerClose()
+        }
+      } else if (hasSeenCulqi) {
+        // Culqi was mounted and has now been removed from DOM by user closing
+        triggerClose()
+      }
+    }, 300)
+
+    function cleanup() {
+      if (pollInterval) {
+        clearInterval(pollInterval)
+        pollInterval = null
+      }
+      window.removeEventListener('message', messageListener)
+      if (window.closeCheckout === triggerClose) {
+        window.closeCheckout = null
+      }
+    }
+
     // Callback global de Culqi
     window.culqi = async function () {
       if (window.Culqi.token) {
         const token = window.Culqi.token
         window.Culqi.close()
-        if (onToken) {
-          onToken(token)
-        }
+        triggerToken(token)
       } else if (window.Culqi.order) {
         // En caso de pagos con banca móvil / agentes (CIP)
         const order = window.Culqi.order
         window.Culqi.close()
-        if (onToken) {
-          onToken({ id: order.id, type: 'order', details: order })
-        }
+        triggerToken({ id: order.id, type: 'order', details: order })
       } else {
         const error = window.Culqi.error
         let msg = error?.user_message || error?.message || 'Hubo un error con la pasarela de pagos.'
         if (typeof msg === 'string' && (msg.includes('autenticar') || msg.includes('autenticación'))) {
           msg = 'Esta tarjeta requiere autenticación adicional con el banco emisor (3D Secure). Para pruebas exitosas en modo test de Culqi, utiliza la tarjeta oficial sin reto: 4456 5300 0000 1005 (CVV 111, fecha futura).'
         }
-        if (onError) {
-          onError({ ...error, user_message: msg, message: msg })
-        } else {
-          console.error('[Culqi Error]', error)
-          alert(msg)
-        }
+        triggerError({ ...error, user_message: msg, message: msg })
       }
     }
 
