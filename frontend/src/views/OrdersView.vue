@@ -369,7 +369,7 @@
               </tr>
 
               <!-- Order Rows with Accordion -->
-              <template v-else v-for="order in orders" :key="order.id">
+              <template v-for="order in orders" :key="order.id">
                 <!-- Master Row -->
                 <tr
                   :class="[
@@ -398,7 +398,7 @@
 
                   <!-- Action Buttons -->
                   <td class="py-2.5 px-2 text-center">
-                    <div class="flex items-center justify-center gap-1">
+                    <div class="flex items-center justify-center gap-1.5">
                       <!-- Quick Options Modal / Dropdown Toggle -->
                       <button
                         @click="openOrderActionModal(order)"
@@ -408,14 +408,14 @@
                         <Settings class="w-3.5 h-3.5" />
                       </button>
 
-                      <!-- Direct WhatsApp Action Button -->
+                      <!-- Direct Official WhatsApp Action Button -->
                       <a
                         :href="buildWhatsAppLink(order)"
                         target="_blank"
-                        class="p-1.5 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded shadow-2xs transition-colors"
-                        title="Abrir WhatsApp con el cliente y recordatorio de saldo"
+                        class="p-1.5 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded shadow-2xs transition-all hover:scale-105 flex items-center justify-center"
+                        title="Abrir WhatsApp oficial con mensaje predeterminado"
                       >
-                        <MessageCircle class="w-3.5 h-3.5" />
+                        <IconWhatsApp customClass="w-3.5 h-3.5 text-white fill-current" />
                       </a>
                     </div>
                   </td>
@@ -451,11 +451,18 @@
                     <span v-else class="text-gray-400 italic">Sin teléfono</span>
                   </td>
 
-                  <!-- DISTRITO / CIUDAD -->
-                  <td class="py-2.5 px-3 text-gray-600">
-                    <div class="truncate max-w-[220px]" :title="order.customer_address">
-                      {{ order.customer_address || 'Entrega coordinada' }}
-                    </div>
+                  <!-- DISTRITO / CIUDAD (ENLACE A GOOGLE MAPS DIRECTO) -->
+                  <td class="py-2.5 px-3">
+                    <a
+                      :href="getMapsLink(order)"
+                      target="_blank"
+                      class="group inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 hover:underline max-w-[240px]"
+                      :title="`Abrir en Google Maps: ${order.customer_address}`"
+                    >
+                      <MapPin class="w-3.5 h-3.5 text-rose-500 shrink-0 group-hover:scale-110 transition-transform" />
+                      <span class="truncate">{{ order.customer_address || 'Entrega coordinada' }}</span>
+                      <ExternalLink class="w-3 h-3 shrink-0 opacity-60 group-hover:opacity-100" />
+                    </a>
                   </td>
 
                   <!-- M. PROD -->
@@ -499,7 +506,7 @@
                     </span>
                     <span
                       v-else
-                      class="text-emerald-700 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded text-[10px]"
+                      class="text-emerald-700 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded text-[10px] tracking-wide"
                     >
                       CANCELADO
                     </span>
@@ -568,7 +575,7 @@
                       class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase"
                       title="Coordinación y pago vía WhatsApp"
                     >
-                      <MessageCircle class="w-3 h-3 text-emerald-600" />
+                      <IconWhatsApp customClass="w-3 h-3 text-emerald-600 fill-current" />
                       <span>WhatsApp</span>
                     </span>
                   </td>
@@ -604,22 +611,19 @@
                           </thead>
                           <tbody class="divide-y divide-gray-100 font-medium">
                             <tr v-for="(it, idx) in order.items" :key="idx" class="hover:bg-gray-50/50">
-                              <!-- Foto -->
+                              <!-- Foto (con fallback inteligente a imagen del catálogo) -->
                               <td class="py-2 px-3 text-center">
                                 <img
-                                  v-if="it.image"
-                                  :src="it.image"
+                                  :src="getItemImage(it)"
                                   :alt="it.name || it.producto"
-                                  class="w-10 h-10 object-cover rounded border border-gray-200 mx-auto"
+                                  class="w-11 h-11 object-cover rounded-lg border border-gray-200 mx-auto shadow-2xs"
+                                  loading="lazy"
                                 />
-                                <div v-else class="w-10 h-10 rounded bg-gray-100 flex items-center justify-center mx-auto text-gray-400">
-                                  <Package class="w-5 h-5" />
-                                </div>
                               </td>
 
                               <!-- Detalle -->
                               <td class="py-2 px-3 font-semibold text-gray-800">
-                                <div>{{ it.name || it.producto || 'Detalle Floral Venezzia' }}</div>
+                                <div class="text-xs">{{ it.name || it.producto || 'Detalle Floral Venezzia' }}</div>
                                 <div v-if="it.addon" class="text-[11px] text-purple-700 font-normal">
                                   + {{ it.addon }}
                                 </div>
@@ -627,17 +631,17 @@
 
                               <!-- Unidades -->
                               <td class="py-2 px-3 text-center font-mono font-bold text-gray-800">
-                                {{ it.quantity || it.cantidad || 1 }}
+                                {{ getItemQty(it) }}
                               </td>
 
-                              <!-- Precio Unitario -->
-                              <td class="py-2 px-3 text-right font-mono text-gray-700">
-                                S/ {{ parseFloat(it.price || it.precio_unitario || 0).toFixed(2) }}
+                              <!-- Precio Unitario (Formateado y limpio de S/ NaN) -->
+                              <td class="py-2 px-3 text-right font-mono text-gray-700 font-semibold">
+                                S/ {{ getItemPrice(it, order).toFixed(2) }}
                               </td>
 
                               <!-- Subtotal -->
                               <td class="py-2 px-3 text-right font-mono font-bold text-gray-900">
-                                S/ {{ ((parseFloat(it.price || it.precio_unitario || 0)) * (parseInt(it.quantity || it.cantidad || 1))).toFixed(2) }}
+                                S/ {{ getItemSubtotal(it, order).toFixed(2) }}
                               </td>
                             </tr>
                           </tbody>
@@ -646,43 +650,59 @@
 
                       <!-- 2. LOWER DETAIL SECTION (Delivery Info, GPS, Dedication & Financial Editor) -->
                       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        <!-- CARD 1: ENTREGA Y DEDICATORIA -->
+                        <!-- CARD 1: ENTREGA Y DEDICATORIA (CON ENLACE CLICKLEABLE DIRECTO A MAPS) -->
                         <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-xs space-y-3">
                           <h4 class="text-[11px] font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 border-b pb-2">
                             <MapPin class="w-3.5 h-3.5 text-rose-500" />
                             <span>Datos de Entrega y Dedicatoria</span>
                           </h4>
 
-                          <div class="space-y-1.5 text-xs">
-                            <div class="text-gray-500 text-[11px]">Dirección Completa:</div>
-                            <div class="font-semibold text-gray-800 bg-gray-50 p-2 rounded border border-gray-200">
-                              {{ order.customer_address || 'No especificada' }}
+                          <div class="space-y-2 text-xs">
+                            <div class="flex items-center justify-between text-gray-500 text-[11px] font-bold">
+                              <span>Dirección de Entrega:</span>
+                              <span class="text-blue-600 font-normal text-[10px]">Toca para abrir Maps ↗</span>
                             </div>
 
-                            <!-- Botón GPS si existe -->
+                            <!-- Enlace de dirección que abre en la app o navegador de Maps -->
+                            <a
+                              :href="getMapsLink(order)"
+                              target="_blank"
+                              class="group block bg-blue-50/80 hover:bg-blue-100 p-2.5 rounded-lg border border-blue-200 transition-colors"
+                              title="Toca para abrir esta ubicación en Google Maps (Móvil o PC)"
+                            >
+                              <div class="flex items-start gap-2">
+                                <MapPin class="w-4 h-4 text-rose-500 shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                                <span class="font-semibold text-blue-900 group-hover:underline break-words leading-relaxed">
+                                  {{ order.customer_address || 'Dirección por coordinar' }}
+                                </span>
+                                <ExternalLink class="w-3.5 h-3.5 text-blue-600 shrink-0 opacity-70 group-hover:opacity-100 ml-auto mt-0.5" />
+                              </div>
+                            </a>
+
+                            <!-- Botón GPS Satelital Exacto si existe -->
                             <div v-if="order.location_url" class="pt-1">
                               <a
                                 :href="order.location_url"
                                 target="_blank"
-                                class="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 font-semibold transition-colors"
+                                class="inline-flex items-center gap-1.5 text-xs text-emerald-800 hover:text-emerald-950 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-300 font-bold transition-colors w-full justify-center"
                               >
-                                <Navigation class="w-3.5 h-3.5 text-blue-600" />
-                                <span>Abrir Ubicación GPS en Google Maps</span>
+                                <Navigation class="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Ver Ubicación Satelital GPS Exacta</span>
                                 <ExternalLink class="w-3 h-3 ml-0.5 opacity-60" />
                               </a>
                             </div>
 
                             <!-- Dedicatoria -->
-                            <div class="pt-2">
-                              <div class="text-gray-500 text-[11px] flex items-center gap-1 mb-1">
+                            <div class="pt-1 border-t border-gray-100">
+                              <div class="text-gray-500 text-[11px] flex items-center gap-1 mb-1 font-bold">
                                 <Heart class="w-3 h-3 text-rose-400" />
-                                <span>Dedicatoria en la Tarjeta:</span>
+                                <span>Dedicatoria para la Tarjeta:</span>
                               </div>
-                              <blockquote v-if="order.notes" class="italic text-gray-700 bg-amber-50/70 p-2.5 rounded-lg border-l-4 border-amber-400 text-xs">
+                              <blockquote v-if="order.notes" class="italic text-gray-800 bg-amber-50/70 p-2.5 rounded-lg border-l-4 border-amber-400 text-xs">
                                 "{{ order.notes }}"
                               </blockquote>
-                              <div v-else class="text-gray-400 italic text-[11px]">
-                                Sin dedicatoria registrada
+                              <div v-else class="text-gray-400 italic text-[11px] bg-gray-50 p-2 rounded">
+                                Sin dedicatoria registrada en este pedido
                               </div>
                             </div>
                           </div>
@@ -813,10 +833,23 @@
                               <span>Adelanto Abonado:</span>
                               <span class="font-mono">- S/ {{ (editingAdvance[order.id] ?? order.advance).toFixed(2) }}</span>
                             </div>
-                            <div class="flex justify-between font-bold text-base border-t pt-1 text-rose-600">
+                            <div class="flex justify-between font-bold text-base border-t pt-1">
                               <span>Saldo Restante:</span>
-                              <span class="font-mono">
+                              <span
+                                :class="[
+                                  'font-mono',
+                                  Math.max(0, (order.products_total + (editingDelivery[order.id] ?? order.delivery_cost)) - (editingAdvance[order.id] ?? order.advance)) > 0
+                                    ? 'text-rose-600'
+                                    : 'text-emerald-700'
+                                ]"
+                              >
                                 S/ {{ Math.max(0, (order.products_total + (editingDelivery[order.id] ?? order.delivery_cost)) - (editingAdvance[order.id] ?? order.advance)).toFixed(2) }}
+                                <span
+                                  v-if="Math.max(0, (order.products_total + (editingDelivery[order.id] ?? order.delivery_cost)) - (editingAdvance[order.id] ?? order.advance)) === 0"
+                                  class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded ml-1"
+                                >
+                                  CANCELADO
+                                </span>
                               </span>
                             </div>
                           </div>
@@ -869,16 +902,19 @@
                             </div>
                           </div>
 
-                          <!-- Contactar WhatsApp -->
+                          <!-- Contactar WhatsApp con Icono Oficial -->
                           <div class="pt-2">
                             <a
                               :href="buildWhatsAppLink(order)"
                               target="_blank"
-                              class="w-full py-2.5 px-3 rounded-lg bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-xs"
+                              class="w-full py-2.5 px-3 rounded-lg bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xs hover:scale-[1.01]"
                             >
-                              <MessageCircle class="w-4 h-4" />
+                              <IconWhatsApp customClass="w-4 h-4 text-white fill-current" />
                               <span>Escribir por WhatsApp</span>
                             </a>
+                            <p class="text-[10px] text-gray-400 text-center mt-1">
+                              {{ (order.status === 'paid' || order.balance <= 0) ? 'Mensaje configurado: Consulta de método de delivery' : 'Mensaje configurado: Saldo pendiente y anticipo' }}
+                            </p>
                           </div>
 
                           <!-- Ocultar (Soft Delete) y Eliminar (Hard Delete) -->
@@ -1127,7 +1163,6 @@ import {
   Search,
   X,
   Settings,
-  MessageCircle,
   MapPin,
   Navigation,
   Heart,
@@ -1145,8 +1180,9 @@ import {
   CreditCard,
   ShoppingBag
 } from 'lucide-vue-next'
+import IconWhatsApp from '../components/icons/IconWhatsApp.vue'
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from '../services/orders'
-import { pb } from '../services/pocketbase'
+import { pb, resolveProductImage } from '../services/pocketbase'
 
 // Auth state
 const isAuthenticated = ref(false)
@@ -1263,6 +1299,53 @@ function handleLogout() {
   isAuthenticated.value = false
 }
 
+// Helper para limpiar strings monetarios (ej: "S/ 85.00" -> 85.00)
+function parseCleanNum(val) {
+  if (val === null || val === undefined) return 0
+  if (typeof val === 'number') return isNaN(val) ? 0 : val
+  const cleaned = String(val).replace(/[^0-9.-]/g, '')
+  const num = parseFloat(cleaned)
+  return isNaN(num) ? 0 : num
+}
+
+function getItemPrice(it, order) {
+  const p = parseCleanNum(it.price !== undefined ? it.price : (it.precio_unitario !== undefined ? it.precio_unitario : it.unitPrice))
+  if (p > 0) return p
+  const sub = parseCleanNum(it.subtotal !== undefined ? it.subtotal : it.total)
+  const q = getItemQty(it)
+  if (sub > 0 && q > 0) return sub / q
+  if (order && order.products_total > 0 && (!order.items || order.items.length <= 1)) {
+    return order.products_total / q
+  }
+  return 0
+}
+
+function getItemQty(it) {
+  return parseInt(it.quantity || it.cantidad || 1) || 1
+}
+
+function getItemSubtotal(it, order) {
+  const sub = parseCleanNum(it.subtotal !== undefined ? it.subtotal : it.total)
+  if (sub > 0) return sub
+  return getItemPrice(it, order) * getItemQty(it)
+}
+
+function getItemImage(it) {
+  if (it.image && it.image.length > 5) return it.image
+  return resolveProductImage({ id: it.id, name: it.name || it.producto })
+}
+
+function getMapsLink(order) {
+  if (order.location_url && order.location_url.startsWith('http')) {
+    return order.location_url
+  }
+  const clean = (order.customer_address || '').replace(/\|\s*GPS:[^|]+/g, '').replace(/\|\s*Dedicatoria:[^|]+/g, '').trim()
+  if (clean) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(clean)}`
+  }
+  return '#'
+}
+
 // Load Orders from API
 async function loadOrders() {
   if (!isAuthenticated.value) return
@@ -1337,7 +1420,11 @@ function toggleExpand(orderId) {
 // Quick status change
 async function quickUpdateStatus(order, newStatus) {
   try {
-    await updateOrder({ id: order.id, status: newStatus })
+    const payload = { id: order.id, status: newStatus }
+    if (newStatus === 'paid' && order.balance > 0) {
+      payload.advance = order.total
+    }
+    await updateOrder(payload)
     order.status = newStatus
     await loadOrders()
   } catch (err) {
@@ -1442,38 +1529,73 @@ function formatOrderTime(dateStr) {
   }
 }
 
-// Pre-fill WhatsApp message
+// Pre-fill WhatsApp message (Diferenciado para PAGADO vs PENDIENTE)
 function buildWhatsAppLink(order) {
   const phone = (order.customer_phone || '').replace(/\D/g, '')
   const intlPhone = phone.startsWith('51') ? phone : (phone ? `51${phone}` : '')
 
-  const greeting = `¡Hola ${order.customer_name}! Te saludamos de Venezzia Detalles.`
-  const orderRef = `Pedido VZ-${order.id.substring(0, 6).toUpperCase()}`
+  const cod = `VZ-${order.id.substring(0, 6).toUpperCase()}`
+  let lines = []
 
-  let lines = [
-    greeting,
-    ``,
-    `Te escribimos para coordinar los detalles de tu ${orderRef}:`
-  ]
+  const isPaid = order.status === 'paid' || (order.balance <= 0 && order.total > 0)
 
-  if (order.items && order.items.length) {
-    lines.push(`*Detalle:*`)
-    order.items.forEach(it => {
-      lines.push(`- ${it.quantity || 1}x ${it.name || it.producto || 'Detalle Floral'}`)
-    })
+  if (isPaid) {
+    // 1. Mensaje para pedidos PAGADOS (Culqi o 100% abonado)
+    lines.push(`¡Hola ${order.customer_name}! Te saludamos de Venezzia Detalles. 🌸`)
     lines.push(``)
-  }
+    lines.push(`Confirmamos la recepción de tu compra: *Pedido ${cod}*`)
+    lines.push(``)
 
-  lines.push(`*Total:* S/ ${order.total.toFixed(2)}`)
-  if (order.advance > 0) {
-    lines.push(`*Adelanto recibido:* S/ ${order.advance.toFixed(2)}`)
-    lines.push(`*Saldo pendiente:* S/ ${order.balance.toFixed(2)}`)
+    if (order.items && order.items.length) {
+      lines.push(`*Detalle de tu compra:*`)
+      order.items.forEach(it => {
+        lines.push(`- ${getItemQty(it)}x ${it.name || it.producto || 'Detalle Floral'}`)
+      })
+      lines.push(``)
+    }
+
+    lines.push(`*Total Pagado:* S/ ${order.total.toFixed(2)} (Pago confirmado)`)
+
+    if (order.delivery_cost > 0 && order.balance > 0) {
+      lines.push(`*Costo de Delivery:* S/ ${order.delivery_cost.toFixed(2)}`)
+      lines.push(`*Saldo pendiente por delivery:* S/ ${order.balance.toFixed(2)}`)
+      lines.push(``)
+      lines.push(`Para la entrega de tu detalle:`)
+      lines.push(`¿Deseas que coordinemos el envío con nuestro motorizado, o prefieres enviar a tu propio motorizado / por aplicativo como InDrive?`)
+    } else {
+      lines.push(``)
+      lines.push(`Para coordinar la entrega de tu detalle:`)
+      lines.push(`¿Prefieres pasar a recogerlo / enviar a tu propio motorizado, o deseas que te lo enviemos con nuestro motorizado / por aplicativo (ej. InDrive)?`)
+    }
+
+    lines.push(``)
+    lines.push(`¡Quedamos atentos a tu confirmación para agendarlo! Muchas gracias. ✨`)
   } else {
-    lines.push(`*Saldo pendiente de pago:* S/ ${order.total.toFixed(2)}`)
-  }
+    // 2. Mensaje para pedidos PENDIENTES de pago (Coordinación WhatsApp)
+    lines.push(`¡Hola ${order.customer_name}! Te saludamos de Venezzia Detalles. 🌸`)
+    lines.push(``)
+    lines.push(`Te escribimos para coordinar los detalles de tu *Pedido ${cod}*:`)
+    lines.push(``)
 
-  lines.push(``)
-  lines.push(`¿Deseas que coordinemos el horario de entrega o el comprobante de pago? ¡Muchas gracias!`)
+    if (order.items && order.items.length) {
+      lines.push(`*Detalles seleccionados:*`)
+      order.items.forEach(it => {
+        lines.push(`- ${getItemQty(it)}x ${it.name || it.producto || 'Detalle Floral'}`)
+      })
+      lines.push(``)
+    }
+
+    lines.push(`*Total a pagar:* S/ ${order.total.toFixed(2)}`)
+    if (order.advance > 0) {
+      lines.push(`*Adelanto recibido:* S/ ${order.advance.toFixed(2)}`)
+      lines.push(`*Saldo pendiente:* S/ ${order.balance.toFixed(2)}`)
+    } else {
+      lines.push(`*Saldo pendiente de pago:* S/ ${order.balance.toFixed(2)}`)
+    }
+
+    lines.push(``)
+    lines.push(`¿Cómo coordinamos el anticipo y horario de despacho? ¡Muchas gracias!`)
+  }
 
   const text = encodeURIComponent(lines.join('\n'))
 

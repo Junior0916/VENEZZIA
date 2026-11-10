@@ -1027,10 +1027,12 @@ async function handleCheckout() {
               location_url: customer.mapUrl || '',
               currency: 'PEN',
               items: cartStore.items.map(item => ({
-                id: item.product.id,
-                name: item.product.name,
-                price: item.product.price,
-                quantity: item.quantity
+                id: item.product?.id || '',
+                name: item.product?.addon ? `${item.product.name} (+ ${item.product.addon})` : (item.product?.name || 'Detalle Floral'),
+                price: Number(item.product?.price || 0),
+                quantity: Number(item.quantity || 1),
+                image: item.product?.image || '',
+                subtotal: Number(((item.product?.price || 0) * (item.quantity || 1)).toFixed(2))
               }))
             }
           })

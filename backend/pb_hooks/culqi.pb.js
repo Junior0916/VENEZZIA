@@ -193,15 +193,19 @@ routerAdd("POST", "/api/culqi/charge", (e) => {
                     }
                     record.set("customer_address", fullAddress);
 
-                    // Formato items en JSON estructurado
+                    // Formato items en JSON estructurado limpio
                     const formattedItems = (orderInfo.items || []).map(function(item) {
                         const qty = Number(item.quantity || 1);
                         const unitPrice = Number(item.price || 0);
                         return {
-                            "producto": item.name || "Detalle Floral",
+                            "name": item.name || item.producto || "Detalle Floral",
+                            "producto": item.name || item.producto || "Detalle Floral",
+                            "quantity": qty,
                             "cantidad": qty,
-                            "precio_unitario": "S/ " + unitPrice.toFixed(2),
-                            "subtotal": "S/ " + (unitPrice * qty).toFixed(2)
+                            "price": unitPrice,
+                            "precio_unitario": unitPrice,
+                            "subtotal": Number((unitPrice * qty).toFixed(2)),
+                            "image": item.image || ""
                         };
                     });
                     record.set("items", JSON.stringify(formattedItems.length ? formattedItems : (orderInfo.items || [])));
