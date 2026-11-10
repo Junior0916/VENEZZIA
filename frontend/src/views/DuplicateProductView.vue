@@ -101,16 +101,36 @@
               <span>Gestión de Catálogo Venezzia • Sesión Activa</span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-serif font-bold text-[#27172b] tracking-tight">
-              Organizador y Duplicador de Productos
+              Panel de Catálogo y Productos
             </h1>
             <p class="text-xs sm:text-sm text-gray-500 mt-1 max-w-2xl leading-relaxed">
-              Elige el orden exacto de los productos arrastrándolos con el mouse o clonando productos existentes para no crearlos desde cero.
+              Edita la información de tus productos (precios, fotos, descripciones, contenido y stock), organiza su orden visualmente o crea nuevos lanzamientos.
             </p>
           </div>
 
-          <!-- Environment, PB link & Logout Button -->
-          <div class="flex flex-wrap items-center gap-3">
-            <div class="p-2.5 bg-[#faf5fb] rounded-2xl border border-[#eedee9] text-left shrink-0">
+          <!-- Quick Actions, Server, PB & Logout -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Link to Orders View -->
+            <router-link
+              to="/pedidos"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-[#27172b] to-[#451f4c] text-white text-xs font-semibold hover:opacity-95 transition-all shadow-sm shrink-0"
+              title="Ir al panel de pedidos y clientes"
+            >
+              <ShoppingBag class="w-3.5 h-3.5 text-[#caa35f]" />
+              <span>Ver Pedidos</span>
+            </router-link>
+
+            <!-- New Product Quick Button -->
+            <button
+              @click="openCreateProductModal"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-[#caa35f] text-[#27172b] text-xs font-bold hover:bg-[#d8b475] transition-all shadow-sm shrink-0 cursor-pointer"
+            >
+              <Plus class="w-4 h-4 text-[#27172b]" />
+              <span>+ Nuevo Producto</span>
+            </button>
+
+            <!-- Environment selector -->
+            <div class="p-2 bg-[#faf5fb] rounded-2xl border border-[#eedee9] text-left shrink-0">
               <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Servidor</span>
               <select
                 v-model="targetServer"
@@ -126,30 +146,91 @@
               :href="adminUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-[#27172b] text-white text-xs font-semibold hover:bg-[#3d2444] transition-all shadow-sm shrink-0"
+              class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition-all shadow-2xs shrink-0"
+              title="Abrir base de datos directa en PocketBase"
             >
               <span>PocketBase</span>
-              <ArrowUpRight class="w-3.5 h-3.5 text-[#caa35f]" />
+              <ArrowUpRight class="w-3.5 h-3.5 text-gray-400" />
             </a>
 
             <!-- Cerrar Sesion Button -->
             <button
               @click="logoutAdmin"
-              class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold transition-all shrink-0 cursor-pointer"
+              class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold transition-all shrink-0 cursor-pointer"
               title="Cerrar sesión y bloquear el acceso"
             >
               <LogOut class="w-3.5 h-3.5" />
-              <span>Cerrar Sesión</span>
+              <span>Salir</span>
             </button>
           </div>
         </div>
 
-        <!-- Mode Navigation Tabs: Live vs Duplicar vs Organizar Arrastrando -->
-        <div class="mt-6 flex flex-wrap items-center gap-3">
+        <!-- Mode Navigation Tabs: Catalogo vs Live vs Duplicar vs Organizar Arrastrando vs Visibilidad -->
+        <div class="mt-6 flex flex-wrap items-center gap-2.5">
+          <!-- TAB 1: CATÁLOGO Y EDICIÓN (Default) -->
+          <button
+            @click="activeToolTab = 'catalogo'"
+            :class="[
+              'flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
+              activeToolTab === 'catalogo'
+                ? 'bg-[#27172b] text-white ring-2 ring-[#caa35f]/50 shadow-md'
+                : 'bg-[#faf7fb] border border-[#eedee9] text-gray-600 hover:bg-[#f3edf5]'
+            ]"
+          >
+            <Package class="w-4 h-4 text-[#caa35f]" />
+            <span>Catálogo y Edición</span>
+            <span class="px-2 py-0.5 rounded-full bg-white/20 text-white font-mono text-[10px] ml-1">
+              {{ products.length }}
+            </span>
+          </button>
+
+          <!-- TAB 2: ORGANIZAR ORDEN -->
+          <button
+            @click="activeToolTab = 'reorder'"
+            :class="[
+              'flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
+              activeToolTab === 'reorder'
+                ? 'bg-[#27172b] text-white ring-2 ring-[#caa35f]/50'
+                : 'bg-[#faf7fb] border border-[#eedee9] text-gray-600 hover:bg-[#f3edf5]'
+            ]"
+          >
+            <Move class="w-4 h-4 text-[#caa35f]" />
+            <span>Organizar Orden (Arrastrar)</span>
+          </button>
+
+          <!-- TAB 3: VISIBILIDAD -->
+          <button
+            @click="activeToolTab = 'visibility'; loadCampaignsAdmin()"
+            :class="[
+              'flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
+              activeToolTab === 'visibility'
+                ? 'bg-[#27172b] text-white ring-2 ring-[#caa35f]/50'
+                : 'bg-[#faf7fb] border border-[#eedee9] text-gray-600 hover:bg-[#f3edf5]'
+            ]"
+          >
+            <Eye class="w-4 h-4 text-[#caa35f]" />
+            <span>Visibilidad de Menús</span>
+          </button>
+
+          <!-- TAB 4: DUPLICADOR -->
+          <button
+            @click="activeToolTab = 'duplicate'"
+            :class="[
+              'flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
+              activeToolTab === 'duplicate'
+                ? 'bg-[#27172b] text-white ring-2 ring-[#caa35f]/50'
+                : 'bg-[#faf7fb] border border-[#eedee9] text-gray-600 hover:bg-[#f3edf5]'
+            ]"
+          >
+            <Copy class="w-4 h-4 text-[#caa35f]" />
+            <span>Duplicador Rápido</span>
+          </button>
+
+          <!-- TAB 5: TIKTOK LIVE -->
           <button
             @click="activeToolTab = 'live'"
             :class="[
-              'flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
+              'flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
               activeToolTab === 'live'
                 ? 'bg-[#ff0050] text-white ring-2 ring-[#00f2fe]/60 shadow-md'
                 : 'bg-[#faf7fb] border border-[#eedee9] text-gray-600 hover:bg-[#f3edf5]'
@@ -157,52 +238,13 @@
           >
             <span v-if="siteSettingsStore.isLiveOfferActive" class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
             <Flame v-else class="w-4 h-4 text-[#ff0050]" />
-            <span>Dinámica TikTok Live Flash (Temporizador)</span>
+            <span>TikTok Live Flash</span>
             <span
               v-if="siteSettingsStore.isLiveOfferActive"
               class="px-2 py-0.5 rounded-full bg-black/30 text-white font-mono text-[10px] ml-1"
             >
               {{ siteSettingsStore.formattedLiveTimeLeft }}
             </span>
-          </button>
-
-          <button
-            @click="activeToolTab = 'reorder'"
-            :class="[
-              'flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
-              activeToolTab === 'reorder'
-                ? 'bg-[#27172b] text-white ring-2 ring-[#caa35f]/50'
-                : 'bg-[#faf7fb] border border-[#eedee9] text-gray-600 hover:bg-[#f3edf5]'
-            ]"
-          >
-            <Move class="w-4 h-4 text-[#caa35f]" />
-            <span>Organizar Orden (Arrastrar y Soltar)</span>
-          </button>
-
-          <button
-            @click="activeToolTab = 'visibility'; loadCampaignsAdmin()"
-            :class="[
-              'flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
-              activeToolTab === 'visibility'
-                ? 'bg-[#27172b] text-white ring-2 ring-[#caa35f]/50'
-                : 'bg-[#faf7fb] border border-[#eedee9] text-gray-600 hover:bg-[#f3edf5]'
-            ]"
-          >
-            <Eye class="w-4 h-4 text-[#caa35f]" />
-            <span>Visibilidad (Menús y Productos)</span>
-          </button>
-
-          <button
-            @click="activeToolTab = 'duplicate'"
-            :class="[
-              'flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
-              activeToolTab === 'duplicate'
-                ? 'bg-[#27172b] text-white ring-2 ring-[#caa35f]/50'
-                : 'bg-[#faf7fb] border border-[#eedee9] text-gray-600 hover:bg-[#f3edf5]'
-            ]"
-          >
-            <Copy class="w-4 h-4 text-[#caa35f]" />
-            <span>Duplicador de Productos</span>
           </button>
         </div>
       </div>
@@ -256,9 +298,527 @@
       <div class="space-y-6">
 
         <!-- ========================================== -->
+        <!-- TAB 1: CATÁLOGO Y EDICIÓN DE PRODUCTOS      -->
+        <!-- ========================================== -->
+        <div v-if="activeToolTab === 'catalogo'" class="space-y-6">
+          <!-- Top Stats & New Product Banner -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-[#eedee9] shadow-xs">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#f4eaf6]">
+              <div>
+                <span class="text-[10px] font-bold text-[#caa35f] uppercase tracking-wider block mb-1">
+                  Catálogo Oficial • Gestión Integral
+                </span>
+                <h2 class="text-xl sm:text-2xl font-serif font-bold text-[#27172b]">
+                  Catálogo y Edición de Productos
+                </h2>
+                <p class="text-xs text-gray-500 mt-1 max-w-xl">
+                  Modifica precios, fotos, descripciones, contenido y stock en tiempo real con una interfaz clara y moderna.
+                </p>
+              </div>
+
+              <button
+                @click="openCreateProductModal"
+                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-[#27172b] hover:bg-[#3d2444] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all cursor-pointer shrink-0"
+              >
+                <Plus class="w-4 h-4 text-[#caa35f]" />
+                <span>+ Crear Nuevo Producto</span>
+              </button>
+            </div>
+
+            <!-- Stats Counters -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-6">
+              <div class="p-3.5 rounded-2xl bg-[#faf7fb] border border-[#eedee9]">
+                <div class="text-[10px] uppercase font-bold text-gray-400">Total Productos</div>
+                <div class="text-2xl font-bold text-[#27172b] mt-1">{{ products.length }}</div>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-100">
+                <div class="text-[10px] uppercase font-bold text-emerald-700">En Stock</div>
+                <div class="text-2xl font-bold text-emerald-800 mt-1">{{ inStockCount }}</div>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-100">
+                <div class="text-[10px] uppercase font-bold text-rose-700">Agotados</div>
+                <div class="text-2xl font-bold text-rose-800 mt-1">{{ outOfStockCount }}</div>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100">
+                <div class="text-[10px] uppercase font-bold text-blue-700">Visibles</div>
+                <div class="text-2xl font-bold text-blue-800 mt-1">{{ visibleProductsCount }}</div>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-gray-100/70 border border-gray-200">
+                <div class="text-[10px] uppercase font-bold text-gray-500">Ocultos / Borradores</div>
+                <div class="text-2xl font-bold text-gray-700 mt-1">{{ hiddenProductsCount }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter, Search and View Toolbar -->
+          <div class="bg-white rounded-3xl p-5 border border-[#eedee9] shadow-xs space-y-4">
+            <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+              <!-- Search Bar -->
+              <div class="relative flex-1">
+                <Search class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  v-model="catalogSearchQuery"
+                  placeholder="Buscar producto por nombre, categoría, descripción o contenido..."
+                  class="w-full pl-10 pr-9 py-2.5 rounded-xl border border-gray-200 text-xs text-[#27172b] focus:border-[#965e9b] focus:outline-none"
+                />
+                <button
+                  v-if="catalogSearchQuery"
+                  @click="catalogSearchQuery = ''"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs font-bold p-1 cursor-pointer"
+                  title="Limpiar búsqueda"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <!-- Stock & Visibility Selects + Grid/Table Toggle -->
+              <div class="flex flex-wrap items-center gap-2">
+                <!-- Stock Select -->
+                <select
+                  v-model="catalogStockFilter"
+                  class="px-3 py-2 rounded-xl border border-gray-200 text-xs text-gray-700 bg-[#faf7fb] focus:outline-none cursor-pointer"
+                >
+                  <option value="all">📦 Todos los stocks</option>
+                  <option value="in_stock">🟢 Solo en Stock</option>
+                  <option value="out_of_stock">🔴 Solo Agotados</option>
+                </select>
+
+                <!-- Visibility Select -->
+                <select
+                  v-model="catalogVisibilityFilter"
+                  class="px-3 py-2 rounded-xl border border-gray-200 text-xs text-gray-700 bg-[#faf7fb] focus:outline-none cursor-pointer"
+                >
+                  <option value="all">👁️ Todas las visibilidades</option>
+                  <option value="visible">Mostrar solo Visibles</option>
+                  <option value="hidden">Mostrar solo Ocultos</option>
+                </select>
+
+                <!-- Grid / Table View Switcher -->
+                <div class="flex items-center bg-[#faf7fb] border border-gray-200 rounded-xl p-1 shrink-0">
+                  <button
+                    @click="catalogViewMode = 'grid'"
+                    :class="[
+                      'p-1.5 rounded-lg transition-all cursor-pointer',
+                      catalogViewMode === 'grid' ? 'bg-white text-[#27172b] shadow-xs' : 'text-gray-400 hover:text-gray-600'
+                    ]"
+                    title="Vista en Tarjetas"
+                  >
+                    <LayoutGrid class="w-4 h-4" />
+                  </button>
+                  <button
+                    @click="catalogViewMode = 'table'"
+                    :class="[
+                      'p-1.5 rounded-lg transition-all cursor-pointer',
+                      catalogViewMode === 'table' ? 'bg-white text-[#27172b] shadow-xs' : 'text-gray-400 hover:text-gray-600'
+                    ]"
+                    title="Vista en Tabla Compacta"
+                  >
+                    <List class="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Campaign Filter Pills with Counts -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-[#f4eaf6]">
+              <button
+                v-for="camp in catalogCampaignFilters"
+                :key="camp.id"
+                @click="catalogSelectedCampaign = camp.id"
+                :class="[
+                  'px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0',
+                  catalogSelectedCampaign === camp.id
+                    ? 'bg-[#27172b] text-white shadow-xs'
+                    : 'bg-[#faf7fb] border border-[#eedee9] text-gray-600 hover:bg-[#f3edf5]'
+                ]"
+              >
+                <span>{{ camp.name }}</span>
+                <span
+                  :class="[
+                    'px-1.5 py-0.2 rounded-full text-[10px] font-bold',
+                    catalogSelectedCampaign === camp.id ? 'bg-[#caa35f] text-[#27172b]' : 'bg-gray-200/70 text-gray-600'
+                  ]"
+                >
+                  {{ getProductCountForFilter(camp.id) }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Product Cards Grid View -->
+          <div
+            v-if="catalogViewMode === 'grid' && filteredCatalogProducts.length > 0"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+          >
+            <div
+              v-for="prod in filteredCatalogProducts"
+              :key="prod.id"
+              class="bg-white rounded-3xl p-4 border border-[#eedee9] shadow-xs hover:shadow-md transition-all flex flex-col justify-between group"
+            >
+              <div>
+                <!-- Image Container with Badges -->
+                <div class="aspect-square relative rounded-2xl overflow-hidden bg-[#faf7fb] border border-[#f4eaf6] mb-3">
+                  <img
+                    v-if="prod.displayImage"
+                    :src="prod.displayImage"
+                    :alt="prod.name"
+                    class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <div v-else class="w-full h-full flex items-center justify-center text-gray-300">
+                    <Package class="w-10 h-10" />
+                  </div>
+
+                  <!-- Campaign Pill (Top-Left) -->
+                  <div class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#27172b]/85 backdrop-blur-xs text-white shadow-xs">
+                    {{ getCampaignName(prod.campaign) }}
+                  </div>
+
+                  <!-- Stock Badge (Top-Right) -->
+                  <div class="absolute top-2.5 right-2.5 flex flex-col items-end gap-1">
+                    <div
+                      :class="[
+                        'px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider shadow-xs backdrop-blur-xs',
+                        prod.in_stock !== false
+                          ? 'bg-emerald-500/90 text-white'
+                          : 'bg-rose-500/90 text-white'
+                      ]"
+                    >
+                      {{ prod.in_stock !== false ? 'En Stock' : 'Agotado' }}
+                    </div>
+
+                    <!-- Hidden Badge if Inactive -->
+                    <div
+                      v-if="prod.is_active === false"
+                      class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-900/80 text-gray-200 shadow-xs backdrop-blur-xs"
+                    >
+                      Oculto en Tienda
+                    </div>
+                  </div>
+
+                  <!-- Bottom Badges: Destacado / Addon Car / Descuento -->
+                  <div class="absolute bottom-2.5 left-2.5 flex items-center gap-1">
+                    <span
+                      v-if="prod.featured"
+                      class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-amber-950 shadow-xs flex items-center gap-1"
+                    >
+                      <Star class="w-3 h-3 fill-amber-950" />
+                      <span>Destacado</span>
+                    </span>
+                    <span
+                      v-if="prod.addon_car"
+                      class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white shadow-xs flex items-center gap-1"
+                    >
+                      <Car class="w-3 h-3" />
+                      <span>Auto</span>
+                    </span>
+                  </div>
+
+                  <!-- Discount % Badge if compare_at_price > price -->
+                  <div
+                    v-if="prod.compare_at_price && Number(prod.compare_at_price) > Number(prod.price)"
+                    class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-[#ff0050] text-white shadow-xs"
+                  >
+                    -{{ Math.round((1 - Number(prod.price) / Number(prod.compare_at_price)) * 100) }}%
+                  </div>
+                </div>
+
+                <!-- Product Details -->
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-[10px] font-bold tracking-wider uppercase text-[#965e9b] truncate">
+                      {{ prod.category || 'General' }}
+                    </span>
+                    <span class="text-[10px] text-gray-400 font-mono shrink-0">
+                      #{{ prod.order || 1 }}
+                    </span>
+                  </div>
+
+                  <h3 class="text-sm font-serif font-bold text-[#27172b] line-clamp-2 leading-snug group-hover:text-[#965e9b] transition-colors">
+                    {{ prod.name }}
+                  </h3>
+
+                  <!-- Prices -->
+                  <div class="flex items-baseline gap-2 pt-0.5">
+                    <span class="text-base font-bold text-[#27172b]">
+                      S/ {{ Number(prod.price).toFixed(2) }}
+                    </span>
+                    <span
+                      v-if="prod.compare_at_price && Number(prod.compare_at_price) > Number(prod.price)"
+                      class="text-xs text-gray-400 line-through"
+                    >
+                      S/ {{ Number(prod.compare_at_price).toFixed(2) }}
+                    </span>
+                  </div>
+
+                  <!-- Description preview -->
+                  <p v-if="prod.description" class="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">
+                    {{ prod.description }}
+                  </p>
+
+                  <!-- Items included summary -->
+                  <div v-if="prod.items_included" class="text-[10px] text-gray-400 flex items-center gap-1 pt-0.5">
+                    <CheckSquare class="w-3 h-3 text-[#caa35f]" />
+                    <span>{{ getItemsCount(prod) }} elementos incluidos</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Toggles & Action Buttons -->
+              <div class="mt-4 pt-3 border-t border-[#f4eaf6] space-y-2.5">
+                <!-- Inline Quick 1-Click Toggles -->
+                <div class="grid grid-cols-2 gap-2">
+                  <!-- Stock Quick Toggle -->
+                  <button
+                    @click="toggleProductStock(prod)"
+                    :disabled="savingStockProdId === prod.id"
+                    :class="[
+                      'w-full py-1.5 px-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border',
+                      prod.in_stock !== false
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                        : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                    ]"
+                    :title="prod.in_stock !== false ? 'Clic para marcar como Agotado' : 'Clic para marcar como En Stock'"
+                  >
+                    <RefreshCw v-if="savingStockProdId === prod.id" class="w-3 h-3 animate-spin text-gray-500" />
+                    <span v-else class="w-2 h-2 rounded-full shrink-0" :class="prod.in_stock !== false ? 'bg-emerald-500' : 'bg-rose-500'"></span>
+                    <span class="truncate">{{ prod.in_stock !== false ? 'En Stock' : 'Agotado' }}</span>
+                  </button>
+
+                  <!-- Visibility Quick Toggle -->
+                  <button
+                    @click="toggleProductActive(prod)"
+                    :disabled="savingProductActiveId === prod.id"
+                    :class="[
+                      'w-full py-1.5 px-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border',
+                      prod.is_active !== false
+                        ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
+                        : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200'
+                    ]"
+                    :title="prod.is_active !== false ? 'Clic para ocultar en la tienda' : 'Clic para hacer visible'"
+                  >
+                    <RefreshCw v-if="savingProductActiveId === prod.id" class="w-3 h-3 animate-spin text-gray-500" />
+                    <template v-else>
+                      <Eye v-if="prod.is_active !== false" class="w-3 h-3 text-blue-600 shrink-0" />
+                      <EyeOff v-else class="w-3 h-3 text-gray-500 shrink-0" />
+                    </template>
+                    <span class="truncate">{{ prod.is_active !== false ? 'Visible' : 'Oculto' }}</span>
+                  </button>
+                </div>
+
+                <!-- Primary Action Buttons Row -->
+                <div class="flex items-center gap-1.5">
+                  <!-- EDIT BUTTON (Primary) -->
+                  <button
+                    @click="openEditProductModal(prod)"
+                    class="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-[#27172b] to-[#451f4c] text-white text-xs font-bold hover:from-[#351a3b] hover:to-[#572460] transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                  >
+                    <Edit3 class="w-3.5 h-3.5 text-[#caa35f]" />
+                    <span>Editar</span>
+                  </button>
+
+                  <!-- DUPLICATE BUTTON -->
+                  <button
+                    @click="openDuplicateModal(prod)"
+                    class="p-2 rounded-xl border border-gray-200 hover:border-[#caa35f] text-gray-600 hover:text-[#27172b] hover:bg-[#faf7fb] transition-all cursor-pointer"
+                    title="Duplicar / Clonar este producto"
+                  >
+                    <Copy class="w-3.5 h-3.5" />
+                  </button>
+
+                  <!-- VIEW IN STORE BUTTON -->
+                  <a
+                    :href="`/?prod=${prod.id}`"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="p-2 rounded-xl border border-gray-200 hover:border-[#965e9b] text-gray-600 hover:text-[#965e9b] hover:bg-[#faf7fb] transition-all"
+                    title="Ver cómo se ve en la tienda pública"
+                  >
+                    <ExternalLink class="w-3.5 h-3.5" />
+                  </a>
+
+                  <!-- DELETE BUTTON -->
+                  <button
+                    @click="confirmDeleteProduct(prod)"
+                    class="p-2 rounded-xl border border-rose-200 text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition-all cursor-pointer"
+                    title="Eliminar este producto"
+                  >
+                    <Trash2 class="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Table View -->
+          <div
+            v-else-if="catalogViewMode === 'table' && filteredCatalogProducts.length > 0"
+            class="bg-white rounded-3xl border border-[#eedee9] shadow-xs overflow-hidden"
+          >
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-[#faf7fb] border-b border-[#eedee9] text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+                    <th class="py-3 px-4">Producto</th>
+                    <th class="py-3 px-4">Campaña / Categoría</th>
+                    <th class="py-3 px-4">Precio</th>
+                    <th class="py-3 px-4 text-center">Stock</th>
+                    <th class="py-3 px-4 text-center">Visibilidad</th>
+                    <th class="py-3 px-4 text-center">Orden</th>
+                    <th class="py-3 px-4 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[#f4eaf6]">
+                  <tr
+                    v-for="prod in filteredCatalogProducts"
+                    :key="prod.id"
+                    class="hover:bg-[#faf7fb]/70 transition-colors"
+                  >
+                    <!-- Product Thumb & Name -->
+                    <td class="py-3 px-4">
+                      <div class="flex items-center gap-3">
+                        <img
+                          v-if="prod.displayImage"
+                          :src="prod.displayImage"
+                          :alt="prod.name"
+                          class="w-12 h-12 rounded-xl object-cover border border-[#eedee9] shrink-0"
+                        />
+                        <div v-else class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 shrink-0">
+                          <Package class="w-5 h-5" />
+                        </div>
+                        <div class="min-w-0 max-w-xs sm:max-w-md">
+                          <div class="font-bold text-[#27172b] truncate">{{ prod.name }}</div>
+                          <div class="text-[10px] text-gray-400 font-mono">ID: {{ prod.id }}</div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- Campaign & Category -->
+                    <td class="py-3 px-4">
+                      <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#27172b]/10 text-[#27172b] mb-0.5">
+                        {{ getCampaignName(prod.campaign) }}
+                      </span>
+                      <div class="text-[11px] text-gray-500">{{ prod.category || 'General' }}</div>
+                    </td>
+
+                    <!-- Price -->
+                    <td class="py-3 px-4 font-bold text-[#27172b] whitespace-nowrap">
+                      <div>S/ {{ Number(prod.price).toFixed(2) }}</div>
+                      <div
+                        v-if="prod.compare_at_price && Number(prod.compare_at_price) > Number(prod.price)"
+                        class="text-[10px] text-gray-400 line-through"
+                      >
+                        S/ {{ Number(prod.compare_at_price).toFixed(2) }}
+                      </div>
+                    </td>
+
+                    <!-- Stock Toggle -->
+                    <td class="py-3 px-4 text-center whitespace-nowrap">
+                      <button
+                        @click="toggleProductStock(prod)"
+                        :disabled="savingStockProdId === prod.id"
+                        :class="[
+                          'px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors cursor-pointer',
+                          prod.in_stock !== false
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                        ]"
+                      >
+                        <RefreshCw v-if="savingStockProdId === prod.id" class="w-3 h-3 animate-spin inline mr-1 text-gray-400" />
+                        <span>{{ prod.in_stock !== false ? 'En Stock' : 'Agotado' }}</span>
+                      </button>
+                    </td>
+
+                    <!-- Visibility Toggle -->
+                    <td class="py-3 px-4 text-center whitespace-nowrap">
+                      <button
+                        @click="toggleProductActive(prod)"
+                        :disabled="savingProductActiveId === prod.id"
+                        :class="[
+                          'px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors cursor-pointer',
+                          prod.is_active !== false
+                            ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
+                            : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200'
+                        ]"
+                      >
+                        <RefreshCw v-if="savingProductActiveId === prod.id" class="w-3 h-3 animate-spin inline mr-1 text-gray-400" />
+                        <span>{{ prod.is_active !== false ? 'Visible' : 'Oculto' }}</span>
+                      </button>
+                    </td>
+
+                    <!-- Order -->
+                    <td class="py-3 px-4 text-center font-mono font-bold text-gray-600 whitespace-nowrap">
+                      #{{ prod.order || 1 }}
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="py-3 px-4 text-right whitespace-nowrap">
+                      <div class="flex items-center justify-end gap-1.5">
+                        <button
+                          @click="openEditProductModal(prod)"
+                          class="px-2.5 py-1.5 rounded-xl bg-[#27172b] hover:bg-[#3d2444] text-white text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          <Edit3 class="w-3 h-3 text-[#caa35f]" />
+                          <span>Editar</span>
+                        </button>
+
+                        <button
+                          @click="openDuplicateModal(prod)"
+                          class="p-1.5 rounded-xl border border-gray-200 hover:border-[#caa35f] text-gray-600 hover:text-[#27172b] transition-all cursor-pointer"
+                          title="Duplicar"
+                        >
+                          <Copy class="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          @click="confirmDeleteProduct(prod)"
+                          class="p-1.5 rounded-xl border border-rose-200 text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition-all cursor-pointer"
+                          title="Eliminar"
+                        >
+                          <Trash2 class="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div
+            v-else
+            class="text-center py-16 bg-white rounded-3xl border border-[#eedee9] shadow-xs px-4"
+          >
+            <div class="w-14 h-14 rounded-2xl bg-[#faf7fb] text-gray-400 flex items-center justify-center mx-auto mb-3">
+              <Package class="w-7 h-7" />
+            </div>
+            <h3 class="text-sm font-bold text-[#27172b]">No se encontraron productos</h3>
+            <p class="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
+              No hay productos que coincidan con la búsqueda o con los filtros activos.
+            </p>
+            <div class="mt-4 flex items-center justify-center gap-2">
+              <button
+                @click="catalogSearchQuery = ''; catalogSelectedCampaign = 'all'; catalogStockFilter = 'all'; catalogVisibilityFilter = 'all'"
+                class="px-4 py-2 rounded-xl bg-[#27172b] text-white text-xs font-semibold hover:bg-[#3d2444] transition-colors cursor-pointer"
+              >
+                Limpiar Filtros
+              </button>
+              <button
+                @click="openCreateProductModal"
+                class="px-4 py-2 rounded-xl bg-[#caa35f] text-[#27172b] text-xs font-bold hover:bg-[#d8b475] transition-colors cursor-pointer"
+              >
+                + Crear Producto
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
         <!-- TAB 0: DINÁMICA TIKTOK LIVE FLASH (TEMPORIZADOR) -->
         <!-- ========================================== -->
-        <div v-if="activeToolTab === 'live'" class="space-y-6">
+        <div v-else-if="activeToolTab === 'live'" class="space-y-6">
           <!-- Live Active Status & Urgent Timer Card -->
           <div
             v-if="siteSettingsStore.isLiveOfferActive"
@@ -682,6 +1242,15 @@
                 <span class="text-[10px] text-gray-400 font-mono">Posición: {{ index + 1 }}</span>
 
                 <div class="flex items-center gap-1">
+                  <!-- Quick Edit in Reorder tab -->
+                  <button
+                    @click="openEditProductModal(prod)"
+                    title="Editar datos de este producto"
+                    class="p-1.5 rounded-lg border border-[#caa35f]/40 bg-[#faf7fb] text-[#27172b] hover:bg-[#27172b] hover:text-white transition-colors cursor-pointer mr-1"
+                  >
+                    <Edit3 class="w-3.5 h-3.5" />
+                  </button>
+
                   <button
                     @click="moveItemUp(index)"
                     :disabled="index === 0"
@@ -841,6 +1410,15 @@
 
               <!-- Actions -->
               <div class="pt-3 border-t border-[#f4eaf6] flex items-center gap-2">
+                <button
+                  @click="openEditProductModal(prod)"
+                  class="py-2 px-3 rounded-xl border border-[#caa35f]/40 bg-[#faf7fb] text-[#27172b] text-xs font-semibold hover:bg-[#27172b] hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  title="Editar este producto"
+                >
+                  <Edit3 class="w-3.5 h-3.5 text-[#caa35f]" />
+                  <span>Editar</span>
+                </button>
+
                 <button
                   @click="openDuplicateModal(prod)"
                   class="flex-1 py-2 px-3 rounded-xl bg-[#27172b] text-white text-xs font-semibold hover:bg-[#965e9b] transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
@@ -1109,6 +1687,15 @@
                     </template>
                     <span>{{ prod.is_active !== false ? 'Ocultar' : 'Hacer Visible' }}</span>
                   </button>
+
+                  <!-- Editar en Visibilidad -->
+                  <button
+                    @click="openEditProductModal(prod)"
+                    class="p-2 rounded-xl border border-[#eedee9] text-gray-600 hover:text-[#27172b] hover:border-[#caa35f] hover:bg-[#faf7fb] transition-all cursor-pointer"
+                    title="Editar información completa del producto"
+                  >
+                    <Edit3 class="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -1318,6 +1905,675 @@
           </div>
         </div>
       </div>
+
+      <!-- PRODUCT EDITOR / CREATOR MODAL -->
+      <div
+        v-if="showProductModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
+      >
+        <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-[#eedee9] overflow-hidden my-auto">
+          <!-- Modal Header -->
+          <div class="p-5 sm:p-6 pb-4 border-b border-[#f4eaf6] flex items-center justify-between shrink-0 bg-[#faf7fb]/70">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-[#27172b] text-[#caa35f] flex items-center justify-center shrink-0 shadow-xs">
+                <Edit3 v-if="!isCreatingProduct" class="w-5 h-5" />
+                <Plus v-else class="w-5 h-5" />
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-[#965e9b]">
+                    {{ isCreatingProduct ? 'Nuevo Registro' : 'Edición de Producto' }}
+                  </span>
+                  <span v-if="!isCreatingProduct && editingProductId" class="text-[10px] text-gray-400 font-mono">
+                    ID: {{ editingProductId }}
+                  </span>
+                </div>
+                <h3 class="text-base sm:text-lg font-serif font-bold text-[#27172b] line-clamp-1">
+                  {{ isCreatingProduct ? 'Crear Nuevo Producto' : (productForm.name || 'Editar Información del Producto') }}
+                </h3>
+              </div>
+            </div>
+
+            <button
+              @click="closeProductModal"
+              class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center text-sm transition-colors cursor-pointer shrink-0"
+              title="Cerrar modal"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Modal Tabs Switcher -->
+          <div class="flex items-center gap-1.5 px-5 sm:px-6 py-2.5 bg-white border-b border-[#f4eaf6] overflow-x-auto shrink-0 no-scrollbar">
+            <button
+              @click="productModalTab = 'info'"
+              :class="[
+                'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5',
+                productModalTab === 'info'
+                  ? 'bg-[#27172b] text-white shadow-xs'
+                  : 'text-gray-600 hover:bg-[#faf7fb]'
+              ]"
+            >
+              <Tag class="w-3.5 h-3.5 text-[#caa35f]" />
+              <span>1. Datos & Precios</span>
+            </button>
+
+            <button
+              @click="productModalTab = 'images'"
+              :class="[
+                'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5',
+                productModalTab === 'images'
+                  ? 'bg-[#27172b] text-white shadow-xs'
+                  : 'text-gray-600 hover:bg-[#faf7fb]'
+              ]"
+            >
+              <ImageIcon class="w-3.5 h-3.5 text-[#caa35f]" />
+              <span>2. Fotos e Imágenes</span>
+              <span v-if="newMainImageFile || newCatalogCardFile" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            </button>
+
+            <button
+              @click="productModalTab = 'content'"
+              :class="[
+                'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5',
+                productModalTab === 'content'
+                  ? 'bg-[#27172b] text-white shadow-xs'
+                  : 'text-gray-600 hover:bg-[#faf7fb]'
+              ]"
+            >
+              <FileText class="w-3.5 h-3.5 text-[#caa35f]" />
+              <span>3. Descripción & Contenido</span>
+            </button>
+
+            <button
+              @click="productModalTab = 'options'"
+              :class="[
+                'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5',
+                productModalTab === 'options'
+                  ? 'bg-[#27172b] text-white shadow-xs'
+                  : 'text-gray-600 hover:bg-[#faf7fb]'
+              ]"
+            >
+              <Layers class="w-3.5 h-3.5 text-[#caa35f]" />
+              <span>4. Stock & Opciones</span>
+            </button>
+          </div>
+
+          <!-- Modal Scrollable Body -->
+          <div class="overflow-y-auto p-5 sm:p-7 space-y-6 flex-1">
+
+            <!-- TAB 1: DATOS & PRECIOS -->
+            <div v-show="productModalTab === 'info'" class="space-y-5">
+              <!-- Product Name -->
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  Nombre Comercial del Producto *
+                </label>
+                <input
+                  type="text"
+                  v-model="productForm.name"
+                  required
+                  placeholder="Ej: Box de Rosas Eternas & Hot Wheels Premium"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-[#27172b] focus:border-[#965e9b] focus:outline-none focus:ring-1 focus:ring-[#965e9b]"
+                />
+                <span class="text-[11px] text-gray-400 mt-1 block">
+                  El nombre visible para tus clientes en la tienda y en los recibos de WhatsApp.
+                </span>
+              </div>
+
+              <!-- Campaign Visual Selector -->
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                  Campaña / Colección *
+                </label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    v-for="camp in availableCampaignOptions"
+                    :key="camp.id"
+                    @click="productForm.campaign = camp.id"
+                    :class="[
+                      'p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-2.5',
+                      productForm.campaign === camp.id
+                        ? 'border-[#27172b] bg-[#27172b] text-white shadow-sm ring-2 ring-[#caa35f]/50'
+                        : 'border-gray-200 bg-[#faf7fb] text-gray-700 hover:border-gray-300'
+                    ]"
+                  >
+                    <span class="text-base">{{ camp.emoji }}</span>
+                    <div>
+                      <div class="text-xs font-bold">{{ camp.name }}</div>
+                      <span class="text-[9px] opacity-70 block">{{ camp.id }}</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Category Input + Quick Suggestion Chips -->
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  Categoría del Producto *
+                </label>
+                <input
+                  type="text"
+                  v-model="productForm.category"
+                  placeholder="Ej: Boxes de Maquillaje, Ramos con Rosas, etc."
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-[#27172b] focus:border-[#965e9b] focus:outline-none"
+                />
+                <!-- Quick Category Suggestions -->
+                <div class="mt-2 flex items-center gap-1.5 flex-wrap">
+                  <span class="text-[10px] text-gray-400 font-medium">Sugerencias rápidas:</span>
+                  <button
+                    type="button"
+                    v-for="cat in categorySuggestions"
+                    :key="cat"
+                    @click="selectCategory(cat)"
+                    class="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-[#faf7fb] border border-[#eedee9] text-[#753d77] hover:bg-[#27172b] hover:text-white transition-colors cursor-pointer"
+                  >
+                    + {{ cat }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Prices & Order Row -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                <!-- Sale Price -->
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Precio de Venta (S/) *
+                  </label>
+                  <div class="relative">
+                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">S/</span>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      v-model="productForm.price"
+                      required
+                      placeholder="0.00"
+                      class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-[#27172b] focus:border-[#965e9b] focus:outline-none"
+                    />
+                  </div>
+                  <span class="text-[10px] text-gray-400 mt-1 block">Precio que pagará el cliente.</span>
+                </div>
+
+                <!-- Compare At Price (Strikethrough) -->
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Precio Antes / Tachado (S/)
+                  </label>
+                  <div class="relative">
+                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">S/</span>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      v-model="productForm.compare_at_price"
+                      placeholder="Opcional"
+                      class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 text-xs text-gray-600 focus:border-[#965e9b] focus:outline-none"
+                    />
+                  </div>
+                  <span class="text-[10px] text-gray-400 mt-1 block">Aparece tachado para mostrar descuento.</span>
+                </div>
+
+                <!-- Order Position -->
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Posición en Catálogo
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    v-model.number="productForm.order"
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-[#27172b] focus:border-[#965e9b] focus:outline-none"
+                  />
+                  <span class="text-[10px] text-gray-400 mt-1 block">1 = primero en el catálogo.</span>
+                </div>
+              </div>
+
+              <!-- Savings Preview Banner -->
+              <div
+                v-if="formSavingsText"
+                class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2"
+              >
+                <Sparkles class="w-4 h-4 text-emerald-600 shrink-0" />
+                <span class="font-semibold">{{ formSavingsText }}</span>
+              </div>
+            </div>
+
+            <!-- TAB 2: FOTOS E IMÁGENES -->
+            <div v-show="productModalTab === 'images'" class="space-y-6">
+              <!-- WebP Performance Note -->
+              <div class="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-purple-900 text-xs flex items-start gap-2.5">
+                <Sparkles class="w-4 h-4 text-[#caa35f] shrink-0 mt-0.5" />
+                <div class="text-[11px] leading-relaxed">
+                  <strong>Conversión Automática a WebP:</strong> Puedes subir fotos en cualquier formato (PNG, JPG o WebP). Al guardar, el sistema optimizará la foto automáticamente a formato WebP ultraligero (~90KB) para que cargue instantáneamente en los celulares de tus clientes.
+                </div>
+              </div>
+
+              <!-- 1. MAIN PRODUCT IMAGE (image) -->
+              <div class="p-5 rounded-2xl bg-[#faf7fb] border border-[#eedee9] space-y-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="text-xs font-bold text-[#27172b] uppercase tracking-wider">
+                      Foto Principal del Producto *
+                    </h4>
+                    <p class="text-[11px] text-gray-500">Es la imagen principal que se muestra en la tienda y en WhatsApp.</p>
+                  </div>
+                  <span class="text-[10px] font-bold text-[#965e9b] bg-white px-2.5 py-1 rounded-full border border-[#eedee9]">
+                    Campo: image
+                  </span>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center gap-4 pt-2">
+                  <!-- Preview Container -->
+                  <div class="w-32 h-32 rounded-2xl overflow-hidden bg-white border border-[#eedee9] shrink-0 relative shadow-2xs flex items-center justify-center">
+                    <img
+                      v-if="newMainImagePreview"
+                      :src="newMainImagePreview"
+                      alt="Nueva foto preview"
+                      class="w-full h-full object-cover"
+                    />
+                    <img
+                      v-else-if="productForm.currentImage"
+                      :src="productForm.currentImage"
+                      alt="Foto actual"
+                      class="w-full h-full object-cover"
+                    />
+                    <div v-else class="text-center p-3 text-gray-300">
+                      <ImageIcon class="w-8 h-8 mx-auto mb-1" />
+                      <span class="text-[10px] block text-gray-400">Sin foto</span>
+                    </div>
+
+                    <!-- Badge if new file picked -->
+                    <div
+                      v-if="newMainImagePreview"
+                      class="absolute top-1 right-1 px-1.5 py-0.5 rounded-full bg-amber-500 text-white font-bold text-[8px] uppercase tracking-wider shadow-xs"
+                    >
+                      Nueva
+                    </div>
+                  </div>
+
+                  <!-- Upload Controls -->
+                  <div class="flex-1 w-full space-y-2">
+                    <label class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#27172b] text-white text-xs font-bold hover:bg-[#3d2444] transition-all cursor-pointer shadow-sm w-full sm:w-auto">
+                      <UploadCloud class="w-4 h-4 text-[#caa35f]" />
+                      <span>{{ (newMainImageFile || productForm.currentImage) ? 'Cambiar Foto Principal' : 'Subir Foto Principal' }}</span>
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/jpg"
+                        @change="onMainImageSelected"
+                        class="hidden"
+                      />
+                    </label>
+
+                    <button
+                      v-if="newMainImagePreview"
+                      type="button"
+                      @click="clearNewMainImage"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold transition-all ml-0 sm:ml-2 cursor-pointer"
+                    >
+                      <X class="w-3.5 h-3.5" />
+                      <span>Cancelar nueva foto</span>
+                    </button>
+
+                    <p class="text-[11px] text-gray-400 leading-snug">
+                      Formatos recomendados: JPG, PNG o WebP. Resolución recomendada: cuadrada (ej: 1000x1000 px).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. CATALOG CARD / SECONDARY FLYER (catalog_card) -->
+              <div class="p-5 rounded-2xl bg-[#faf7fb] border border-[#eedee9] space-y-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="text-xs font-bold text-[#27172b] uppercase tracking-wider">
+                      Tarjeta de Catálogo / Flyer Secundario
+                    </h4>
+                    <p class="text-[11px] text-gray-500">Foto complementaria o flyer con la dedicatoria / detalles del box.</p>
+                  </div>
+                  <span class="text-[10px] font-bold text-gray-500 bg-white px-2.5 py-1 rounded-full border border-[#eedee9]">
+                    Campo: catalog_card
+                  </span>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center gap-4 pt-2">
+                  <!-- Preview -->
+                  <div class="w-32 h-32 rounded-2xl overflow-hidden bg-white border border-[#eedee9] shrink-0 relative shadow-2xs flex items-center justify-center">
+                    <img
+                      v-if="newCatalogCardPreview"
+                      :src="newCatalogCardPreview"
+                      alt="Nueva tarjeta preview"
+                      class="w-full h-full object-cover"
+                    />
+                    <img
+                      v-else-if="productForm.currentCatalogCard && !removeCatalogCard"
+                      :src="productForm.currentCatalogCard"
+                      alt="Tarjeta actual"
+                      class="w-full h-full object-cover"
+                    />
+                    <div v-else class="text-center p-3 text-gray-300">
+                      <ImageIcon class="w-8 h-8 mx-auto mb-1" />
+                      <span class="text-[10px] block text-gray-400">{{ removeCatalogCard ? 'Se eliminará' : 'Opcional' }}</span>
+                    </div>
+
+                    <div
+                      v-if="newCatalogCardPreview"
+                      class="absolute top-1 right-1 px-1.5 py-0.5 rounded-full bg-amber-500 text-white font-bold text-[8px] uppercase tracking-wider shadow-xs"
+                    >
+                      Nueva
+                    </div>
+                  </div>
+
+                  <!-- Upload Controls -->
+                  <div class="flex-1 w-full space-y-2">
+                    <label class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 text-xs font-bold transition-all cursor-pointer shadow-2xs w-full sm:w-auto">
+                      <UploadCloud class="w-4 h-4 text-[#caa35f]" />
+                      <span>{{ (newCatalogCardFile || (productForm.currentCatalogCard && !removeCatalogCard)) ? 'Cambiar Tarjeta' : 'Subir Tarjeta' }}</span>
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/jpg"
+                        @change="onCatalogCardSelected"
+                        class="hidden"
+                      />
+                    </label>
+
+                    <button
+                      v-if="productForm.currentCatalogCard && !removeCatalogCard && !newCatalogCardFile"
+                      type="button"
+                      @click="markRemoveCatalogCard"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold transition-all ml-0 sm:ml-2 cursor-pointer"
+                    >
+                      <Trash2 class="w-3.5 h-3.5" />
+                      <span>Quitar tarjeta</span>
+                    </button>
+
+                    <button
+                      v-if="newCatalogCardPreview || removeCatalogCard"
+                      type="button"
+                      @click="clearNewCatalogCard(); removeCatalogCard = false"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs font-semibold transition-all ml-0 sm:ml-2 cursor-pointer"
+                    >
+                      <X class="w-3.5 h-3.5" />
+                      <span>Restaurar anterior</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 3: DESCRIPCIÓN & CONTENIDO -->
+            <div v-show="productModalTab === 'content'" class="space-y-5">
+              <!-- Marketing Description -->
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  Descripción Comercial del Producto
+                </label>
+                <textarea
+                  v-model="productForm.description"
+                  rows="3"
+                  placeholder="Ej: Hermoso detalle personalizado con luces LED cálidas, rosas eternas de satén hechas a mano y acabados de lujo."
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs text-[#27172b] focus:border-[#965e9b] focus:outline-none leading-relaxed"
+                ></textarea>
+                <span class="text-[11px] text-gray-400 mt-1 block">
+                  Aparece debajo del título del producto para enamorar al cliente.
+                </span>
+              </div>
+
+              <!-- Included Items (One per line) -->
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  Contenido del Box / Ramo (Ítems Incluidos)
+                </label>
+                <textarea
+                  v-model="productForm.items_included"
+                  rows="6"
+                  placeholder="Caja personalizada con personaje favorito&#10;Luces cálidas LED integradas&#10;Tarjeta personalizada con dedicatoria&#10;Mascarilla facial hidratante&#10;Vincha suave para skincare"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-mono text-[#27172b] focus:border-[#965e9b] focus:outline-none leading-relaxed"
+                ></textarea>
+                <div class="p-3 mt-2 rounded-xl bg-[#faf7fb] border border-[#eedee9] text-[11px] text-gray-600 flex items-start gap-2">
+                  <Info class="w-4 h-4 text-[#caa35f] shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Escribe cada elemento en una línea nueva.</strong> En la tienda web se mostrará automáticamente con viñetas elegantes y organizadas.
+                  </span>
+                </div>
+              </div>
+
+              <!-- Live Preview of Items Included -->
+              <div v-if="itemsIncludedList.length > 0" class="p-4 rounded-2xl bg-white border border-[#eedee9] shadow-2xs space-y-2">
+                <span class="text-[10px] font-bold text-[#caa35f] uppercase tracking-wider block">
+                  Vista Previa en Tienda ({{ itemsIncludedList.length }} ítems):
+                </span>
+                <ul class="space-y-1.5 text-xs text-gray-700">
+                  <li v-for="(item, idx) in itemsIncludedList" :key="idx" class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#caa35f] shrink-0"></span>
+                    <span>{{ item }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- TAB 4: STOCK & OPCIONES -->
+            <div v-show="productModalTab === 'options'" class="space-y-5">
+              <!-- Stock Toggle Card -->
+              <div class="p-4 rounded-2xl border transition-all" :class="productForm.in_stock ? 'bg-emerald-50/70 border-emerald-200' : 'bg-rose-50/70 border-rose-200'">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" :class="productForm.in_stock ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'">
+                      <CheckCircle2 v-if="productForm.in_stock" class="w-5 h-5" />
+                      <AlertCircle v-else class="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 class="text-xs font-bold text-gray-900">
+                        {{ productForm.in_stock ? '🟢 Producto En Stock (Disponible para Compra)' : '🔴 Producto Agotado' }}
+                      </h4>
+                      <p class="text-[11px] text-gray-600">
+                        {{ productForm.in_stock ? 'Los clientes pueden añadir este producto al carrito y comprarlo.' : 'Se mostrará con la etiqueta "Agotado" y no permitirá procesar compras.' }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input type="checkbox" v-model="productForm.in_stock" class="sr-only peer" />
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Visibility Toggle Card -->
+              <div class="p-4 rounded-2xl border transition-all" :class="productForm.is_active ? 'bg-blue-50/70 border-blue-200' : 'bg-gray-100 border-gray-300'">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" :class="productForm.is_active ? 'bg-blue-600 text-white' : 'bg-gray-600 text-white'">
+                      <Eye v-if="productForm.is_active" class="w-5 h-5" />
+                      <EyeOff v-else class="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 class="text-xs font-bold text-gray-900">
+                        {{ productForm.is_active ? '👁️ Visible en la Tienda Pública' : '🔒 Oculto en Tienda (Borrador Privado)' }}
+                      </h4>
+                      <p class="text-[11px] text-gray-600">
+                        {{ productForm.is_active ? 'Visible en el menú y catálogo para todos los visitantes.' : 'Oculto al público sin necesidad de eliminarlo. Puedes reactivarlo cuando quieras.' }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input type="checkbox" v-model="productForm.is_active" class="sr-only peer" />
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Featured & Car Addon Toggles -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Featured (Destacado) -->
+                <div class="p-4 rounded-2xl bg-[#faf7fb] border border-[#eedee9] flex items-center justify-between">
+                  <div>
+                    <div class="flex items-center gap-1.5 text-xs font-bold text-[#27172b]">
+                      <Star class="w-4 h-4 text-amber-500 fill-amber-500" />
+                      <span>Producto Destacado</span>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-0.5">Resalta con insignia dorada</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    v-model="productForm.featured"
+                    class="w-5 h-5 rounded text-[#caa35f] accent-[#caa35f] cursor-pointer"
+                  />
+                </div>
+
+                <!-- Addon Car -->
+                <div class="p-4 rounded-2xl bg-[#faf7fb] border border-[#eedee9] flex items-center justify-between">
+                  <div>
+                    <div class="flex items-center gap-1.5 text-xs font-bold text-[#27172b]">
+                      <Car class="w-4 h-4 text-blue-600" />
+                      <span>Accesorio para Auto</span>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-0.5">Ofrecido como adicional en compras</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    v-model="productForm.addon_car"
+                    class="w-5 h-5 rounded text-blue-600 accent-blue-600 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <!-- TikTok Live Discount Input -->
+              <div class="p-4 rounded-2xl bg-gradient-to-r from-[#faf7fb] to-[#fff5f8] border border-[#ff0050]/20 space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <Flame class="w-4 h-4 text-[#ff0050]" />
+                    <span class="text-xs font-bold text-[#27172b]">Descuento TikTok Live Flash (S/)</span>
+                  </div>
+                  <span class="text-[10px] font-bold text-[#ff0050] bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                    Opcional
+                  </span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="relative w-36">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">S/</span>
+                    <input
+                      type="number"
+                      step="1"
+                      min="0"
+                      v-model.number="productForm.live_discount"
+                      placeholder="0"
+                      class="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 text-xs font-bold text-[#27172b] focus:border-[#ff0050] focus:outline-none"
+                    />
+                  </div>
+                  <span class="text-[11px] text-gray-500">
+                    Descuento automático que se aplicará únicamente cuando la dinámica de TikTok Live esté encendida.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Error banner -->
+            <div v-if="saveProductError" class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+              <AlertCircle class="w-4 h-4 shrink-0" />
+              <span>{{ saveProductError }}</span>
+            </div>
+
+            <!-- Success banner -->
+            <div v-if="saveProductSuccess" class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+              <CheckCircle2 class="w-4 h-4 shrink-0" />
+              <span>{{ saveProductSuccess }}</span>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="p-4 sm:p-5 border-t border-[#f4eaf6] bg-[#faf7fb] flex flex-wrap items-center justify-between gap-3 shrink-0">
+            <!-- Left: Delete button (only when editing) -->
+            <div>
+              <button
+                v-if="!isCreatingProduct && editingProductId"
+                type="button"
+                @click="confirmDeleteProduct({ id: editingProductId, name: productForm.name, price: productForm.price, displayImage: productForm.currentImage })"
+                class="px-3.5 py-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <Trash2 class="w-3.5 h-3.5" />
+                <span>Eliminar Producto</span>
+              </button>
+            </div>
+
+            <!-- Right: Cancel & Save -->
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                @click="closeProductModal"
+                :disabled="isSavingProduct"
+                class="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-white transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                @click="saveEditedProduct"
+                :disabled="isSavingProduct"
+                class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#27172b] to-[#451f4c] text-white text-xs font-bold hover:from-[#351a3b] hover:to-[#572460] transition-all flex items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer"
+              >
+                <RefreshCw v-if="isSavingProduct" class="w-3.5 h-3.5 animate-spin text-[#caa35f]" />
+                <Save v-else class="w-3.5 h-3.5 text-[#caa35f]" />
+                <span>{{ isSavingProduct ? 'Guardando en PocketBase...' : (isCreatingProduct ? 'Crear y Publicar Producto' : 'Guardar Todos los Cambios') }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAFE DELETE CONFIRMATION MODAL -->
+      <div
+        v-if="showDeleteConfirmModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      >
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-rose-100 text-center space-y-4">
+          <div class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto shadow-xs">
+            <Trash2 class="w-7 h-7" />
+          </div>
+
+          <div>
+            <h3 class="text-lg font-serif font-bold text-[#27172b]">¿Eliminar este producto?</h3>
+            <p class="text-xs text-gray-500 mt-1 leading-relaxed">
+              Esta acción no se puede deshacer. El producto desaparecerá de la tienda web y de la base de datos de PocketBase.
+            </p>
+          </div>
+
+          <!-- Product Preview -->
+          <div v-if="productToDelete" class="p-3 rounded-2xl bg-[#faf7fb] border border-[#eedee9] flex items-center gap-3 text-left">
+            <img
+              v-if="productToDelete.displayImage"
+              :src="productToDelete.displayImage"
+              :alt="productToDelete.name"
+              class="w-12 h-12 rounded-xl object-cover border border-[#eedee9] shrink-0"
+            />
+            <div class="min-w-0">
+              <h4 class="text-xs font-bold text-[#27172b] truncate">{{ productToDelete.name }}</h4>
+              <span class="text-xs text-[#caa35f] font-bold">S/ {{ Number(productToDelete.price || 0).toFixed(2) }}</span>
+            </div>
+          </div>
+
+          <div class="pt-2 flex items-center justify-center gap-2">
+            <button
+              @click="cancelDeleteProduct"
+              :disabled="isDeletingProduct"
+              class="w-1/2 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              @click="executeDeleteProduct"
+              :disabled="isDeletingProduct"
+              class="w-1/2 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50 cursor-pointer"
+            >
+              <RefreshCw v-if="isDeletingProduct" class="w-3.5 h-3.5 animate-spin text-white" />
+              <span>{{ isDeletingProduct ? 'Eliminando...' : 'Sí, Eliminar' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -1330,7 +2586,9 @@ import {
   ArrowRight, RefreshCw, AlertCircle, Home, CheckCircle2,
   Package, Tag, DollarSign, Layers, PlusCircle, ArrowUpRight,
   Move, GripVertical, ChevronUp, ChevronDown, Save, Lock, LogOut, Zap,
-  Flame, Clock, Play, Square, Plus, Eye, EyeOff
+  Flame, Clock, Play, Square, Plus, Eye, EyeOff,
+  Edit3, Trash2, UploadCloud, X, Star, Car, LayoutGrid, List,
+  FileText, Image as ImageIcon, ShoppingBag, Info, CheckSquare
 } from 'lucide-vue-next'
 import { useSiteSettingsStore } from '../stores/siteSettings'
 
@@ -1338,7 +2596,402 @@ const siteSettingsStore = useSiteSettingsStore()
 
 const AUTH_STORAGE_KEY = 'venezzia_admin_auth'
 
-const activeToolTab = ref('live') // 'live', 'reorder' o 'duplicate'
+// Default active tab: 'catalogo'
+const activeToolTab = ref('catalogo')
+
+// Catalog View & Filter State
+const catalogSearchQuery = ref('')
+const catalogSelectedCampaign = ref('all')
+const catalogStockFilter = ref('all') // 'all', 'in_stock', 'out_of_stock'
+const catalogVisibilityFilter = ref('all') // 'all', 'visible', 'hidden'
+const catalogViewMode = ref('grid') // 'grid' | 'table'
+
+// Product Editor Modal State
+const showProductModal = ref(false)
+const isCreatingProduct = ref(false)
+const editingProductId = ref(null)
+const productModalTab = ref('info') // 'info', 'images', 'content', 'options'
+const newMainImageFile = ref(null)
+const newMainImagePreview = ref('')
+const newCatalogCardFile = ref(null)
+const newCatalogCardPreview = ref('')
+const removeCatalogCard = ref(false)
+const isSavingProduct = ref(false)
+const saveProductError = ref('')
+const saveProductSuccess = ref('')
+
+const productForm = ref({
+  name: '',
+  price: 0,
+  compare_at_price: null,
+  campaign: 'maquillaje',
+  category: 'Boxes de Maquillaje',
+  description: '',
+  items_included: '',
+  order: 1,
+  in_stock: true,
+  is_active: true,
+  featured: false,
+  addon_car: false,
+  live_discount: 0,
+  currentImage: '',
+  currentCatalogCard: ''
+})
+
+// Safe Delete Confirmation Modal State
+const showDeleteConfirmModal = ref(false)
+const productToDelete = ref(null)
+const isDeletingProduct = ref(false)
+
+const availableCampaignOptions = [
+  { id: 'maquillaje', name: 'Maquillaje', emoji: '💄' },
+  { id: 'hotwheels', name: 'Hot Wheels', emoji: '🏎️' },
+  { id: 'graduacion', name: 'Graduación', emoji: '🎓' },
+  { id: 'cumpleanos', name: 'Cumpleaños', emoji: '🎂' },
+  { id: 'navidad', name: 'Navidad', emoji: '🎄' }
+]
+
+const categorySuggestions = [
+  'Boxes de Maquillaje',
+  'Ramos con Rosas',
+  'Autos Personalizados',
+  'Ramos Hot Wheels',
+  'Gift Boxes & Cuadros',
+  'Peluches Graduados',
+  'Boxes de Birrete & Gala',
+  'Ramos de Graduación',
+  'Boxes de Cumpleaños',
+  'Ramos Festivos',
+  'Boxes Navideños',
+  'Calendario de Adviento'
+]
+
+function selectCategory(cat) {
+  productForm.value.category = cat
+}
+
+function getItemsCount(prod) {
+  if (!prod.items_included) return 0
+  if (Array.isArray(prod.items_included)) return prod.items_included.length
+  return String(prod.items_included).split('\n').filter(line => line.trim().length > 0).length
+}
+
+const itemsIncludedList = computed(() => {
+  if (!productForm.value.items_included) return []
+  return String(productForm.value.items_included)
+    .split('\n')
+    .map(l => l.trim())
+    .filter(Boolean)
+})
+
+const formSavingsText = computed(() => {
+  const price = Number(productForm.value.price) || 0
+  const compare = Number(productForm.value.compare_at_price) || 0
+  if (compare > price && price > 0) {
+    const diff = compare - price
+    const pct = Math.round((diff / compare) * 100)
+    return `Ahorro de S/ ${diff.toFixed(2)} (-${pct}% de descuento para el cliente)`
+  }
+  return null
+})
+
+const inStockCount = computed(() => products.value.filter(p => p.in_stock !== false).length)
+const outOfStockCount = computed(() => products.value.filter(p => p.in_stock === false).length)
+
+const catalogCampaignFilters = computed(() => [
+  { id: 'all', name: 'Todos' },
+  { id: 'maquillaje', name: 'Maquillaje' },
+  { id: 'hotwheels', name: 'Hot Wheels' },
+  { id: 'graduacion', name: 'Graduación' },
+  { id: 'cumpleanos', name: 'Cumpleaños' },
+  { id: 'navidad', name: 'Navidad' }
+])
+
+function getProductCountForFilter(campId) {
+  if (campId === 'all') return products.value.length
+  return products.value.filter(p => (p.campaign || '').toLowerCase() === campId.toLowerCase()).length
+}
+
+const filteredCatalogProducts = computed(() => {
+  let list = products.value
+
+  if (catalogSelectedCampaign.value !== 'all') {
+    list = list.filter(p => (p.campaign || '').toLowerCase() === catalogSelectedCampaign.value.toLowerCase())
+  }
+
+  if (catalogStockFilter.value === 'in_stock') {
+    list = list.filter(p => p.in_stock !== false)
+  } else if (catalogStockFilter.value === 'out_of_stock') {
+    list = list.filter(p => p.in_stock === false)
+  }
+
+  if (catalogVisibilityFilter.value === 'visible') {
+    list = list.filter(p => p.is_active !== false)
+  } else if (catalogVisibilityFilter.value === 'hidden') {
+    list = list.filter(p => p.is_active === false)
+  }
+
+  if (catalogSearchQuery.value.trim()) {
+    const q = catalogSearchQuery.value.toLowerCase().trim()
+    list = list.filter(p => {
+      const name = (p.name || '').toLowerCase()
+      const cat = (p.category || '').toLowerCase()
+      const desc = (p.description || '').toLowerCase()
+      const items = (p.items_included || '').toLowerCase()
+      return name.includes(q) || cat.includes(q) || desc.includes(q) || items.includes(q)
+    })
+  }
+
+  return list
+})
+
+function openCreateProductModal() {
+  isCreatingProduct.value = true
+  editingProductId.value = null
+  productModalTab.value = 'info'
+  saveProductError.value = ''
+  saveProductSuccess.value = ''
+  newMainImageFile.value = null
+  newMainImagePreview.value = ''
+  newCatalogCardFile.value = null
+  newCatalogCardPreview.value = ''
+  removeCatalogCard.value = false
+
+  productForm.value = {
+    name: '',
+    price: 0,
+    compare_at_price: null,
+    campaign: catalogSelectedCampaign.value !== 'all' ? catalogSelectedCampaign.value : 'maquillaje',
+    category: 'Boxes de Maquillaje',
+    description: '',
+    items_included: '',
+    order: 1,
+    in_stock: true,
+    is_active: true,
+    featured: false,
+    addon_car: false,
+    live_discount: 0,
+    currentImage: '',
+    currentCatalogCard: ''
+  }
+
+  showProductModal.value = true
+}
+
+function openEditProductModal(prod) {
+  isCreatingProduct.value = false
+  editingProductId.value = prod.id
+  productModalTab.value = 'info'
+  saveProductError.value = ''
+  saveProductSuccess.value = ''
+  newMainImageFile.value = null
+  newMainImagePreview.value = ''
+  newCatalogCardFile.value = null
+  newCatalogCardPreview.value = ''
+  removeCatalogCard.value = false
+
+  let curImg = prod.displayImage || ''
+  if (!curImg && prod.image && currentPbClient.value) {
+    curImg = currentPbClient.value.files.getURL(prod, prod.image)
+  }
+
+  let curCard = ''
+  if (prod.catalog_card && currentPbClient.value) {
+    curCard = currentPbClient.value.files.getURL(prod, prod.catalog_card)
+  }
+
+  productForm.value = {
+    name: prod.name || '',
+    price: prod.price !== undefined && prod.price !== null ? Number(prod.price) : 0,
+    compare_at_price: prod.compare_at_price !== undefined && prod.compare_at_price !== null && prod.compare_at_price !== '' && Number(prod.compare_at_price) > 0 ? Number(prod.compare_at_price) : null,
+    campaign: prod.campaign || 'maquillaje',
+    category: prod.category || 'General',
+    description: prod.description || '',
+    items_included: typeof prod.items_included === 'string'
+      ? prod.items_included
+      : Array.isArray(prod.items_included)
+        ? prod.items_included.join('\n')
+        : '',
+    order: prod.order !== undefined && prod.order !== null ? Number(prod.order) : 1,
+    in_stock: prod.in_stock !== false,
+    is_active: prod.is_active !== false,
+    featured: prod.featured === true,
+    addon_car: prod.addon_car === true,
+    live_discount: prod.live_discount !== undefined && prod.live_discount !== null ? Number(prod.live_discount) : 0,
+    currentImage: curImg,
+    currentCatalogCard: curCard
+  }
+
+  showProductModal.value = true
+}
+
+function closeProductModal() {
+  showProductModal.value = false
+  editingProductId.value = null
+  newMainImageFile.value = null
+  if (newMainImagePreview.value) {
+    URL.revokeObjectURL(newMainImagePreview.value)
+    newMainImagePreview.value = ''
+  }
+  newCatalogCardFile.value = null
+  if (newCatalogCardPreview.value) {
+    URL.revokeObjectURL(newCatalogCardPreview.value)
+    newCatalogCardPreview.value = ''
+  }
+  removeCatalogCard.value = false
+  saveProductError.value = ''
+  saveProductSuccess.value = ''
+}
+
+function onMainImageSelected(event) {
+  const file = event.target.files && event.target.files[0]
+  if (!file) return
+  newMainImageFile.value = file
+  if (newMainImagePreview.value) {
+    URL.revokeObjectURL(newMainImagePreview.value)
+  }
+  newMainImagePreview.value = URL.createObjectURL(file)
+}
+
+function clearNewMainImage() {
+  newMainImageFile.value = null
+  if (newMainImagePreview.value) {
+    URL.revokeObjectURL(newMainImagePreview.value)
+    newMainImagePreview.value = ''
+  }
+}
+
+function onCatalogCardSelected(event) {
+  const file = event.target.files && event.target.files[0]
+  if (!file) return
+  newCatalogCardFile.value = file
+  removeCatalogCard.value = false
+  if (newCatalogCardPreview.value) {
+    URL.revokeObjectURL(newCatalogCardPreview.value)
+  }
+  newCatalogCardPreview.value = URL.createObjectURL(file)
+}
+
+function clearNewCatalogCard() {
+  newCatalogCardFile.value = null
+  if (newCatalogCardPreview.value) {
+    URL.revokeObjectURL(newCatalogCardPreview.value)
+    newCatalogCardPreview.value = ''
+  }
+}
+
+function markRemoveCatalogCard() {
+  clearNewCatalogCard()
+  removeCatalogCard.value = true
+}
+
+async function saveEditedProduct() {
+  if (!productForm.value.name.trim()) {
+    saveProductError.value = 'El nombre del producto es obligatorio.'
+    productModalTab.value = 'info'
+    return
+  }
+  if (productForm.value.price === null || productForm.value.price === undefined || isNaN(productForm.value.price) || Number(productForm.value.price) < 0) {
+    saveProductError.value = 'Por favor ingresa un precio válido.'
+    productModalTab.value = 'info'
+    return
+  }
+
+  isSavingProduct.value = true
+  saveProductError.value = ''
+  saveProductSuccess.value = ''
+
+  try {
+    const formData = new FormData()
+    formData.append('name', productForm.value.name.trim())
+    formData.append('price', String(Number(productForm.value.price)))
+    if (productForm.value.compare_at_price !== null && productForm.value.compare_at_price !== '' && !isNaN(productForm.value.compare_at_price) && Number(productForm.value.compare_at_price) > 0) {
+      formData.append('compare_at_price', String(Number(productForm.value.compare_at_price)))
+    } else {
+      formData.append('compare_at_price', '0')
+    }
+    formData.append('campaign', productForm.value.campaign || 'maquillaje')
+    formData.append('category', productForm.value.category || 'General')
+    formData.append('description', productForm.value.description || '')
+    formData.append('items_included', productForm.value.items_included || '')
+    formData.append('order', String(productForm.value.order || 1))
+    formData.append('in_stock', productForm.value.in_stock ? 'true' : 'false')
+    formData.append('is_active', productForm.value.is_active ? 'true' : 'false')
+    formData.append('featured', productForm.value.featured ? 'true' : 'false')
+    formData.append('addon_car', productForm.value.addon_car ? 'true' : 'false')
+    formData.append('live_discount', String(Number(productForm.value.live_discount || 0)))
+
+    // Handle Main Image file upload (with automatic WebP optimization)
+    if (newMainImageFile.value) {
+      let blob = newMainImageFile.value
+      let filename = newMainImageFile.value.name || 'product.webp'
+      if (!filename.toLowerCase().endsWith('.webp')) {
+        blob = await convertBlobToWebP(blob, 1200, 0.86)
+        filename = filename.replace(/\.[^/.]+$/, '') + '.webp'
+      }
+      formData.append('image', blob, filename)
+    }
+
+    // Handle Catalog Card file upload
+    if (newCatalogCardFile.value) {
+      let blob = newCatalogCardFile.value
+      let filename = newCatalogCardFile.value.name || 'catalog_card.webp'
+      if (!filename.toLowerCase().endsWith('.webp')) {
+        blob = await convertBlobToWebP(blob, 1400, 0.86)
+        filename = filename.replace(/\.[^/.]+$/, '') + '.webp'
+      }
+      formData.append('catalog_card', blob, filename)
+    } else if (removeCatalogCard.value) {
+      formData.append('catalog_card', '')
+    }
+
+    if (isCreatingProduct.value) {
+      await currentPbClient.value.collection('products').create(formData)
+      saveProductSuccess.value = '¡Producto creado y publicado con éxito!'
+    } else {
+      await currentPbClient.value.collection('products').update(editingProductId.value, formData)
+      saveProductSuccess.value = '¡Producto actualizado correctamente!'
+    }
+
+    await loadProducts()
+    setTimeout(() => {
+      closeProductModal()
+    }, 1200)
+  } catch (err) {
+    console.error('Error saving product:', err)
+    saveProductError.value = err?.message || 'Error al guardar el producto en PocketBase.'
+  } finally {
+    isSavingProduct.value = false
+  }
+}
+
+function confirmDeleteProduct(prod) {
+  productToDelete.value = prod
+  showDeleteConfirmModal.value = true
+}
+
+function cancelDeleteProduct() {
+  productToDelete.value = null
+  showDeleteConfirmModal.value = false
+}
+
+async function executeDeleteProduct() {
+  if (!productToDelete.value || !currentPbClient.value) return
+  isDeletingProduct.value = true
+  try {
+    await currentPbClient.value.collection('products').delete(productToDelete.value.id)
+    if (showProductModal.value && editingProductId.value === productToDelete.value.id) {
+      closeProductModal()
+    }
+    cancelDeleteProduct()
+    await loadProducts()
+  } catch (err) {
+    console.error('Error deleting product:', err)
+    alert('Error al eliminar el producto: ' + (err?.message || 'Error desconocido'))
+  } finally {
+    isDeletingProduct.value = false
+  }
+}
 
 const selectedLiveDuration = ref(15)
 const customLiveMinutes = ref('')
@@ -1497,13 +3150,16 @@ function initPbClient() {
   const url = getTargetBaseUrl()
   currentPbClient.value = new PocketBase(url)
 
-  // Check saved session in localStorage
+  // Check saved session in localStorage (checks both venezzia_admin_auth and pb_admin_auth from orders)
   try {
-    const saved = localStorage.getItem(AUTH_STORAGE_KEY)
+    let saved = localStorage.getItem(AUTH_STORAGE_KEY)
+    if (!saved) {
+      saved = localStorage.getItem('pb_admin_auth')
+    }
     if (saved) {
       const parsed = JSON.parse(saved)
-      if (parsed && parsed.token && parsed.server === targetServer.value) {
-        currentPbClient.value.authStore.save(parsed.token, parsed.record)
+      if (parsed && parsed.token) {
+        currentPbClient.value.authStore.save(parsed.token, parsed.record || parsed.admin)
         if (currentPbClient.value.authStore.isValid && currentPbClient.value.authStore.isSuperuser) {
           isAuthenticated.value = true
           loadProducts()
@@ -1530,12 +3186,14 @@ async function loginAsAdmin() {
     )
 
     if (authData && authData.token) {
-      // Save session securely on this device
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+      // Save session securely on this device (synced with orders panel)
+      const sessionData = JSON.stringify({
         token: authData.token,
         record: authData.record,
         server: targetServer.value
-      }))
+      })
+      localStorage.setItem(AUTH_STORAGE_KEY, sessionData)
+      localStorage.setItem('pb_admin_auth', sessionData)
 
       isAuthenticated.value = true
       loginPassword.value = '' // Clear password from memory
@@ -1554,6 +3212,7 @@ async function loginAsAdmin() {
 function logoutAdmin() {
   try {
     localStorage.removeItem(AUTH_STORAGE_KEY)
+    localStorage.removeItem('pb_admin_auth')
     if (currentPbClient.value && currentPbClient.value.authStore) {
       currentPbClient.value.authStore.clear()
     }
