@@ -131,6 +131,18 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
+          <!-- Botón Configuración Rápida Número Yape / Plin -->
+          <button
+            type="button"
+            @click="openYapeConfigModal"
+            class="px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+            title="Cambiar número de Yape o Plin para los mensajes de WhatsApp"
+          >
+            <Smartphone class="w-3.5 h-3.5 text-purple-700" />
+            <span>Yape: {{ yapePhoneNumber }}</span>
+            <Edit3 class="w-3 h-3 text-purple-600 opacity-60" />
+          </button>
+
           <button
             @click="loadOrders"
             :disabled="isLoading"
@@ -1400,6 +1412,59 @@
         </form>
       </div>
     </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL: CONFIGURAR NÚMERO YAPE / PLIN -->
+    <!-- ========================================================= -->
+    <div
+      v-if="showYapeConfigModal"
+      class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+      @click.self="showYapeConfigModal = false"
+    >
+      <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-gray-200 animate-in fade-in zoom-in-95 duration-150">
+        <div class="w-12 h-12 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center mx-auto">
+          <Smartphone class="w-6 h-6" />
+        </div>
+
+        <div>
+          <h3 class="font-bold text-gray-900 text-base">Número de Yape / Plin</h3>
+          <p class="text-xs text-gray-500 mt-1">
+            Este número se insertará automáticamente en todos los mensajes de WhatsApp para el cobro de delivery o saldos.
+          </p>
+        </div>
+
+        <form @submit.prevent="saveYapePhoneNumber" class="space-y-3 text-left">
+          <div>
+            <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+              Número de Celular (Yape / Plin) *
+            </label>
+            <input
+              type="text"
+              v-model="tempYapePhone"
+              required
+              placeholder="926 420 003"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-mono font-bold focus:border-purple-600 focus:outline-none"
+            />
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-2">
+            <button
+              type="button"
+              @click="showYapeConfigModal = false"
+              class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer shadow-sm transition-colors"
+            >
+              Guardar Número
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -1433,7 +1498,8 @@ import {
   Loader2,
   Inbox,
   CreditCard,
-  ShoppingBag
+  ShoppingBag,
+  Smartphone
 } from 'lucide-vue-next'
 import IconWhatsApp from '../components/icons/IconWhatsApp.vue'
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from '../services/orders'
@@ -1445,6 +1511,27 @@ const loginEmail = ref('')
 const loginPassword = ref('')
 const isLoggingIn = ref(false)
 const loginError = ref('')
+
+// =========================================================
+// CONFIGURACIÓN OFICIAL DE NÚMERO YAPE / PLIN
+// Puedes cambiar el valor por defecto aquí o desde el botón en la pantalla
+// =========================================================
+const DEFAULT_YAPE_PHONE = '926 420 003'
+const yapePhoneNumber = ref(localStorage.getItem('venezzia_yape_phone') || DEFAULT_YAPE_PHONE)
+const showYapeConfigModal = ref(false)
+const tempYapePhone = ref(yapePhoneNumber.value)
+
+function openYapeConfigModal() {
+  tempYapePhone.value = yapePhoneNumber.value
+  showYapeConfigModal.value = true
+}
+
+function saveYapePhoneNumber() {
+  const clean = tempYapePhone.value.trim() || DEFAULT_YAPE_PHONE
+  yapePhoneNumber.value = clean
+  localStorage.setItem('venezzia_yape_phone', clean)
+  showYapeConfigModal.value = false
+}
 
 // Orders data & stats
 const orders = ref([])
@@ -1958,10 +2045,11 @@ function buildWhatsAppLink(order) {
 
   const isDeliveryPending = (order.advance >= order.products_total && order.delivery_cost > 0 && order.balance > 0)
   const isFullyPaid = (order.balance <= 0 && order.total > 0)
+  const yapeNum = yapePhoneNumber.value || DEFAULT_YAPE_PHONE
 
   if (isDeliveryPending) {
     // 1. Mensaje para pedidos con productos 100% pagados y solo delivery pendiente
-    lines.push(`¡Hola ${order.customer_name}! Te saludamos de Venezzia Detalles. 🌸`)
+    lines.push(`¡Hola ${order.customer_name}! Te saludamos de Venezzia Detalles.`)
     lines.push(``)
     lines.push(`Confirmamos tu compra: *Pedido ${cod}*`)
     lines.push(``)
@@ -1969,36 +2057,36 @@ function buildWhatsAppLink(order) {
     if (order.items && order.items.length) {
       lines.push(`*Detalle de tu detalle floral:*`)
       order.items.forEach(it => {
-        lines.push(`- ${getItemQty(it)}x ${it.name || it.producto || 'Detalle Floral'}`)
+        lines.push(`• ${getItemQty(it)}x ${it.name || it.producto || 'Detalle Floral'}`)
       })
       lines.push(``)
     }
 
-    lines.push(`*Productos:* S/ ${order.products_total.toFixed(2)} (✅ Pagado con éxito)`)
+    lines.push(`*Productos:* S/ ${order.products_total.toFixed(2)} *(PAGADO CON ÉXITO)*`)
     lines.push(`*Costo de Envío / Delivery:* S/ ${order.delivery_cost.toFixed(2)}`)
     lines.push(`*Saldo pendiente por delivery:* S/ ${order.balance.toFixed(2)}`)
     lines.push(``)
-    lines.push(`Para programar el despacho con nuestro motorizado a *${order.customer_address || 'tu dirección'}*, puedes cancelar los S/ ${order.balance.toFixed(2)} del delivery mediante Yape o Plin al *955 083 400*.`)
+    lines.push(`Para programar el despacho con nuestro motorizado a *${order.customer_address || 'tu dirección'}*, puedes cancelar los S/ ${order.balance.toFixed(2)} del delivery mediante Yape o Plin al *${yapeNum}*.`)
     lines.push(``)
     lines.push(`(O si prefieres enviar a tu propio motorizado o aplicativo como InDrive, indícanoslo para dejar el costo de delivery en S/ 0.00).`)
     lines.push(``)
-    lines.push(`¡Quedamos atentos a tu confirmación para agendarlo! Muchas gracias. ✨`)
+    lines.push(`¡Quedamos atentos a tu confirmación para agendarlo! Muchas gracias.`)
   } else if (isFullyPaid) {
     // 2. Mensaje para pedidos 100% PAGADOS (Productos + Delivery si correspondía)
-    lines.push(`¡Hola ${order.customer_name}! Te saludamos de Venezzia Detalles. 🌸`)
+    lines.push(`¡Hola ${order.customer_name}! Te saludamos de Venezzia Detalles.`)
     lines.push(``)
-    lines.push(`Confirmamos la recepción de tu compra: *Pedido ${cod}* (100% CANCELADO)`)
+    lines.push(`Confirmamos la recepción de tu compra: *Pedido ${cod}* *(100% CANCELADO)*`)
     lines.push(``)
 
     if (order.items && order.items.length) {
       lines.push(`*Detalle de tu compra:*`)
       order.items.forEach(it => {
-        lines.push(`- ${getItemQty(it)}x ${it.name || it.producto || 'Detalle Floral'}`)
+        lines.push(`• ${getItemQty(it)}x ${it.name || it.producto || 'Detalle Floral'}`)
       })
       lines.push(``)
     }
 
-    lines.push(`*Total Pagado:* S/ ${order.total.toFixed(2)} (Pago confirmado ✅)`)
+    lines.push(`*Total Pagado:* S/ ${order.total.toFixed(2)} *(Pago confirmado)*`)
     lines.push(``)
 
     if (order.delivery_cost > 0) {
@@ -2010,10 +2098,10 @@ function buildWhatsAppLink(order) {
     }
 
     lines.push(``)
-    lines.push(`¡Quedamos atentos a tu confirmación para agendarlo! Muchas gracias. ✨`)
+    lines.push(`¡Quedamos atentos a tu confirmación para agendarlo! Muchas gracias.`)
   } else {
     // 3. Mensaje para pedidos PENDIENTES o con ADELANTO PARCIAL
-    lines.push(`¡Hola ${order.customer_name}! Te saludamos de Venezzia Detalles. 🌸`)
+    lines.push(`¡Hola ${order.customer_name}! Te saludamos de Venezzia Detalles.`)
     lines.push(``)
     lines.push(`Te escribimos para coordinar los detalles de tu *Pedido ${cod}*:`)
     lines.push(``)
@@ -2021,7 +2109,7 @@ function buildWhatsAppLink(order) {
     if (order.items && order.items.length) {
       lines.push(`*Detalles seleccionados:*`)
       order.items.forEach(it => {
-        lines.push(`- ${getItemQty(it)}x ${it.name || it.producto || 'Detalle Floral'}`)
+        lines.push(`• ${getItemQty(it)}x ${it.name || it.producto || 'Detalle Floral'}`)
       })
       lines.push(``)
     }
@@ -2035,15 +2123,15 @@ function buildWhatsAppLink(order) {
     }
 
     lines.push(``)
-    lines.push(`¿Cómo coordinamos el anticipo y horario de despacho? Puedes yaparnos o plinearnos al *955 083 400*. ¡Muchas gracias!`)
+    lines.push(`¿Cómo coordinamos el anticipo y horario de despacho? Puedes yaparnos o plinearnos al *${yapeNum}*. ¡Muchas gracias!`)
   }
 
   const text = encodeURIComponent(lines.join('\n'))
 
   if (intlPhone) {
-    return `https://wa.me/${intlPhone}?text=${text}`
+    return `https://api.whatsapp.com/send/?phone=${intlPhone}&text=${text}`
   }
-  return `https://wa.me/?text=${text}`
+  return `https://api.whatsapp.com/send/?text=${text}`
 }
 
 // Submit manual order
