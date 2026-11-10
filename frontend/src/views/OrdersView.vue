@@ -397,13 +397,19 @@
                   </td>
 
                   <!-- Action Buttons -->
-                  <td class="py-2.5 px-2 text-center">
+                  <td class="py-2.5 px-2 text-center relative">
                     <div class="flex items-center justify-center gap-1.5">
-                      <!-- Quick Options Modal / Dropdown Toggle -->
+                      <!-- Gear Nut Icon Button (SISFS Style Dropdown Trigger) -->
                       <button
-                        @click="openOrderActionModal(order)"
-                        class="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded shadow-2xs transition-colors cursor-pointer"
-                        title="Opciones del pedido (Estado, Delivery, Adelanto, etc.)"
+                        type="button"
+                        @click.stop="toggleActionMenu(order.id, $event)"
+                        :class="[
+                          'p-1.5 rounded shadow-2xs transition-colors cursor-pointer',
+                          activeActionMenuId === order.id
+                            ? 'bg-emerald-800 text-white ring-2 ring-emerald-400'
+                            : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                        ]"
+                        title="Opciones del pedido (Ver, Editar, Eliminar)"
                       >
                         <Settings class="w-3.5 h-3.5" />
                       </button>
@@ -417,6 +423,47 @@
                       >
                         <IconWhatsApp customClass="w-3.5 h-3.5 text-white fill-current" />
                       </a>
+                    </div>
+
+                    <!-- FLOATING OPTIONS DROPDOWN (EXACTLY AS IN USER'S SISFS SCREENSHOT) -->
+                    <div
+                      v-if="activeActionMenuId === order.id"
+                      @click.stop
+                      class="absolute left-10 top-1 z-50 bg-white rounded-lg border border-gray-200 shadow-xl py-1.5 w-44 text-left divide-y divide-gray-100 animate-in fade-in zoom-in-95 duration-100"
+                    >
+                      <div class="py-0.5">
+                        <!-- Ver pedido -->
+                        <button
+                          type="button"
+                          @click="handleViewOrder(order)"
+                          class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2.5 transition-colors cursor-pointer text-left"
+                        >
+                          <Eye class="w-4 h-4 text-[#0097a7] shrink-0" />
+                          <span>Ver pedido</span>
+                        </button>
+
+                        <!-- Editar Pedido -->
+                        <button
+                          type="button"
+                          @click="handleEditOrder(order)"
+                          class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-amber-50 hover:text-amber-800 flex items-center gap-2.5 transition-colors cursor-pointer text-left"
+                        >
+                          <Edit3 class="w-4 h-4 text-amber-500 shrink-0" />
+                          <span>Editar Pedido</span>
+                        </button>
+                      </div>
+
+                      <div class="py-0.5">
+                        <!-- Eliminar Pedido -->
+                        <button
+                          type="button"
+                          @click="handleDeleteOrderRequest(order)"
+                          class="w-full px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition-colors cursor-pointer text-left"
+                        >
+                          <Trash2 class="w-4 h-4 text-rose-500 shrink-0" />
+                          <span>Eliminar Pedido</span>
+                        </button>
+                      </div>
                     </div>
                   </td>
 
@@ -1114,43 +1161,206 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- MODAL: CONFIRMACIÓN DE ELIMINACIÓN PERMANENTE -->
+    <!-- MODAL: EDITAR PEDIDO (DESDE EL MENÚ DE LA TUERCA) -->
+    <!-- ========================================================= -->
+    <div
+      v-if="showEditOrderModal"
+      class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+      @click.self="showEditOrderModal = false"
+    >
+      <div class="bg-white rounded-2xl max-w-lg w-full p-6 border border-gray-200 shadow-2xl my-auto space-y-4">
+        <div class="flex items-center justify-between border-b pb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+              <Edit3 class="w-5 h-5" />
+            </div>
+            <div>
+              <h3 class="font-bold text-gray-800 text-base">Editar Pedido VZ-{{ editOrderForm.id.substring(0, 6).toUpperCase() }}</h3>
+              <p class="text-xs text-gray-500">Modifica datos del cliente, entrega, delivery o estado.</p>
+            </div>
+          </div>
+          <button @click="showEditOrderModal = false" class="text-gray-400 hover:text-gray-600 p-1 cursor-pointer">
+            <X class="w-5 h-5" />
+          </button>
+        </div>
+
+        <form @submit.prevent="submitEditOrder" class="space-y-3 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-gray-700 uppercase mb-1">Nombre del Cliente</label>
+              <input
+                type="text"
+                v-model="editOrderForm.customer_name"
+                required
+                class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label class="block font-bold text-gray-700 uppercase mb-1">Celular</label>
+              <input
+                type="tel"
+                v-model="editOrderForm.customer_phone"
+                class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-gray-700 uppercase mb-1">Dirección / Distrito de Entrega</label>
+            <input
+              type="text"
+              v-model="editOrderForm.customer_address"
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="block font-bold text-gray-700 uppercase mb-1">Dedicatoria para la Tarjeta</label>
+            <textarea
+              v-model="editOrderForm.notes"
+              rows="2"
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none"
+            ></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-gray-700 uppercase mb-1">Costo Delivery (S/)</label>
+              <input
+                type="number"
+                step="0.5"
+                min="0"
+                v-model.number="editOrderForm.delivery_cost"
+                class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none font-mono font-bold"
+              />
+              <div class="flex items-center gap-1 pt-1 text-[10px]">
+                <button type="button" @click="editOrderForm.delivery_cost = 0" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 rounded border cursor-pointer">S/ 0</button>
+                <button type="button" @click="editOrderForm.delivery_cost = 10" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 rounded border cursor-pointer">S/ 10</button>
+                <button type="button" @click="editOrderForm.delivery_cost = 15" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 rounded border cursor-pointer">S/ 15</button>
+                <button type="button" @click="editOrderForm.delivery_cost = 20" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 rounded border cursor-pointer">S/ 20</button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 uppercase mb-1">Adelanto Recibido (S/)</label>
+              <input
+                type="number"
+                step="0.5"
+                min="0"
+                v-model.number="editOrderForm.advance"
+                class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none font-mono font-bold"
+              />
+              <div class="flex items-center gap-1 pt-1 text-[10px]">
+                <button type="button" @click="editOrderForm.advance = 30" class="px-1.5 py-0.5 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded border border-amber-200 font-semibold cursor-pointer">S/ 30</button>
+                <button type="button" @click="editOrderForm.advance = (selectedOrderTotal)" class="px-1.5 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded border border-emerald-200 font-semibold cursor-pointer">100%</button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-gray-700 uppercase mb-1">Estado del Pedido</label>
+            <select
+              v-model="editOrderForm.status"
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs font-semibold focus:border-blue-500 focus:outline-none"
+            >
+              <option value="pending">PENDIENTE DE PAGO</option>
+              <option value="paid">PAGADO</option>
+              <option value="delivered">ENTREGADO</option>
+              <option value="hidden">OCULTO / ARCHIVADO</option>
+            </select>
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-3 border-t">
+            <button
+              type="button"
+              @click="showEditOrderModal = false"
+              class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold transition-colors cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              :disabled="isSavingEditOrder"
+              class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              <Loader2 v-if="isSavingEditOrder" class="w-4 h-4 animate-spin" />
+              <span>{{ isSavingEditOrder ? 'Guardando...' : 'Guardar Cambios' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL: ELIMINAR PEDIDO CON VERIFICACIÓN DE CONTRASEÑA -->
     <!-- ========================================================= -->
     <div
       v-if="orderToDelete"
       class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+      @click.self="orderToDelete = null"
     >
-      <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-gray-200">
+      <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-gray-200 animate-in fade-in zoom-in-95 duration-150">
         <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
-          <AlertCircle class="w-6 h-6" />
+          <Trash2 class="w-6 h-6" />
         </div>
+
         <div>
-          <h3 class="font-bold text-gray-900 text-base">¿Eliminar este pedido definitivamente?</h3>
-          <p class="text-xs text-gray-500 mt-1">
-            Esta acción no se puede deshacer. Si solo deseas que no aparezca en pendientes, se recomienda usar <strong class="text-gray-700">"Ocultar / Archivar"</strong> para guardar los datos del cliente.
+          <h3 class="font-bold text-gray-900 text-base">Eliminar Pedido</h3>
+          <p class="text-xs text-gray-700 font-bold mt-1">
+            VZ-{{ orderToDelete.id.substring(0, 6).toUpperCase() }} • {{ orderToDelete.customer_name }}
+          </p>
+          <p class="text-[11px] text-gray-500 mt-1">
+            Esta acción borrará permanentemente este registro. Por seguridad, confirma con tu contraseña de administrador:
           </p>
         </div>
-        <div class="flex items-center justify-center gap-2 pt-2">
-          <button
-            @click="orderToDelete = null"
-            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold cursor-pointer"
-          >
-            Cancelar
-          </button>
-          <button
-            @click="executePermanentDelete"
-            class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer shadow-sm"
-          >
-            Sí, Eliminar Registro
-          </button>
-        </div>
+
+        <!-- Formulario con campo de contraseña -->
+        <form @submit.prevent="executePermanentDelete" class="space-y-3 text-left">
+          <div>
+            <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1 flex items-center justify-between">
+              <span>Contraseña de Administrador *</span>
+              <Lock class="w-3.5 h-3.5 text-gray-400" />
+            </label>
+            <input
+              type="password"
+              v-model="deletePassword"
+              required
+              autofocus
+              placeholder="••••••••"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs focus:border-rose-500 focus:outline-none"
+            />
+          </div>
+
+          <div v-if="deletePasswordError" class="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs flex items-center gap-1.5">
+            <AlertCircle class="w-4 h-4 shrink-0" />
+            <span>{{ deletePasswordError }}</span>
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-2">
+            <button
+              type="button"
+              @click="orderToDelete = null"
+              class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              :disabled="isDeletingOrder"
+              class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <Loader2 v-if="isDeletingOrder" class="w-3.5 h-3.5 animate-spin" />
+              <span>{{ isDeletingOrder ? 'Verificando...' : 'Confirmar y Eliminar' }}</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import {
   Layers,
   Package,
@@ -1163,6 +1373,7 @@ import {
   Search,
   X,
   Settings,
+  Edit3,
   MapPin,
   Navigation,
   Heart,
@@ -1222,10 +1433,33 @@ const filters = reactive({
 
 let searchDebounceTimer = null
 
-// Modals
+// Modals and action menus
+const activeActionMenuId = ref(null)
 const showNewOrderModal = ref(false)
 const isSubmittingOrder = ref(false)
 const orderToDelete = ref(null)
+const deletePassword = ref('')
+const deletePasswordError = ref('')
+const isDeletingOrder = ref(false)
+
+// Edit Order Modal state
+const showEditOrderModal = ref(false)
+const isSavingEditOrder = ref(false)
+const editOrderForm = reactive({
+  id: '',
+  customer_name: '',
+  customer_phone: '',
+  customer_address: '',
+  notes: '',
+  delivery_cost: 0,
+  advance: 0,
+  status: 'pending'
+})
+
+const selectedOrderTotal = computed(() => {
+  const o = orders.value.find(x => x.id === editOrderForm.id)
+  return o ? o.total : 0
+})
 
 // New manual order form model
 const newOrder = reactive({
@@ -1480,27 +1714,145 @@ async function handleUnhideOrder(order) {
   }
 }
 
-// Permanent delete
-function confirmPermanentDelete(order) {
+// Action Dropdown Menu handlers
+function toggleActionMenu(orderId, event) {
+  if (event) event.stopPropagation()
+  if (activeActionMenuId.value === orderId) {
+    activeActionMenuId.value = null
+  } else {
+    activeActionMenuId.value = orderId
+  }
+}
+
+function closeActionMenu() {
+  activeActionMenuId.value = null
+}
+
+function handleViewOrder(order) {
+  activeActionMenuId.value = null
+  if (expandedOrderId.value !== order.id) {
+    expandedOrderId.value = order.id
+  }
+}
+
+function handleEditOrder(order) {
+  activeActionMenuId.value = null
+  editOrderForm.id = order.id
+  editOrderForm.customer_name = order.customer_name || ''
+  editOrderForm.customer_phone = order.customer_phone || ''
+  editOrderForm.customer_address = order.customer_address || ''
+  editOrderForm.notes = order.notes || ''
+  editOrderForm.delivery_cost = Number(editingDelivery[order.id] ?? order.delivery_cost ?? 0)
+  editOrderForm.advance = Number(editingAdvance[order.id] ?? order.advance ?? 0)
+  editOrderForm.status = order.status || 'pending'
+  showEditOrderModal.value = true
+}
+
+async function submitEditOrder() {
+  if (!editOrderForm.id) return
+  isSavingEditOrder.value = true
+
+  try {
+    await updateOrder({
+      id: editOrderForm.id,
+      customer_name: editOrderForm.customer_name,
+      customer_phone: editOrderForm.customer_phone,
+      customer_address: editOrderForm.customer_address,
+      notes: editOrderForm.notes,
+      delivery_cost: Number(editOrderForm.delivery_cost || 0),
+      advance: Number(editOrderForm.advance || 0),
+      status: editOrderForm.status
+    })
+
+    showEditOrderModal.value = false
+    await loadOrders()
+  } catch (err) {
+    alert('Error al guardar cambios: ' + err.message)
+  } finally {
+    isSavingEditOrder.value = false
+  }
+}
+
+function handleDeleteOrderRequest(order) {
+  activeActionMenuId.value = null
   orderToDelete.value = order
+  deletePassword.value = ''
+  deletePasswordError.value = ''
+}
+
+function confirmPermanentDelete(order) {
+  handleDeleteOrderRequest(order)
+}
+
+function getStoredAdminEmail() {
+  try {
+    const raw = localStorage.getItem('pb_admin_auth')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (parsed?.record?.email) return parsed.record.email
+      if (parsed?.admin?.email) return parsed.admin.email
+    }
+  } catch (_) {}
+  return loginEmail.value || 'admin@venezzia.shop'
 }
 
 async function executePermanentDelete() {
   if (!orderToDelete.value) return
-  const id = orderToDelete.value.id
-  orderToDelete.value = null
+  if (!deletePassword.value) {
+    deletePasswordError.value = 'Por favor ingresa tu contraseña de administrador.'
+    return
+  }
+
+  isDeletingOrder.value = true
+  deletePasswordError.value = ''
 
   try {
-    await deleteOrder(id, true)
+    const adminEmail = getStoredAdminEmail()
+    let authOk = false
+
+    // 1. Probar con el correo del superusuario almacenado
+    try {
+      await pb.collection('_superusers').authWithPassword(adminEmail, deletePassword.value)
+      authOk = true
+    } catch (_) {}
+
+    // 2. Probar con el correo alternativo 'venezzia@gmail.com'
+    if (!authOk) {
+      try {
+        await pb.collection('_superusers').authWithPassword('venezzia@gmail.com', deletePassword.value)
+        authOk = true
+      } catch (_) {}
+    }
+
+    // 3. Fallback adicional
+    if (!authOk) {
+      try {
+        await pb.collection('_superusers').authWithPassword('admin@venezzia.shop', deletePassword.value)
+        authOk = true
+      } catch (_) {}
+    }
+
+    if (!authOk) {
+      deletePasswordError.value = 'Contraseña incorrecta. No tienes permiso para eliminar este pedido.'
+      isDeletingOrder.value = false
+      return
+    }
+
+    // Contraseña correcta -> Ejecutar eliminación permanente
+    await deleteOrder(orderToDelete.value.id, true)
+    orderToDelete.value = null
+    deletePassword.value = ''
     await loadOrders()
   } catch (err) {
-    alert('Error al eliminar definitivamente: ' + err.message)
+    deletePasswordError.value = 'Error al eliminar pedido: ' + err.message
+  } finally {
+    isDeletingOrder.value = false
   }
 }
 
 // Quick action modal
 function openOrderActionModal(order) {
-  toggleExpand(order.id)
+  handleEditOrder(order)
 }
 
 // Format dates (dd/mm/aaaa)
@@ -1656,8 +2008,13 @@ async function submitManualOrder() {
 }
 
 onMounted(() => {
+  window.addEventListener('click', closeActionMenu)
   if (checkAuth()) {
     loadOrders()
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', closeActionMenu)
 })
 </script>
