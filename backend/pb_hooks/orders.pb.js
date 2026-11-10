@@ -329,7 +329,15 @@ routerAdd("POST", "/api/venezzia/orders", (e) => {
         const total = parseFloat(body.total) || 0;
         record.set("total", total);
         record.set("currency", String(body.currency || "PEN"));
-        record.set("status", String(body.status || "pending"));
+
+        let initialStatus = String(body.status || "pending").toLowerCase().trim();
+        if (initialStatus === "delivery_pending" || initialStatus === "partial" || initialStatus === "hidden") {
+            initialStatus = "pending";
+        } else if (initialStatus !== "paid" && initialStatus !== "delivered" && initialStatus !== "cancelled") {
+            initialStatus = "pending";
+        }
+        record.set("status", initialStatus);
+
         record.set("payment_method", String(body.payment_method || "whatsapp"));
         record.set("advance", parseFloat(body.advance) || 0);
         record.set("delivery_cost", parseFloat(body.delivery_cost) || 0);
@@ -391,9 +399,20 @@ routerAdd("POST", "/api/venezzia/orders/update", (e) => {
         const fullTotal = curTotal + curDelivery;
 
         if (body.status !== undefined) {
-            record.set("status", String(body.status));
+            let st = String(body.status).toLowerCase().trim();
+            if (st === "hidden") {
+                record.set("hidden", true);
+                st = "pending";
+            } else if (st === "delivery_pending" || st === "partial") {
+                st = "pending";
+            } else if (st !== "paid" && st !== "delivered" && st !== "cancelled") {
+                st = "pending";
+            }
+
+            record.set("status", st);
+
             // Si se marca como pagado y el adelanto no cubre el total, igualar al total
-            if (body.status === "paid" && curAdvance < fullTotal && fullTotal > 0) {
+            if (st === "paid" && curAdvance < fullTotal && fullTotal > 0) {
                 record.set("advance", fullTotal);
             }
         } else {

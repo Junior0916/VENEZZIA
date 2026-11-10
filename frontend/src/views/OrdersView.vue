@@ -1311,7 +1311,6 @@
               <option value="delivery_pending">DELIVERY PENDIENTE (SOLO SALDO DE ENVÍO)</option>
               <option value="paid">PAGADO (100%)</option>
               <option value="delivered">ENTREGADO</option>
-              <option value="hidden">OCULTO / ARCHIVADO</option>
             </select>
           </div>
 
