@@ -36,10 +36,10 @@ const routes = [
     alias: ['/recortador', '/herramientas/recortador', '/optimizador']
   },
   {
-    path: '/duplicar',
-    name: 'duplicar-producto',
+    path: '/admin',
+    name: 'admin',
     component: () => import('../views/DuplicateProductView.vue'),
-    alias: ['/admin/duplicar', '/duplicador', '/clonar-producto']
+    alias: ['/duplicar', '/admin/duplicar', '/duplicador', '/clonar-producto']
   },
   {
     path: '/:pathMatch(.*)*',
