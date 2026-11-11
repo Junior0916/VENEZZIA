@@ -442,6 +442,7 @@ routerAdd("POST", "/api/venezzia/orders/update", (e) => {
         if (body.customer_address !== undefined) record.set("customer_address", String(body.customer_address));
         if (body.customer_phone !== undefined) record.set("customer_phone", String(body.customer_phone));
         if (body.customer_name !== undefined) record.set("customer_name", String(body.customer_name));
+        if (body.location_url !== undefined) record.set("location_url", String(body.location_url));
 
         try {
             $app.save(record);

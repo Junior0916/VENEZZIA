@@ -131,6 +131,28 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
+          <!-- Botón Generar Ruta Delivery (Google Maps) -->
+          <button
+            type="button"
+            @click="openRouteModal"
+            :class="[
+              'px-3.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer',
+              selectedOrderIds.length > 0
+                ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-300 animate-pulse'
+                : 'bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200'
+            ]"
+            title="Generar la mejor ruta en Google Maps para el motorizado con los pedidos seleccionados"
+          >
+            <Route class="w-3.5 h-3.5 text-blue-600" />
+            <span>Ruta Delivery</span>
+            <span
+              v-if="selectedOrderIds.length > 0"
+              class="bg-white text-blue-800 px-1.5 py-0.2 rounded-full text-[10px] font-extrabold"
+            >
+              {{ selectedOrderIds.length }}
+            </span>
+          </button>
+
           <!-- Botón Configuración Rápida Número Yape / Plin -->
           <button
             type="button"
@@ -345,6 +367,53 @@
         </button>
       </div>
 
+      <!-- BANNER DE RUTA RÁPIDA CUANDO HAY PEDIDOS SELECCIONADOS -->
+      <div
+        v-if="selectedOrderIds.length > 0"
+        class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-3 px-4 rounded-xl shadow-md flex items-center justify-between gap-3 flex-wrap animate-in fade-in duration-200"
+      >
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-blue-500/30 text-blue-300 flex items-center justify-center shrink-0">
+            <Route class="w-4 h-4 text-blue-300" />
+          </div>
+          <div>
+            <div class="font-bold text-xs">
+              {{ selectedOrderIds.length }} {{ selectedOrderIds.length === 1 ? 'pedido seleccionado' : 'pedidos seleccionados' }} para reparto
+            </div>
+            <div class="text-[10px] text-blue-200">
+              Listos para armar la ruta en Google Maps
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            @click="openRouteModal"
+            class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
+          >
+            <Navigation class="w-3.5 h-3.5" />
+            <span>🗺️ Generar Ruta Google Maps</span>
+          </button>
+          <button
+            type="button"
+            @click="copyQuickRouteSheet"
+            class="px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white font-bold rounded-lg text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <Check v-if="copiedRouteToast" class="w-3.5 h-3.5 text-emerald-400" />
+            <Copy v-else class="w-3.5 h-3.5" />
+            <span>{{ copiedRouteToast ? '¡Copiado!' : 'Copiar para WhatsApp' }}</span>
+          </button>
+          <button
+            type="button"
+            @click="clearSelection"
+            class="px-2.5 py-1.5 text-blue-200 hover:text-white text-xs underline cursor-pointer"
+          >
+            Limpiar
+          </button>
+        </div>
+      </div>
+
       <!-- MAIN DATA TABLE -->
       <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
         <!-- Table container with horizontal scroll -->
@@ -353,7 +422,16 @@
             <!-- HEADER -->
             <thead class="bg-[#24334a] text-white uppercase text-[11px] tracking-wider font-bold select-none">
               <tr>
-                <th class="py-3 px-2 text-center w-10">#</th>
+                <th class="py-3 px-2 text-center w-9">
+                  <input
+                    type="checkbox"
+                    :checked="isAllVisibleSelected"
+                    @change="toggleSelectAllVisible"
+                    class="w-3.5 h-3.5 rounded text-blue-600 cursor-pointer accent-blue-600"
+                    title="Seleccionar / Deseleccionar todos los pedidos visibles"
+                  />
+                </th>
+                <th class="py-3 px-2 text-center w-9">#</th>
                 <th class="py-3 px-2 text-center w-24">ACCIONES</th>
                 <th class="py-3 px-3 w-28">COD</th>
                 <th class="py-3 px-3 w-32">FECHA</th>
@@ -374,7 +452,7 @@
             <tbody class="divide-y divide-gray-100 font-medium">
               <!-- Loading state -->
               <tr v-if="isLoading">
-                <td colspan="14" class="py-12 text-center text-gray-500">
+                <td colspan="15" class="py-12 text-center text-gray-500">
                   <div class="flex items-center justify-center gap-2">
                     <Loader2 class="w-5 h-5 animate-spin text-blue-600" />
                     <span>Cargando pedidos...</span>
@@ -384,7 +462,7 @@
 
               <!-- Empty state -->
               <tr v-else-if="orders.length === 0">
-                <td colspan="14" class="py-12 text-center text-gray-500">
+                <td colspan="15" class="py-12 text-center text-gray-500">
                   <div class="max-w-sm mx-auto text-center space-y-2">
                     <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto text-gray-400">
                       <Inbox class="w-6 h-6" />
@@ -404,9 +482,21 @@
                   :class="[
                     'hover:bg-blue-50/40 transition-colors',
                     expandedOrderId === order.id ? 'bg-blue-50/70 border-b-0' : '',
+                    selectedOrderIds.includes(order.id) ? 'bg-blue-50/80' : '',
                     order.hidden ? 'opacity-60 bg-gray-50' : ''
                   ]"
                 >
+                  <!-- Checkbox de Selección para Ruta -->
+                  <td class="py-2.5 px-2 text-center">
+                    <input
+                      type="checkbox"
+                      :checked="selectedOrderIds.includes(order.id)"
+                      @change="toggleSelectOrder(order.id)"
+                      class="w-3.5 h-3.5 rounded text-blue-600 cursor-pointer accent-blue-600"
+                      title="Seleccionar pedido para ruta de delivery"
+                    />
+                  </td>
+
                   <!-- (+) / (-) Expand button -->
                   <td class="py-2.5 px-2 text-center">
                     <button
@@ -671,7 +761,7 @@
                 <!-- ACCORDION EXPANDED SUB-TABLE (MATCHING USER'S SISFS IMAGE) -->
                 <!-- ========================================================= -->
                 <tr v-if="expandedOrderId === order.id" class="bg-blue-50/40">
-                  <td colspan="14" class="p-3 sm:p-5 border-t border-b border-blue-200">
+                  <td colspan="15" class="p-3 sm:p-5 border-t border-b border-blue-200">
                     <div class="space-y-4 max-w-6xl mx-auto">
                       <!-- 1. NESTED SUB-TABLE OF ITEMS (Identical to Image 2 & 3) -->
                       <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs">
@@ -765,17 +855,83 @@
                               </div>
                             </a>
 
-                            <!-- Botón GPS Satelital Exacto si existe -->
-                            <div v-if="order.location_url" class="pt-1">
-                              <a
-                                :href="order.location_url"
-                                target="_blank"
-                                class="inline-flex items-center gap-1.5 text-xs text-emerald-800 hover:text-emerald-950 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-300 font-bold transition-colors w-full justify-center"
+                            <!-- Sección GPS Exacto / Pegar link de WhatsApp -->
+                            <div class="pt-1.5 space-y-1.5">
+                              <div
+                                v-if="order.location_url && activeGpsEditingOrderId !== order.id"
+                                class="flex items-center justify-between gap-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-xs"
                               >
-                                <Navigation class="w-3.5 h-3.5 text-emerald-600" />
-                                <span>Ver Ubicación Satelital GPS Exacta</span>
-                                <ExternalLink class="w-3 h-3 ml-0.5 opacity-60" />
-                              </a>
+                                <div class="flex items-center gap-1.5 text-emerald-800 font-semibold truncate">
+                                  <Navigation class="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                  <span class="truncate">GPS Vinculado</span>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                  <a
+                                    :href="order.location_url"
+                                    target="_blank"
+                                    class="text-emerald-700 hover:text-emerald-900 underline font-bold text-[11px] flex items-center gap-0.5"
+                                  >
+                                    <span>Ver en Maps</span>
+                                    <ExternalLink class="w-3 h-3" />
+                                  </a>
+                                  <button
+                                    type="button"
+                                    @click="openGpsEditor(order)"
+                                    class="text-blue-600 hover:text-blue-800 font-semibold text-[11px] underline cursor-pointer"
+                                  >
+                                    Cambiar
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div v-else-if="activeGpsEditingOrderId !== order.id">
+                                <button
+                                  type="button"
+                                  @click="openGpsEditor(order)"
+                                  class="w-full py-1.5 px-3 border border-dashed border-emerald-400 bg-emerald-50/60 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                                  title="Si el cliente te mandó su ubicación por WhatsApp, pégala aquí para incluirla en la ruta de Google Maps"
+                                >
+                                  <Navigation class="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>+ Pegar link GPS enviado por WhatsApp</span>
+                                </button>
+                              </div>
+
+                              <!-- Formulario inline para pegar link de WhatsApp -->
+                              <div
+                                v-if="activeGpsEditingOrderId === order.id"
+                                class="p-2.5 bg-emerald-50/90 border border-emerald-300 rounded-lg space-y-2 text-xs animate-in fade-in"
+                              >
+                                <div class="flex items-center justify-between font-bold text-emerald-900 text-[11px]">
+                                  <span>Pegar enlace de WhatsApp o Google Maps:</span>
+                                  <button
+                                    type="button"
+                                    @click="activeGpsEditingOrderId = null"
+                                    class="text-gray-400 hover:text-gray-600 cursor-pointer"
+                                  >
+                                    <X class="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                  <input
+                                    type="url"
+                                    v-model="tempGpsUrl"
+                                    placeholder="https://maps.app.goo.gl/... o https://maps.google.com/?q=..."
+                                    class="flex-1 px-2.5 py-1.5 bg-white rounded border border-gray-300 text-xs focus:border-emerald-600 focus:outline-none"
+                                    @keydown.enter.prevent="saveOrderGps(order)"
+                                  />
+                                  <button
+                                    type="button"
+                                    @click="saveOrderGps(order)"
+                                    :disabled="isSavingGps"
+                                    class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold cursor-pointer transition-colors disabled:opacity-50 shrink-0"
+                                  >
+                                    {{ isSavingGps ? '...' : 'Guardar' }}
+                                  </button>
+                                </div>
+                                <p class="text-[10px] text-gray-500">
+                                  Copia el enlace de ubicación del chat de WhatsApp y pégalo aquí para incluirlo automáticamente en la ruta.
+                                </p>
+                              </div>
                             </div>
 
                             <!-- Dedicatoria -->
@@ -1119,6 +1275,17 @@
             />
           </div>
 
+          <div>
+            <label class="block font-bold text-gray-700 uppercase mb-1">Enlace GPS / Google Maps (Opcional)</label>
+            <input
+              type="url"
+              v-model="newOrder.location_url"
+              placeholder="https://maps.app.goo.gl/... o https://maps.google.com/?q=..."
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none text-xs"
+            />
+            <p class="text-[10px] text-gray-400 mt-0.5">Enlace enviado por WhatsApp para fijar en la ruta del motorizado.</p>
+          </div>
+
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div class="sm:col-span-2">
               <label class="block font-bold text-gray-700 uppercase mb-1">Producto o Arreglo *</label>
@@ -1268,6 +1435,17 @@
               v-model="editOrderForm.customer_address"
               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none"
             />
+          </div>
+
+          <div>
+            <label class="block font-bold text-gray-700 uppercase mb-1">Enlace GPS / Google Maps (WhatsApp)</label>
+            <input
+              type="url"
+              v-model="editOrderForm.location_url"
+              placeholder="https://maps.app.goo.gl/... o https://maps.google.com/?q=..."
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none text-xs"
+            />
+            <p class="text-[10px] text-gray-400 mt-0.5">Pega aquí el enlace si el cliente lo mandó por WhatsApp para incluirlo en la ruta.</p>
           </div>
 
           <div>
@@ -1465,6 +1643,294 @@
         </form>
       </div>
     </div>
+
+    <!-- ========================================================= -->
+    <!-- FLOATING ROUTE BAR (STICKY AT BOTTOM WHEN ORDERS SELECTED) -->
+    <!-- ========================================================= -->
+    <div
+      v-if="selectedOrderIds.length > 0"
+      class="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 bg-gray-900/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-gray-700/60 flex items-center gap-3 sm:gap-5 animate-in slide-in-from-bottom duration-200 max-w-xl w-[92%]"
+    >
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+          <Route class="w-4 h-4 text-blue-400" />
+        </div>
+        <div class="truncate">
+          <div class="font-bold text-xs truncate">
+            {{ selectedOrderIds.length }} {{ selectedOrderIds.length === 1 ? 'pedido seleccionado' : 'pedidos seleccionados' }}
+          </div>
+          <div class="text-[10px] text-gray-400 truncate">
+            Listo para armar la ruta en Google Maps
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 ml-auto shrink-0">
+        <button
+          type="button"
+          @click="openRouteModal"
+          class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95"
+        >
+          <Navigation class="w-3.5 h-3.5" />
+          <span>Generar Ruta</span>
+        </button>
+        <button
+          type="button"
+          @click="clearSelection"
+          class="text-gray-400 hover:text-white p-1.5 rounded-lg text-xs cursor-pointer"
+          title="Deseleccionar todos"
+        >
+          <X class="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL: GENERADOR Y PLANIFICADOR DE RUTA DE DELIVERY -->
+    <!-- ========================================================= -->
+    <div
+      v-if="showRouteModal"
+      class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4"
+      @click.self="showRouteModal = false"
+    >
+      <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
+        <!-- Header -->
+        <div class="px-5 py-3.5 bg-gradient-to-r from-[#1e293b] to-[#2563eb] text-white flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shadow-xs">
+              <Route class="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 class="font-bold text-sm">Ruta de Despacho en Google Maps</h3>
+              <p class="text-[11px] text-blue-100">
+                {{ routeOrdersList.length }} {{ routeOrdersList.length === 1 ? 'parada de entrega' : 'paradas de entrega' }}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            @click="showRouteModal = false"
+            class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs">
+          <!-- Punto de partida (Origen) -->
+          <div class="p-3 bg-blue-50/70 rounded-xl border border-blue-200 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-blue-900 flex items-center gap-1.5 text-xs">
+                <MapPin class="w-3.5 h-3.5 text-rose-500" />
+                <span>Punto de Partida (Taller / Tienda):</span>
+              </label>
+              <button
+                v-if="!isEditingOrigin"
+                type="button"
+                @click="isEditingOrigin = true; tempOriginInput = deliveryOrigin"
+                class="text-blue-700 hover:text-blue-900 font-bold text-[11px] underline cursor-pointer"
+              >
+                Cambiar origen
+              </button>
+            </div>
+
+            <div v-if="!isEditingOrigin" class="font-semibold text-gray-800 text-xs pl-5">
+              {{ deliveryOrigin }}
+            </div>
+
+            <div v-else class="flex items-center gap-2 pt-1">
+              <input
+                type="text"
+                v-model="tempOriginInput"
+                placeholder="Dirección o referencia del taller (ej: Venezzia Detalles, Lima, Peru)"
+                class="flex-1 px-3 py-1.5 bg-white rounded-lg border border-blue-300 text-xs focus:border-blue-600 focus:outline-none"
+                @keydown.enter.prevent="saveDeliveryOrigin"
+              />
+              <button
+                type="button"
+                @click="saveDeliveryOrigin"
+                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs cursor-pointer"
+              >
+                Guardar
+              </button>
+              <button
+                type="button"
+                @click="isEditingOrigin = false"
+                class="px-2.5 py-1.5 text-gray-500 hover:text-gray-700 text-xs cursor-pointer"
+              >
+                Cancelar
+              </button>
+            </div>
+            <p class="text-[10px] text-blue-600 pl-5">Desde aquí iniciará la navegación el motorizado.</p>
+          </div>
+
+          <!-- Secuencia de paradas -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-gray-700 uppercase tracking-wider text-[11px]">
+                Secuencia de Entregas (Paradas)
+              </span>
+              <span class="text-gray-400 text-[10px]">
+                Usa ▲ ▼ para ordenar las paradas
+              </span>
+            </div>
+
+            <div class="space-y-2">
+              <div
+                v-for="(order, idx) in routeOrdersList"
+                :key="order.id"
+                class="p-3 bg-gray-50 hover:bg-white rounded-xl border border-gray-200 shadow-2xs flex items-center gap-3 transition-colors"
+              >
+                <!-- Stop Number Badge -->
+                <div class="w-7 h-7 rounded-full bg-blue-600 text-white font-extrabold flex items-center justify-center shrink-0 text-xs shadow-xs">
+                  {{ idx + 1 }}
+                </div>
+
+                <!-- Info -->
+                <div class="flex-1 min-w-0 space-y-1">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-mono font-bold text-gray-900 bg-gray-200/80 px-1.5 py-0.2 rounded text-[11px]">
+                      VZ-{{ order.id.substring(0, 6).toUpperCase() }}
+                    </span>
+                    <span class="font-bold text-gray-800 truncate">{{ order.customer_name }}</span>
+                    <span v-if="order.customer_phone" class="text-gray-500 font-mono text-[11px]">
+                      📞 {{ order.customer_phone }}
+                    </span>
+                  </div>
+
+                  <div class="text-gray-600 truncate flex items-center gap-1.5">
+                    <MapPin class="w-3 h-3 text-rose-500 shrink-0" />
+                    <span class="truncate">{{ order.customer_address || 'Dirección a coordinar' }}</span>
+                  </div>
+
+                  <!-- Badge GPS vs Texto -->
+                  <div class="flex items-center gap-2 flex-wrap text-[10px]">
+                    <span
+                      v-if="order.location_url"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold"
+                    >
+                      <Navigation class="w-2.5 h-2.5" />
+                      <span>GPS Exacto</span>
+                    </span>
+                    <span
+                      v-else
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold"
+                    >
+                      <span>🏠 Dirección en texto</span>
+                    </span>
+
+                    <span
+                      v-if="order.balance > 0"
+                      class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200"
+                    >
+                      Cobrar saldo: S/ {{ order.balance.toFixed(2) }}
+                    </span>
+                    <span
+                      v-else
+                      class="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"
+                    >
+                      PAGADO 100%
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Reorder Controls -->
+                <div class="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    @click="moveStopUp(idx)"
+                    :disabled="idx === 0"
+                    class="w-7 h-7 rounded-lg bg-white border border-gray-200 hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-white text-gray-700 flex items-center justify-center transition-colors cursor-pointer"
+                    title="Mover antes en la ruta"
+                  >
+                    <ArrowUp class="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    @click="moveStopDown(idx)"
+                    :disabled="idx === routeOrdersList.length - 1"
+                    class="w-7 h-7 rounded-lg bg-white border border-gray-200 hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-white text-gray-700 flex items-center justify-center transition-colors cursor-pointer"
+                    title="Mover después en la ruta"
+                  >
+                    <ArrowDown class="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    @click="removeStopFromRoute(order.id)"
+                    class="w-7 h-7 rounded-lg bg-white border border-gray-200 hover:bg-rose-50 text-gray-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer ml-1"
+                    title="Quitar de esta ruta"
+                  >
+                    <X class="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Celular del motorizado para envío directo -->
+          <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-2">
+            <label class="block font-bold text-gray-700 text-[11px] uppercase">
+              Celular del Motorizado (WhatsApp):
+            </label>
+            <div class="flex items-center gap-2">
+              <input
+                type="tel"
+                v-model="motorizadoPhone"
+                @blur="saveMotorizadoPhone"
+                placeholder="Ej: 987654321"
+                class="flex-1 px-3 py-1.5 bg-white rounded-lg border border-gray-300 text-xs font-mono focus:border-blue-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                @click="sendRouteToMotorizadoWhatsApp"
+                class="px-3.5 py-1.5 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-lg font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs shrink-0"
+              >
+                <IconWhatsApp class="w-3.5 h-3.5 text-white" />
+                <span>Enviar al WhatsApp</span>
+              </button>
+            </div>
+            <p class="text-[10px] text-gray-400">
+              Se guardará automáticamente para tus próximos despachos.
+            </p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-5 py-3.5 bg-gray-50 border-t border-gray-200 flex items-center justify-between gap-2 flex-wrap shrink-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Botón 1: Abrir en Google Maps -->
+            <a
+              :href="getGoogleMapsRouteUrl()"
+              target="_blank"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm transition-all hover:scale-102 cursor-pointer"
+            >
+              <Navigation class="w-3.5 h-3.5" />
+              <span>Abrir Ruta en Google Maps ↗</span>
+            </a>
+
+            <!-- Botón 2: Copiar Hoja de Ruta -->
+            <button
+              type="button"
+              @click="copyRouteSheet"
+              class="px-3.5 py-2 bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+            >
+              <Check v-if="copiedRouteToast" class="w-3.5 h-3.5 text-emerald-600" />
+              <Copy v-else class="w-3.5 h-3.5 text-gray-600" />
+              <span>{{ copiedRouteToast ? '¡Copiado!' : 'Copiar Texto para WhatsApp' }}</span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            @click="showRouteModal = false"
+            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold text-xs transition-colors cursor-pointer ml-auto"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -1499,7 +1965,12 @@ import {
   Inbox,
   CreditCard,
   ShoppingBag,
-  Smartphone
+  Smartphone,
+  Route,
+  Copy,
+  ArrowUp,
+  ArrowDown,
+  Check
 } from 'lucide-vue-next'
 import IconWhatsApp from '../components/icons/IconWhatsApp.vue'
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from '../services/orders'
@@ -1615,6 +2086,7 @@ const editOrderForm = reactive({
   customer_phone: '',
   customer_address: '',
   notes: '',
+  location_url: '',
   delivery_cost: 0,
   advance: 0,
   status: 'pending'
@@ -1634,8 +2106,244 @@ const newOrder = reactive({
   product_price: 85,
   delivery_cost: 0,
   advance: 0,
-  notes: ''
+  notes: '',
+  location_url: ''
 })
+
+// =========================================================
+// GESTIÓN DE RUTAS Y DELIVERY MULTI-PARADA (OPCIÓN A HÍBRIDA)
+// =========================================================
+const selectedOrderIds = ref([])
+const showRouteModal = ref(false)
+const DEFAULT_DELIVERY_ORIGIN = 'Venezzia Detalles, Lima, Peru'
+const deliveryOrigin = ref(localStorage.getItem('venezzia_delivery_origin') || DEFAULT_DELIVERY_ORIGIN)
+const motorizadoPhone = ref(localStorage.getItem('venezzia_motorizado_phone') || '')
+const isEditingOrigin = ref(false)
+const tempOriginInput = ref('')
+const routeOrdersList = ref([])
+const copiedRouteToast = ref(false)
+
+// Inline GPS editor per order
+const activeGpsEditingOrderId = ref(null)
+const tempGpsUrl = ref('')
+const isSavingGps = ref(false)
+
+function toggleSelectOrder(orderId) {
+  const idx = selectedOrderIds.value.indexOf(orderId)
+  if (idx > -1) {
+    selectedOrderIds.value.splice(idx, 1)
+  } else {
+    selectedOrderIds.value.push(orderId)
+  }
+}
+
+const isAllVisibleSelected = computed(() => {
+  if (orders.value.length === 0) return false
+  return orders.value.every(o => selectedOrderIds.value.includes(o.id))
+})
+
+function toggleSelectAllVisible() {
+  if (isAllVisibleSelected.value) {
+    const visibleIds = orders.value.map(o => o.id)
+    selectedOrderIds.value = selectedOrderIds.value.filter(id => !visibleIds.includes(id))
+  } else {
+    orders.value.forEach(o => {
+      if (!selectedOrderIds.value.includes(o.id)) {
+        selectedOrderIds.value.push(o.id)
+      }
+    })
+  }
+}
+
+function clearSelection() {
+  selectedOrderIds.value = []
+}
+
+function openRouteModal() {
+  if (selectedOrderIds.value.length === 0) {
+    alert('Por favor selecciona al menos un pedido marcando su casilla para armar la ruta.')
+    return
+  }
+  routeOrdersList.value = selectedOrderIds.value
+    .map(id => orders.value.find(o => o.id === id))
+    .filter(Boolean)
+  showRouteModal.value = true
+}
+
+function moveStopUp(index) {
+  if (index <= 0) return
+  const item = routeOrdersList.value.splice(index, 1)[0]
+  routeOrdersList.value.splice(index - 1, 0, item)
+}
+
+function moveStopDown(index) {
+  if (index >= routeOrdersList.value.length - 1) return
+  const item = routeOrdersList.value.splice(index, 1)[0]
+  routeOrdersList.value.splice(index + 1, 0, item)
+}
+
+function removeStopFromRoute(orderId) {
+  routeOrdersList.value = routeOrdersList.value.filter(o => o.id !== orderId)
+  const idx = selectedOrderIds.value.indexOf(orderId)
+  if (idx > -1) selectedOrderIds.value.splice(idx, 1)
+  if (routeOrdersList.value.length === 0) {
+    showRouteModal.value = false
+  }
+}
+
+function saveDeliveryOrigin() {
+  const val = tempOriginInput.value.trim() || DEFAULT_DELIVERY_ORIGIN
+  deliveryOrigin.value = val
+  localStorage.setItem('venezzia_delivery_origin', val)
+  isEditingOrigin.value = false
+}
+
+function saveMotorizadoPhone() {
+  const val = motorizadoPhone.value.trim()
+  localStorage.setItem('venezzia_motorizado_phone', val)
+}
+
+function getGoogleMapsRouteUrl() {
+  if (!routeOrdersList.value || routeOrdersList.value.length === 0) return '#'
+  const originStr = encodeURIComponent((deliveryOrigin.value || DEFAULT_DELIVERY_ORIGIN).trim())
+  
+  const stops = routeOrdersList.value.map(order => {
+    if (order.location_url) {
+      const match = order.location_url.match(/([-+]?\d{1,2}\.\d+)[,\s]+([-+]?\d{1,3}\.\d+)/)
+      if (match) {
+        return `${match[1]},${match[2]}`
+      }
+    }
+    const clean = (order.customer_address || '')
+      .replace(/\|\s*GPS:[^|]+/g, '')
+      .replace(/\|\s*Dedicatoria:[^|]+/g, '')
+      .trim()
+    const fullAddress = clean.toLowerCase().includes('lima') || clean.toLowerCase().includes('peru')
+      ? clean
+      : `${clean}, Lima, Peru`
+    return encodeURIComponent(fullAddress)
+  })
+
+  return `https://www.google.com/maps/dir/${originStr}/${stops.join('/')}`
+}
+
+function buildRouteWhatsAppSheet() {
+  const list = routeOrdersList.value.length > 0
+    ? routeOrdersList.value
+    : selectedOrderIds.value.map(id => orders.value.find(o => o.id === id)).filter(Boolean)
+
+  if (!list || list.length === 0) return ''
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const count = list.length
+
+  let lines = []
+  lines.push(`🛵 *HOJA DE RUTA DE ENTREGAS - VENEZZIA DETALLES*`)
+  lines.push(`📅 *Fecha:* ${dateStr}  |  📦 *Total pedidos:* ${count}`)
+  lines.push(`🌸 *Punto de Salida:* ${deliveryOrigin.value || DEFAULT_DELIVERY_ORIGIN}`)
+  lines.push(`═══════════════════════════`)
+  lines.push(``)
+
+  list.forEach((order, idx) => {
+    const stopNum = idx + 1
+    const cod = `VZ-${order.id.substring(0, 6).toUpperCase()}`
+    const phone = order.customer_phone ? order.customer_phone.replace(/\D/g, '') : ''
+    const cleanAddr = (order.customer_address || 'Dirección por coordinar')
+      .replace(/\|\s*GPS:[^|]+/g, '')
+      .replace(/\|\s*Dedicatoria:[^|]+/g, '')
+      .trim()
+
+    lines.push(`📍 *PARADA ${stopNum}: Pedido ${cod}*`)
+    lines.push(`👤 *Cliente:* ${order.customer_name}`)
+    if (phone) lines.push(`📞 *Teléfono:* ${phone}`)
+    lines.push(`🏠 *Dirección:* ${cleanAddr}`)
+
+    if (order.location_url) {
+      lines.push(`🗺️ *GPS Exacto:* ${order.location_url}`)
+    } else {
+      lines.push(`🗺️ *Maps:* https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanAddr)}`)
+    }
+
+    if (Array.isArray(order.items) && order.items.length > 0) {
+      const itemsText = order.items.map(it => `${getItemQty(it)}x ${it.name || it.producto || 'Detalle'}`).join(', ')
+      lines.push(`🎁 *Productos:* ${itemsText}`)
+    }
+
+    if (order.notes) {
+      lines.push(`💌 *Dedicatoria:* "${order.notes}"`)
+    }
+
+    if (order.balance > 0) {
+      lines.push(`💰 *COBRAR SALDO AL ENTREGAR:* S/ ${order.balance.toFixed(2)}`)
+    } else {
+      lines.push(`✅ *PAGADO 100% (No cobrar)*`)
+    }
+
+    lines.push(``)
+  })
+
+  lines.push(`═══════════════════════════`)
+  lines.push(`🗺️ *RUTA COMPLETA MULTI-PARADA EN GOOGLE MAPS:*`)
+  lines.push(getGoogleMapsRouteUrl())
+  lines.push(`═══════════════════════════`)
+  lines.push(`¡Buen viaje y entregas con cuidado! ✨🌸`)
+
+  return lines.join('\n')
+}
+
+async function copyRouteSheet() {
+  const text = buildRouteWhatsAppSheet()
+  if (!text) return
+  try {
+    await navigator.clipboard.writeText(text)
+    copiedRouteToast.value = true
+    setTimeout(() => { copiedRouteToast.value = false }, 3000)
+  } catch (_) {
+    alert('No se pudo copiar automáticamente. Puedes seleccionar y copiar el texto.')
+  }
+}
+
+async function copyQuickRouteSheet() {
+  if (routeOrdersList.value.length === 0 && selectedOrderIds.value.length > 0) {
+    routeOrdersList.value = selectedOrderIds.value
+      .map(id => orders.value.find(o => o.id === id))
+      .filter(Boolean)
+  }
+  await copyRouteSheet()
+}
+
+function sendRouteToMotorizadoWhatsApp() {
+  const phone = (motorizadoPhone.value || '').replace(/\D/g, '')
+  saveMotorizadoPhone()
+  const text = buildRouteWhatsAppSheet()
+  const intlPhone = phone ? (phone.startsWith('51') ? phone : `51${phone}`) : ''
+  const url = intlPhone
+    ? `https://api.whatsapp.com/send?phone=${intlPhone}&text=${encodeURIComponent(text)}`
+    : `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`
+  window.open(url, '_blank')
+}
+
+function openGpsEditor(order) {
+  activeGpsEditingOrderId.value = order.id
+  tempGpsUrl.value = order.location_url || ''
+}
+
+async function saveOrderGps(order) {
+  const val = tempGpsUrl.value.trim()
+  isSavingGps.value = true
+  try {
+    await updateOrder({
+      id: order.id,
+      location_url: val
+    })
+    order.location_url = val
+    activeGpsEditingOrderId.value = null
+  } catch (err) {
+    alert('Error al guardar ubicación GPS: ' + err.message)
+  } finally {
+    isSavingGps.value = false
+  }
+}
 
 // Check if user is authenticated (checks localStorage pb_admin_auth or PocketBase authStore)
 function checkAuth() {
@@ -1928,6 +2636,7 @@ function handleEditOrder(order) {
   editOrderForm.customer_phone = order.customer_phone || ''
   editOrderForm.customer_address = order.customer_address || ''
   editOrderForm.notes = order.notes || ''
+  editOrderForm.location_url = order.location_url || ''
   editOrderForm.delivery_cost = getSafeDelivery(order)
   editOrderForm.advance = getSafeAdvance(order)
   editOrderForm.status = order.status || 'pending'
@@ -1945,6 +2654,7 @@ async function submitEditOrder() {
       customer_phone: editOrderForm.customer_phone,
       customer_address: editOrderForm.customer_address,
       notes: editOrderForm.notes,
+      location_url: editOrderForm.location_url ? editOrderForm.location_url.trim() : '',
       delivery_cost: Number(editOrderForm.delivery_cost || 0),
       advance: Number(editOrderForm.advance || 0),
       status: editOrderForm.status
@@ -2193,6 +2903,7 @@ async function submitManualOrder() {
       delivery_cost: delivCost,
       advance: adv,
       notes: newOrder.notes,
+      location_url: newOrder.location_url ? newOrder.location_url.trim() : '',
       payment_method: 'whatsapp',
       status: adv >= total && total > 0 ? 'paid' : 'pending'
     })
@@ -2207,6 +2918,7 @@ async function submitManualOrder() {
     newOrder.delivery_cost = 0
     newOrder.advance = 0
     newOrder.notes = ''
+    newOrder.location_url = ''
 
     await loadOrders()
   } catch (err) {
