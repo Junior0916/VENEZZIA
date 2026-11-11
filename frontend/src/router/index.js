@@ -4,6 +4,7 @@ import TerminosCondiciones from '../views/TerminosCondiciones.vue'
 import PoliticasCambioDevolucion from '../views/PoliticasCambioDevolucion.vue'
 import LibroReclamaciones from '../views/LibroReclamaciones.vue'
 import ImageOptimizerView from '../views/ImageOptimizerView.vue'
+import { isReservedRoute } from '../utils/productUrl'
 
 const routes = [
   {
@@ -46,6 +47,23 @@ const routes = [
     name: 'pedidos',
     component: () => import('../views/OrdersView.vue'),
     alias: ['/admin/pedidos', '/sistema/pedidos', '/lista-pedidos']
+  },
+  {
+    path: '/p/:slug',
+    name: 'product-slug-p',
+    component: HomeView
+  },
+  {
+    path: '/:slug([a-zA-Z0-9_-]+)',
+    name: 'product-slug',
+    component: HomeView,
+    beforeEnter: (to, from, next) => {
+      if (isReservedRoute(to.params.slug)) {
+        next('/')
+      } else {
+        next()
+      }
+    }
   },
   {
     path: '/:pathMatch(.*)*',

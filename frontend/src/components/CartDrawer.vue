@@ -708,6 +708,7 @@ import LocationPickerModal from './LocationPickerModal.vue'
 import DistrictAutocomplete from './DistrictAutocomplete.vue'
 import peruLocations from '../data/peruLocations.json'
 import { useCartStore } from '../stores/cart'
+import { getProductUrl } from '../utils/productUrl'
 import { openCulqiCheckout, sendChargeToBackend } from '../services/culqi'
 import { createOrder } from '../services/orders'
 import { useSiteSettingsStore } from '../stores/siteSettings'
@@ -798,7 +799,7 @@ const whatsappCartUrl = computed(() => {
     const p = item.product
     const liveTag = p.liveDiscount ? ` (Descuento TikTok Live: -S/ ${p.liveDiscount})` : ''
     lines.push(`- ${item.quantity}x ${p.name}${liveTag} — S/ ${(p.price * item.quantity).toFixed(2)}`)
-    lines.push(`  ↳ Ficha: ${window.location.origin}/?prod=${p.id}`)
+    lines.push(`  ↳ Ficha: ${getProductUrl(p)}`)
   })
 
   lines.push(``)

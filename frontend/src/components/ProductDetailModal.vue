@@ -95,14 +95,19 @@
           </div>
 
           <!-- Direct Link Copy Pill -->
-          <button
-            @click="copyDirectLink"
-            class="mt-2.5 inline-flex items-center gap-1.5 text-[11px] text-gray-500 hover:text-[#965e9b] transition-colors cursor-pointer"
-            title="Copiar enlace directo de este producto"
-          >
-            <LinkIcon class="w-3.5 h-3.5" />
-            <span>{{ copiedLink ? '¡Enlace copiado!' : 'Copiar enlace directo' }}</span>
-          </button>
+          <div class="mt-2.5 flex items-center gap-2">
+            <button
+              @click="copyDirectLink"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#faf7fb] hover:bg-[#eedee9] border border-[#eedee9] text-[11px] font-semibold text-[#753d77] hover:text-[#27172b] transition-all cursor-pointer shadow-2xs"
+              :title="`Copiar enlace: ${cleanProductUrl}`"
+            >
+              <LinkIcon class="w-3.5 h-3.5 text-[#caa35f]" />
+              <span>{{ copiedLink ? '¡Enlace copiado!' : 'Copiar enlace directo' }}</span>
+            </button>
+            <span class="text-[10px] text-gray-400 font-mono hidden sm:inline truncate max-w-[180px]">
+              /{{ cleanProductSlug }}
+            </span>
+          </div>
         </div>
 
         <!-- Product Information (Cols 6-12) -->
@@ -429,6 +434,7 @@ import IconWhatsApp from './icons/IconWhatsApp.vue'
 import { useCartStore } from '../stores/cart'
 import { useCampaignStore } from '../stores/campaign'
 import { useSiteSettingsStore } from '../stores/siteSettings'
+import { getProductUrl, getProductSlug } from '../utils/productUrl'
 
 const props = defineProps({
   product: {
@@ -706,9 +712,12 @@ const whatsappUrl = computed(() => {
   return siteSettingsStore.whatsappLink(fullText)
 })
 
+const cleanProductSlug = computed(() => getProductSlug(props.product))
+const cleanProductUrl = computed(() => getProductUrl(props.product))
+
 function copyDirectLink() {
   if (!props.product) return
-  const directUrl = `${window.location.origin}/?prod=${props.product.id}`
+  const directUrl = cleanProductUrl.value
   navigator.clipboard.writeText(directUrl).then(() => {
     copiedLink.value = true
     setTimeout(() => {

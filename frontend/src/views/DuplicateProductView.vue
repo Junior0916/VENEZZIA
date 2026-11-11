@@ -629,14 +629,24 @@
 
                   <!-- VIEW IN STORE BUTTON -->
                   <a
-                    :href="`/?prod=${prod.id}`"
+                    :href="`/${getProductSlug(prod)}`"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="p-2 rounded-xl border border-gray-200 hover:border-[#965e9b] text-gray-600 hover:text-[#965e9b] hover:bg-[#faf7fb] transition-all"
-                    title="Ver cómo se ve en la tienda pública"
+                    :title="`Ver en la tienda: venezzia.shop/${getProductSlug(prod)}`"
                   >
                     <ExternalLink class="w-3.5 h-3.5" />
                   </a>
+
+                  <!-- COPY DIRECT LINK BUTTON -->
+                  <button
+                    @click="copyProductLink(prod)"
+                    class="p-2 rounded-xl border border-gray-200 hover:border-[#caa35f] text-gray-600 hover:text-[#27172b] hover:bg-[#faf7fb] transition-all cursor-pointer"
+                    :title="`Copiar enlace para cliente: venezzia.shop/${getProductSlug(prod)}`"
+                  >
+                    <Check v-if="copiedCardLinkId === prod.id" class="w-3.5 h-3.5 text-emerald-600" />
+                    <LinkIcon v-else class="w-3.5 h-3.5 text-[#caa35f]" />
+                  </button>
 
                   <!-- DELETE BUTTON -->
                   <button
@@ -761,6 +771,15 @@
                         >
                           <Edit3 class="w-3 h-3 text-[#caa35f]" />
                           <span>Editar</span>
+                        </button>
+
+                        <button
+                          @click="copyProductLink(prod)"
+                          class="p-1.5 rounded-xl border border-gray-200 hover:border-[#caa35f] text-gray-600 hover:text-[#27172b] transition-all cursor-pointer"
+                          :title="`Copiar enlace para cliente: venezzia.shop/${getProductSlug(prod)}`"
+                        >
+                          <Check v-if="copiedCardLinkId === prod.id" class="w-3.5 h-3.5 text-emerald-600" />
+                          <LinkIcon v-else class="w-3.5 h-3.5 text-[#caa35f]" />
                         </button>
 
                         <button
@@ -1868,7 +1887,7 @@
                   <ExternalLink class="w-3 h-3" />
                 </a>
                 <router-link
-                  :to="`/?prod=${duplicateSuccess.id}`"
+                  :to="`/${getProductSlug(duplicateSuccess)}`"
                   target="_blank"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-green-300 text-green-800 font-semibold text-[11px] hover:bg-green-100 transition-colors"
                 >
@@ -2018,6 +2037,38 @@
                 />
                 <span class="text-[11px] text-gray-400 mt-1 block">
                   El nombre visible para tus clientes en la tienda y en los recibos de WhatsApp.
+                </span>
+              </div>
+
+              <!-- Friendly Slug / Direct Link -->
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                  <span>Enlace Amigable Directo (URL limpia para compartir)</span>
+                  <span class="text-[10px] text-[#caa35f] font-mono font-bold">
+                    venezzia.shop/{{ productForm.slug || generateSlug(productForm.name) }}
+                  </span>
+                </label>
+                <div class="relative flex items-center">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 select-none">
+                    venezzia.shop/
+                  </span>
+                  <input
+                    type="text"
+                    v-model="productForm.slug"
+                    :placeholder="generateSlug(productForm.name) || 'ej: CalendarioAdviento'"
+                    class="w-full pl-28 pr-24 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-[#27172b] focus:border-[#965e9b] focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    @click="copyCleanLinkFromForm"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-[#faf7fb] hover:bg-[#27172b] hover:text-white border border-[#eedee9] text-[10px] font-bold text-[#753d77] transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                  >
+                    <Copy class="w-3 h-3 text-[#caa35f]" />
+                    <span>{{ copiedFormLink ? '¡Copiado!' : 'Copiar' }}</span>
+                  </button>
+                </div>
+                <span class="text-[11px] text-gray-400 mt-1 block">
+                  Tus clientes podrán ingresar directamente con este enlace bonito y confiable sin signos de interrogación ni códigos extraños.
                 </span>
               </div>
 
@@ -2588,9 +2639,11 @@ import {
   Move, GripVertical, ChevronUp, ChevronDown, Save, Lock, LogOut, Zap,
   Flame, Clock, Play, Square, Plus, Eye, EyeOff,
   Edit3, Trash2, UploadCloud, X, Star, Car, LayoutGrid, List,
-  FileText, Image as ImageIcon, ShoppingBag, Info, CheckSquare
+  FileText, Image as ImageIcon, ShoppingBag, Info, CheckSquare,
+  Link as LinkIcon
 } from 'lucide-vue-next'
 import { useSiteSettingsStore } from '../stores/siteSettings'
+import { getProductSlug, getProductUrl, generateSlug } from '../utils/productUrl'
 
 const siteSettingsStore = useSiteSettingsStore()
 
@@ -2619,9 +2672,12 @@ const removeCatalogCard = ref(false)
 const isSavingProduct = ref(false)
 const saveProductError = ref('')
 const saveProductSuccess = ref('')
+const copiedFormLink = ref(false)
+const copiedCardLinkId = ref(null)
 
 const productForm = ref({
   name: '',
+  slug: '',
   price: 0,
   compare_at_price: null,
   campaign: 'maquillaje',
@@ -2759,6 +2815,7 @@ function openCreateProductModal() {
 
   productForm.value = {
     name: '',
+    slug: '',
     price: 0,
     compare_at_price: null,
     campaign: catalogSelectedCampaign.value !== 'all' ? catalogSelectedCampaign.value : 'maquillaje',
@@ -2802,6 +2859,7 @@ function openEditProductModal(prod) {
 
   productForm.value = {
     name: prod.name || '',
+    slug: prod.slug || getProductSlug(prod),
     price: prod.price !== undefined && prod.price !== null ? Number(prod.price) : 0,
     compare_at_price: prod.compare_at_price !== undefined && prod.compare_at_price !== null && prod.compare_at_price !== '' && Number(prod.compare_at_price) > 0 ? Number(prod.compare_at_price) : null,
     campaign: prod.campaign || 'maquillaje',
@@ -2823,6 +2881,27 @@ function openEditProductModal(prod) {
   }
 
   showProductModal.value = true
+}
+
+function copyCleanLinkFromForm() {
+  const slug = productForm.value.slug?.trim() || generateSlug(productForm.value.name)
+  const fullUrl = `${window.location.origin}/${slug}`
+  navigator.clipboard.writeText(fullUrl).then(() => {
+    copiedFormLink.value = true
+    setTimeout(() => {
+      copiedFormLink.value = false
+    }, 2500)
+  })
+}
+
+function copyProductLink(prod) {
+  const fullUrl = getProductUrl(prod)
+  navigator.clipboard.writeText(fullUrl).then(() => {
+    copiedCardLinkId.value = prod.id
+    setTimeout(() => {
+      copiedCardLinkId.value = null
+    }, 2500)
+  })
 }
 
 function closeProductModal() {
@@ -2920,6 +2999,12 @@ async function saveEditedProduct() {
     formData.append('featured', productForm.value.featured ? 'true' : 'false')
     formData.append('addon_car', productForm.value.addon_car ? 'true' : 'false')
     formData.append('live_discount', String(Number(productForm.value.live_discount || 0)))
+
+    // Friendly Slug
+    const finalSlug = (productForm.value.slug && productForm.value.slug.trim()) || generateSlug(productForm.value.name)
+    if (finalSlug) {
+      formData.append('slug', finalSlug)
+    }
 
     // Handle Main Image file upload (with automatic WebP optimization)
     if (newMainImageFile.value) {

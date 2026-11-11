@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
@@ -44,6 +44,7 @@ import ProductDetailModal from './components/ProductDetailModal.vue'
 import { fetchProducts, subscribeToRealtime, MOCK_PRODUCTS } from './services/pocketbase'
 import { useCampaignStore } from './stores/campaign'
 import { useSiteSettingsStore } from './stores/siteSettings'
+import { getProductSlug, findProductBySlugOrId, isReservedRoute } from './utils/productUrl'
 
 const route = useRoute()
 
@@ -78,11 +79,13 @@ let unsubscribeRealtime = null
 
 function openProductModal(product) {
   selectedProductModal.value = product
-  // Deep link update in browser URL without full reload
+  // Actualización limpia de URL con enlace amigable (ej: /CalendarioAdviento) sin recargar
   try {
-    const url = new URL(window.location.href)
-    url.searchParams.set('prod', product.id)
-    window.history.replaceState(null, '', url.toString())
+    const slug = getProductSlug(product)
+    const newPath = `/${slug}`
+    if (window.location.pathname !== newPath) {
+      window.history.replaceState(null, '', newPath)
+    }
   } catch (e) {
     // fallback safe
   }
@@ -106,11 +109,18 @@ function openProductModal(product) {
 
 function closeProductModal() {
   selectedProductModal.value = null
-  // Clean URL parameter
+  // Restaurar URL limpia a la raíz sin parámetros feos
   try {
-    const url = new URL(window.location.href)
-    url.searchParams.delete('prod')
-    window.history.replaceState(null, '', url.toString())
+    const currentPath = window.location.pathname
+    if (currentPath !== '/' && !isReservedRoute(currentPath)) {
+      window.history.replaceState(null, '', '/')
+    } else {
+      const url = new URL(window.location.href)
+      if (url.searchParams.has('prod')) {
+        url.searchParams.delete('prod')
+        window.history.replaceState(null, '', url.toString())
+      }
+    }
   } catch (e) {
     // fallback safe
   }
@@ -124,14 +134,37 @@ function checkDeepLink() {
       campaignStore.setCampaign(campaignParam)
     }
 
-    const prodId = urlParams.get('prod')
-    if (prodId && allProducts.value.length > 0) {
-      const found = allProducts.value.find(p => p.id === prodId)
+    if (!allProducts.value || allProducts.value.length === 0) return
+
+    // 1. Extraer slug amigable de la ruta (ej: /CalendarioAdviento o /p/CalendarioAdviento)
+    const rawPath = window.location.pathname.replace(/^\/+|\/+$/g, '')
+    let slugCandidate = null
+
+    if (rawPath) {
+      if (rawPath.startsWith('p/')) {
+        slugCandidate = rawPath.slice(2)
+      } else if (!isReservedRoute(rawPath)) {
+        slugCandidate = rawPath.split('/')[0]
+      }
+    }
+
+    // 2. Extraer parámetro antiguo ?prod=... para compatibilidad total con enlaces anteriores
+    const prodParam = urlParams.get('prod')
+    const identifier = slugCandidate || prodParam
+
+    if (identifier) {
+      const found = findProductBySlugOrId(identifier, allProducts.value)
       if (found) {
         if (found.campaign && found.campaign !== campaignStore.activeCampaignId) {
           campaignStore.setCampaign(found.campaign)
         }
         selectedProductModal.value = found
+
+        // Si entró con ?prod=..., actualizar la barra de direcciones al nuevo enlace amigable y limpio
+        if (prodParam && !slugCandidate) {
+          const cleanSlug = getProductSlug(found)
+          window.history.replaceState(null, '', `/${cleanSlug}`)
+        }
       }
     }
   } catch (e) {
@@ -158,6 +191,13 @@ async function reloadCatalog() {
     }
   }
 }
+
+watch(
+  () => route.path,
+  () => {
+    checkDeepLink()
+  }
+)
 
 onMounted(() => {
   // Sync initial products immediately to campaignStore (0ms instant render)
