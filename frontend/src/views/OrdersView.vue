@@ -1719,50 +1719,109 @@
         <!-- Body -->
         <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs">
           <!-- Punto de partida (Origen) -->
-          <div class="p-3 bg-blue-50/70 rounded-xl border border-blue-200 space-y-1.5">
-            <div class="flex items-center justify-between">
+          <div class="p-3.5 bg-blue-50/70 rounded-2xl border border-blue-200/90 shadow-2xs space-y-2">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
               <label class="font-bold text-blue-900 flex items-center gap-1.5 text-xs">
                 <MapPin class="w-3.5 h-3.5 text-rose-500" />
                 <span>Punto de Partida (Taller / Tienda):</span>
               </label>
-              <button
-                v-if="!isEditingOrigin"
-                type="button"
-                @click="isEditingOrigin = true; tempOriginInput = deliveryOrigin"
-                class="text-blue-700 hover:text-blue-900 font-bold text-[11px] underline cursor-pointer"
-              >
-                Cambiar origen
-              </button>
+
+              <!-- Actions on top right -->
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  @click="openOriginMapModal"
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-[11px] shadow-xs hover:shadow transition-all cursor-pointer active:scale-95"
+                  title="Fijar ubicación exacta del taller en el mapa interactivo con GPS o buscador"
+                >
+                  <MapPin class="w-3 h-3 text-white" />
+                  <span>Fijar en Mapa</span>
+                </button>
+
+                <button
+                  v-if="!isEditingOrigin"
+                  type="button"
+                  @click="isEditingOrigin = true; tempOriginInput = deliveryOrigin"
+                  class="text-blue-700 hover:text-blue-900 font-bold text-[11px] underline cursor-pointer"
+                >
+                  Editar texto
+                </button>
+              </div>
             </div>
 
-            <div v-if="!isEditingOrigin" class="font-semibold text-gray-800 text-xs pl-5">
-              {{ deliveryOrigin }}
+            <!-- View mode -->
+            <div v-if="!isEditingOrigin" class="space-y-1 pl-5">
+              <div class="font-semibold text-gray-800 text-xs flex items-center gap-2 flex-wrap">
+                <span class="break-words">{{ deliveryOrigin }}</span>
+                <span
+                  v-if="deliveryOriginCoords"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold"
+                >
+                  <Navigation class="w-2.5 h-2.5 text-emerald-600" />
+                  GPS: {{ deliveryOriginCoords.lat.toFixed(5) }}, {{ deliveryOriginCoords.lng.toFixed(5) }}
+                </span>
+              </div>
+
+              <div class="flex items-center gap-3 text-[10px] text-blue-600 flex-wrap">
+                <span>Desde aquí iniciará la navegación el motorizado.</span>
+                <a
+                  v-if="deliveryOriginMapUrl"
+                  :href="deliveryOriginMapUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1 text-blue-700 hover:text-blue-900 font-semibold underline"
+                >
+                  <ExternalLink class="w-2.5 h-2.5" />
+                  Ver punto en Google Maps
+                </a>
+                <button
+                  v-if="deliveryOrigin !== DEFAULT_DELIVERY_ORIGIN || deliveryOriginCoords"
+                  type="button"
+                  @click="resetDeliveryOriginToDefault"
+                  class="text-gray-400 hover:text-gray-600 underline cursor-pointer"
+                >
+                  Restablecer por defecto
+                </button>
+              </div>
             </div>
 
-            <div v-else class="flex items-center gap-2 pt-1">
-              <input
-                type="text"
-                v-model="tempOriginInput"
-                placeholder="Dirección o referencia del taller (ej: Venezzia Detalles, Lima, Peru)"
-                class="flex-1 px-3 py-1.5 bg-white rounded-lg border border-blue-300 text-xs focus:border-blue-600 focus:outline-none"
-                @keydown.enter.prevent="saveDeliveryOrigin"
-              />
-              <button
-                type="button"
-                @click="saveDeliveryOrigin"
-                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs cursor-pointer"
-              >
-                Guardar
-              </button>
-              <button
-                type="button"
-                @click="isEditingOrigin = false"
-                class="px-2.5 py-1.5 text-gray-500 hover:text-gray-700 text-xs cursor-pointer"
-              >
-                Cancelar
-              </button>
+            <!-- Edit mode (Text Input + Map Button) -->
+            <div v-else class="space-y-2 pt-1 pl-5">
+              <div class="flex items-center gap-2 flex-wrap">
+                <input
+                  type="text"
+                  v-model="tempOriginInput"
+                  placeholder="Dirección o referencia del taller (ej: Venezzia Detalles, Lima, Peru)"
+                  class="flex-1 min-w-[200px] px-3 py-1.5 bg-white rounded-lg border border-blue-300 text-xs focus:border-blue-600 focus:outline-none"
+                  @keydown.enter.prevent="saveDeliveryOrigin"
+                />
+                <button
+                  type="button"
+                  @click="saveDeliveryOrigin"
+                  class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs cursor-pointer shadow-2xs"
+                >
+                  Guardar
+                </button>
+                <button
+                  type="button"
+                  @click="openOriginMapModal"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs cursor-pointer shadow-2xs"
+                >
+                  <MapPin class="w-3.5 h-3.5" />
+                  <span>Fijar en Mapa</span>
+                </button>
+                <button
+                  type="button"
+                  @click="isEditingOrigin = false"
+                  class="px-2.5 py-1.5 text-gray-500 hover:text-gray-700 text-xs cursor-pointer"
+                >
+                  Cancelar
+                </button>
+              </div>
+              <p class="text-[10px] text-blue-600">
+                Puedes escribir la dirección o hacer clic en <strong>Fijar en Mapa</strong> para ubicarlo con GPS o el mapa interactivo.
+              </p>
             </div>
-            <p class="text-[10px] text-blue-600 pl-5">Desde aquí iniciará la navegación el motorizado.</p>
           </div>
 
           <!-- Secuencia de paradas -->
@@ -1973,6 +2032,7 @@ import {
   Check
 } from 'lucide-vue-next'
 import IconWhatsApp from '../components/icons/IconWhatsApp.vue'
+import LocationPickerModal from '../components/LocationPickerModal.vue'
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from '../services/orders'
 import { pb, resolveProductImage } from '../services/pocketbase'
 
@@ -2117,6 +2177,16 @@ const selectedOrderIds = ref([])
 const showRouteModal = ref(false)
 const DEFAULT_DELIVERY_ORIGIN = 'Venezzia Detalles, Lima, Peru'
 const deliveryOrigin = ref(localStorage.getItem('venezzia_delivery_origin') || DEFAULT_DELIVERY_ORIGIN)
+const deliveryOriginCoords = ref((() => {
+  try {
+    const raw = localStorage.getItem('venezzia_delivery_origin_coords')
+    return raw ? JSON.parse(raw) : null
+  } catch (_) {
+    return null
+  }
+})())
+const deliveryOriginMapUrl = ref(localStorage.getItem('venezzia_delivery_origin_map_url') || '')
+const showOriginMapModal = ref(false)
 const motorizadoPhone = ref(localStorage.getItem('venezzia_motorizado_phone') || '')
 const isEditingOrigin = ref(false)
 const tempOriginInput = ref('')
@@ -2191,10 +2261,56 @@ function removeStopFromRoute(orderId) {
   }
 }
 
+function openOriginMapModal() {
+  showOriginMapModal.value = true
+}
+
+function handleOriginSelectedFromMap({ lat, lng, mapUrl, addressText }) {
+  deliveryOriginCoords.value = { lat, lng }
+  deliveryOriginMapUrl.value = mapUrl
+
+  const label = addressText && addressText.trim()
+    ? addressText.trim()
+    : `Ubicación GPS (${lat.toFixed(5)}, ${lng.toFixed(5)})`
+
+  deliveryOrigin.value = label
+  tempOriginInput.value = label
+  isEditingOrigin.value = false
+
+  localStorage.setItem('venezzia_delivery_origin', label)
+  localStorage.setItem('venezzia_delivery_origin_coords', JSON.stringify({ lat, lng }))
+  localStorage.setItem('venezzia_delivery_origin_map_url', mapUrl)
+}
+
+function resetDeliveryOriginToDefault() {
+  deliveryOrigin.value = DEFAULT_DELIVERY_ORIGIN
+  tempOriginInput.value = DEFAULT_DELIVERY_ORIGIN
+  deliveryOriginCoords.value = null
+  deliveryOriginMapUrl.value = ''
+  localStorage.removeItem('venezzia_delivery_origin')
+  localStorage.removeItem('venezzia_delivery_origin_coords')
+  localStorage.removeItem('venezzia_delivery_origin_map_url')
+  isEditingOrigin.value = false
+}
+
 function saveDeliveryOrigin() {
   const val = tempOriginInput.value.trim() || DEFAULT_DELIVERY_ORIGIN
   deliveryOrigin.value = val
   localStorage.setItem('venezzia_delivery_origin', val)
+
+  const match = val.match(/([-+]?\d{1,2}\.\d+)[,\s]+([-+]?\d{1,3}\.\d+)/)
+  if (match) {
+    const coords = { lat: parseFloat(match[1]), lng: parseFloat(match[2]) }
+    deliveryOriginCoords.value = coords
+    deliveryOriginMapUrl.value = `https://maps.google.com/?q=${coords.lat},${coords.lng}`
+    localStorage.setItem('venezzia_delivery_origin_coords', JSON.stringify(coords))
+    localStorage.setItem('venezzia_delivery_origin_map_url', deliveryOriginMapUrl.value)
+  } else {
+    deliveryOriginCoords.value = null
+    deliveryOriginMapUrl.value = ''
+    localStorage.removeItem('venezzia_delivery_origin_coords')
+    localStorage.removeItem('venezzia_delivery_origin_map_url')
+  }
   isEditingOrigin.value = false
 }
 
@@ -2205,7 +2321,18 @@ function saveMotorizadoPhone() {
 
 function getGoogleMapsRouteUrl() {
   if (!routeOrdersList.value || routeOrdersList.value.length === 0) return '#'
-  const originStr = encodeURIComponent((deliveryOrigin.value || DEFAULT_DELIVERY_ORIGIN).trim())
+  
+  let originStr = ''
+  if (deliveryOriginCoords.value && deliveryOriginCoords.value.lat && deliveryOriginCoords.value.lng) {
+    originStr = `${deliveryOriginCoords.value.lat},${deliveryOriginCoords.value.lng}`
+  } else {
+    const match = (deliveryOrigin.value || '').match(/([-+]?\d{1,2}\.\d+)[,\s]+([-+]?\d{1,3}\.\d+)/)
+    if (match) {
+      originStr = `${match[1]},${match[2]}`
+    } else {
+      originStr = encodeURIComponent((deliveryOrigin.value || DEFAULT_DELIVERY_ORIGIN).trim())
+    }
+  }
   
   const stops = routeOrdersList.value.map(order => {
     if (order.location_url) {
@@ -2240,7 +2367,10 @@ function buildRouteWhatsAppSheet() {
   let lines = []
   lines.push(`🛵 *HOJA DE RUTA DE ENTREGAS - VENEZZIA DETALLES*`)
   lines.push(`📅 *Fecha:* ${dateStr}  |  📦 *Total pedidos:* ${count}`)
-  lines.push(`🌸 *Punto de Salida:* ${deliveryOrigin.value || DEFAULT_DELIVERY_ORIGIN}`)
+  const originWhatsAppText = deliveryOriginCoords.value
+    ? `${deliveryOrigin.value || DEFAULT_DELIVERY_ORIGIN} (📍 GPS: ${deliveryOriginCoords.value.lat.toFixed(5)}, ${deliveryOriginCoords.value.lng.toFixed(5)})`
+    : (deliveryOrigin.value || DEFAULT_DELIVERY_ORIGIN)
+  lines.push(`🌸 *Punto de Salida:* ${originWhatsAppText}`)
   lines.push(`═══════════════════════════`)
   lines.push(``)
 

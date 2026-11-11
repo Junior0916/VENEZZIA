@@ -14,8 +14,8 @@
             <MapPin class="w-4 h-4 text-[#caa35f]" />
           </div>
           <div>
-            <h3 class="font-serif font-bold text-sm text-[#27172b]">Fijar Ubicación de Entrega</h3>
-            <p class="text-[10px] text-gray-500">Mueve el mapa para ubicar el punto exacto para el delivery</p>
+            <h3 class="font-serif font-bold text-sm text-[#27172b]">{{ title || 'Fijar Ubicación de Entrega' }}</h3>
+            <p class="text-[10px] text-gray-500">{{ subtitle || 'Mueve el mapa para ubicar el punto exacto para el delivery' }}</p>
           </div>
         </div>
         <button
@@ -201,6 +201,14 @@ const props = defineProps({
   initialCoords: {
     type: Object,
     default: () => null
+  },
+  title: {
+    type: String,
+    default: 'Fijar Ubicación de Entrega'
+  },
+  subtitle: {
+    type: String,
+    default: 'Mueve el mapa para ubicar el punto exacto para el delivery'
   }
 })
 
