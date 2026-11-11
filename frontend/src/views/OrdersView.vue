@@ -905,33 +905,33 @@
                           <div class="bg-gray-50 p-2.5 rounded-lg border border-gray-200 space-y-1 text-xs">
                             <div class="flex justify-between text-gray-500">
                               <span>Monto Productos:</span>
-                              <span class="font-mono">S/ {{ order.products_total.toFixed(2) }}</span>
+                              <span class="font-mono">S/ {{ (order.products_total || 0).toFixed(2) }}</span>
                             </div>
                             <div class="flex justify-between text-gray-500">
                               <span>Delivery:</span>
-                              <span class="font-mono">+ S/ {{ (editingDelivery[order.id] ?? order.delivery_cost).toFixed(2) }}</span>
+                              <span class="font-mono">+ S/ {{ getSafeDelivery(order).toFixed(2) }}</span>
                             </div>
                             <div class="flex justify-between font-bold text-gray-800 border-t pt-1">
                               <span>Total a Pagar:</span>
-                              <span class="font-mono">S/ {{ (order.products_total + (editingDelivery[order.id] ?? order.delivery_cost)).toFixed(2) }}</span>
+                              <span class="font-mono">S/ {{ getSafeTotal(order).toFixed(2) }}</span>
                             </div>
                             <div class="flex justify-between text-emerald-700">
                               <span>Adelanto Abonado:</span>
-                              <span class="font-mono">- S/ {{ (editingAdvance[order.id] ?? order.advance).toFixed(2) }}</span>
+                              <span class="font-mono">- S/ {{ getSafeAdvance(order).toFixed(2) }}</span>
                             </div>
                             <div class="flex justify-between font-bold text-base border-t pt-1">
                               <span>Saldo Restante:</span>
                               <span
                                 :class="[
                                   'font-mono',
-                                  Math.max(0, (order.products_total + (editingDelivery[order.id] ?? order.delivery_cost)) - (editingAdvance[order.id] ?? order.advance)) > 0
+                                  getSafeBalance(order) > 0
                                     ? 'text-rose-600'
                                     : 'text-emerald-700'
                                 ]"
                               >
-                                S/ {{ Math.max(0, (order.products_total + (editingDelivery[order.id] ?? order.delivery_cost)) - (editingAdvance[order.id] ?? order.advance)).toFixed(2) }}
+                                S/ {{ getSafeBalance(order).toFixed(2) }}
                                 <span
-                                  v-if="Math.max(0, (order.products_total + (editingDelivery[order.id] ?? order.delivery_cost)) - (editingAdvance[order.id] ?? order.advance)) === 0"
+                                  v-if="getSafeBalance(order) === 0"
                                   class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded ml-1"
                                 >
                                   CANCELADO
@@ -1555,6 +1555,38 @@ const editingDelivery = reactive({})
 const editingAdvance = reactive({})
 const isSavingFinancials = reactive({})
 
+// Safe financial helpers for reactive template rendering & calculation
+function getSafeDelivery(order) {
+  if (!order) return 0
+  const val = editingDelivery[order.id]
+  if (val === '') return 0
+  if (val === null || val === undefined || isNaN(val)) {
+    return Number(order.delivery_cost || 0)
+  }
+  return Number(val)
+}
+
+function getSafeAdvance(order) {
+  if (!order) return 0
+  const val = editingAdvance[order.id]
+  if (val === '') return 0
+  if (val === null || val === undefined || isNaN(val)) {
+    return Number(order.advance || 0)
+  }
+  return Number(val)
+}
+
+function getSafeTotal(order) {
+  if (!order) return 0
+  const prodTotal = Number(order.products_total || 0)
+  return prodTotal + getSafeDelivery(order)
+}
+
+function getSafeBalance(order) {
+  if (!order) return 0
+  return Math.max(0, getSafeTotal(order) - getSafeAdvance(order))
+}
+
 // Filters state
 const filters = reactive({
   status: 'active',
@@ -1800,17 +1832,17 @@ async function quickUpdateStatus(order, newStatus) {
 
 // Quick delivery & advance presets
 function setQuickDelivery(order, amount) {
-  editingDelivery[order.id] = amount
+  editingDelivery[order.id] = Number(amount || 0)
 }
 
 function setQuickAdvance(order, amount) {
-  editingAdvance[order.id] = amount
+  editingAdvance[order.id] = Number(amount || 0)
 }
 
 // Save delivery and advance changes
 async function saveFinancials(order) {
-  const delivery = Number(editingDelivery[order.id] ?? order.delivery_cost)
-  const advance = Number(editingAdvance[order.id] ?? order.advance)
+  const delivery = getSafeDelivery(order)
+  const advance = getSafeAdvance(order)
 
   isSavingFinancials[order.id] = true
   try {
@@ -1829,8 +1861,8 @@ async function saveFinancials(order) {
 
 // 1-Clic para cobrar el delivery acordado y dejar el pedido 100% pagado (saldo 0)
 async function payDeliveryAndClearBalance(order) {
-  const delivery = Number(editingDelivery[order.id] ?? order.delivery_cost)
-  const fullTotal = order.products_total + delivery
+  const delivery = getSafeDelivery(order)
+  const fullTotal = (order.products_total || 0) + delivery
   editingAdvance[order.id] = fullTotal
 
   isSavingFinancials[order.id] = true
@@ -1896,8 +1928,8 @@ function handleEditOrder(order) {
   editOrderForm.customer_phone = order.customer_phone || ''
   editOrderForm.customer_address = order.customer_address || ''
   editOrderForm.notes = order.notes || ''
-  editOrderForm.delivery_cost = Number(editingDelivery[order.id] ?? order.delivery_cost ?? 0)
-  editOrderForm.advance = Number(editingAdvance[order.id] ?? order.advance ?? 0)
+  editOrderForm.delivery_cost = getSafeDelivery(order)
+  editOrderForm.advance = getSafeAdvance(order)
   editOrderForm.status = order.status || 'pending'
   showEditOrderModal.value = true
 }
