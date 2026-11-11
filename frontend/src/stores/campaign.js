@@ -225,7 +225,7 @@ export const DEFAULT_CAMPAIGNS = [
     heroSubtitle: 'Descubre la magia de la Navidad abriendo una sorpresa cada día. Edición limitada de 12 días y 14 sorpresas en una exclusiva caja interactiva de gala.',
     heroPrimaryImage: '/products/calendario-de-adviento-2026.webp',
     heroPrimaryTitle: 'Calendario de Adviento 2026 • 12 Días 14 Sorpresas',
-    heroSideImage: '/products/ramo-pinguino-hotwheels_centered.webp',
+    heroSideImage: '/products/ramo-nochebuena-rosas_centered.webp',
     heroSideTitle: 'Ramo Nochebuena con Rosas Eternas',
     heroSidePrice: 75.00,
     accentColor: '#15803d',
@@ -251,7 +251,7 @@ export const DEFAULT_CAMPAIGNS = [
       {
         name: 'Ramos Nochebuena',
         filter: 'Ramos',
-        image: '/products/ramo-pinguino-hotwheels_centered.webp'
+        image: '/products/ramo-nochebuena-rosas_centered.webp'
       },
       {
         name: 'Peluches Festivos',

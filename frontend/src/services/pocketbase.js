@@ -1079,7 +1079,7 @@ export function resolveProductImage(record, client = pb) {
   if (norm.includes('adviento') || norm.includes('calendario')) return '/products/calendario-de-adviento-2026.webp'
   if (norm.includes('nochebuena') || norm.includes('navideño') || norm.includes('navidad') || norm.includes('nieve')) {
     if (norm.includes('box') || norm.includes('caja')) return '/products/box-pinguino-lucifer_centered.webp'
-    return '/products/ramo-pinguino-hotwheels_centered.webp'
+    return '/products/ramo-nochebuena-rosas_centered.webp'
   }
 
   return '/products/box_basico_centered.webp'
