@@ -294,7 +294,19 @@ export const useCampaignStore = defineStore('campaign', () => {
         filterTabs = typeof r.filter_tabs === 'string' ? JSON.parse(r.filter_tabs) : (r.filter_tabs || [])
       } catch (_) {}
       try {
-        categories = typeof r.categories === 'string' ? JSON.parse(r.categories) : (r.categories || [])
+        if (typeof r.categories === 'string') {
+        categories = JSON.parse(r.categories)
+      } else if (Array.isArray(r.categories)) {
+        if (typeof r.categories[0] === 'number') {
+          const str = String.fromCharCode(...r.categories)
+          categories = JSON.parse(str)
+        } else {
+          categories = r.categories
+        }
+      }
+      if (!Array.isArray(categories) || (categories.length > 0 && typeof categories[0] !== 'object')) {
+        categories = defaultMatch?.categories || []
+      }
       } catch (_) {}
 
       const id = r.slug || r.id
@@ -419,8 +431,8 @@ export const useCampaignStore = defineStore('campaign', () => {
       if (campProducts.length > 0) {
         const catMatch = campProducts.find(p => 
           p.is_active !== false &&
-          ((p.category && p.category.toLowerCase().includes(cat.filter.toLowerCase())) ||
-           (p.name && p.name.toLowerCase().includes(cat.filter.toLowerCase())))
+          ((p.category && p.category.toLowerCase().includes(String(cat.filter || '').toLowerCase())) ||
+           (p.name && p.name.toLowerCase().includes(String(cat.filter || '').toLowerCase())))
         )
         if (catMatch?.image) {
           catImage = catMatch.image
