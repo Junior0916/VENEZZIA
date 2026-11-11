@@ -288,6 +288,9 @@ export const useCampaignStore = defineStore('campaign', () => {
   async function loadCampaigns() {
     // Helper to map DB record to campaign object
     const mapCampaignRecord = (r) => {
+      const id = r.slug || r.id
+      const defaultMatch = DEFAULT_CAMPAIGNS.find(d => d.id === id)
+
       let filterTabs = []
       let categories = []
       try {
@@ -295,22 +298,21 @@ export const useCampaignStore = defineStore('campaign', () => {
       } catch (_) {}
       try {
         if (typeof r.categories === 'string') {
-        categories = JSON.parse(r.categories)
-      } else if (Array.isArray(r.categories)) {
-        if (typeof r.categories[0] === 'number') {
-          const str = String.fromCharCode(...r.categories)
-          categories = JSON.parse(str)
-        } else {
-          categories = r.categories
+          categories = JSON.parse(r.categories)
+        } else if (Array.isArray(r.categories)) {
+          if (typeof r.categories[0] === 'number') {
+            const str = String.fromCharCode(...r.categories)
+            categories = JSON.parse(str)
+          } else {
+            categories = r.categories
+          }
         }
-      }
-      if (!Array.isArray(categories) || (categories.length > 0 && typeof categories[0] !== 'object')) {
+        if (!Array.isArray(categories) || (categories.length > 0 && typeof categories[0] !== 'object')) {
+          categories = defaultMatch?.categories || []
+        }
+      } catch (_) {
         categories = defaultMatch?.categories || []
       }
-      } catch (_) {}
-
-      const id = r.slug || r.id
-      const defaultMatch = DEFAULT_CAMPAIGNS.find(d => d.id === id)
 
       return {
         id,
@@ -421,8 +423,8 @@ export const useCampaignStore = defineStore('campaign', () => {
       dynamicHeroSideImage = findProductImage('Tulipanes', base.heroSideImage)
       dynamicHeroSidePrice = findProductPrice('Tulipanes', base.heroSidePrice)
     } else if (base.id === 'navidad') {
-      dynamicHeroSideImage = findProductImage('Nieve', base.heroSideImage)
-      dynamicHeroSidePrice = findProductPrice('Nieve', base.heroSidePrice)
+      dynamicHeroSideImage = findProductImage('Ramo Nochebuena', base.heroSideImage)
+      dynamicHeroSidePrice = findProductPrice('Ramo Nochebuena', base.heroSidePrice)
     }
 
     // Dynamic categories images from live products

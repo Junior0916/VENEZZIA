@@ -1030,7 +1030,9 @@ const PRODUCT_OPTIMIZED_ASSETS = {
 export function resolveProductImage(record, client = pb) {
   // 1. Highest Priority: PocketBase User Uploaded File
   // When a user uploads a new image in PocketBase, record.image contains the uploaded filename (e.g. 'ramo_123.webp')
-  if (record?.image && client?.files?.getURL && !record.image.startsWith('http://') && !record.image.startsWith('https://') && !record.image.startsWith('/')) {
+  // Ignore accidental hello_kitty placeholder on navidad products
+  const isKittyPlaceholderOnNavidad = record?.campaign === 'navidad' && (record.image || '').includes('hello_kitty')
+  if (!isKittyPlaceholderOnNavidad && record?.image && client?.files?.getURL && !record.image.startsWith('http://') && !record.image.startsWith('https://') && !record.image.startsWith('/')) {
     const isWebP = (record.image || '').toLowerCase().endsWith('.webp')
     let url = isWebP
       ? client.files.getURL(record, record.image)
