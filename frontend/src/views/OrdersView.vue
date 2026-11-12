@@ -1990,6 +1990,16 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal para fijar punto de partida en el mapa interactivo -->
+    <LocationPickerModal
+      :is-open="showOriginMapModal"
+      :initial-coords="deliveryOriginCoords"
+      title="Fijar Punto de Partida (Taller / Tienda)"
+      subtitle="Mueve el mapa o usa el buscador/GPS para ubicar el punto donde iniciará el delivery"
+      @close="showOriginMapModal = false"
+      @select="handleOriginSelectedFromMap"
+    />
   </div>
 </template>
 
