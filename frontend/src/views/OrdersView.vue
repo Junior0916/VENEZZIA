@@ -1,55 +1,63 @@
 <template>
-  <div class="min-h-screen bg-[#f4f6f9] text-[#27172b]">
-    <!-- TOP NAVIGATION BAR (SISFS / VENEZZIA STYLE) -->
-    <header class="bg-[#1b2b48] text-white border-b border-[#2b3e63] sticky top-0 z-40 shadow-md">
-      <div class="max-w-[98%] mx-auto px-3 sm:px-6 h-14 flex items-center justify-between">
-        <!-- Brand & Title -->
+  <div class="min-h-screen bg-[#faf7fb] text-[#27172b]">
+    <!-- TOP NAVIGATION BAR (VENEZZIA BOUTIQUE STYLE) -->
+    <header class="bg-white/95 backdrop-blur-md text-[#27172b] border-b border-[#eedee9] sticky top-0 z-40 shadow-[0_2px_14px_-4px_rgba(150,94,155,0.08)]">
+      <div class="max-w-[98%] mx-auto px-3 sm:px-6 h-16 flex items-center justify-between">
+        <!-- Brand & Title with Official Logo (marca_lila + isotipo_lila) -->
         <div class="flex items-center gap-3">
-          <router-link to="/" class="flex items-center gap-2 hover:opacity-90 transition-opacity">
-            <img src="/isotipo_lila.webp" alt="Venezzia" class="h-8 w-auto brightness-0 invert" />
-            <span class="font-serif font-bold text-lg tracking-wider text-white hidden sm:inline">VENEZZIA</span>
+          <router-link to="/" class="flex items-center gap-2 sm:gap-2.5 group shrink-0" title="Venezzia Detalles">
+            <img
+              src="/marca_lila.webp"
+              alt="Venezzia Detalles"
+              class="h-8 sm:h-9 w-auto object-contain group-hover:opacity-85 transition-opacity"
+            />
+            <img
+              src="/isotipo_lila.webp"
+              alt="Venezzia Isotipo"
+              class="h-7 sm:h-8 w-auto object-contain group-hover:scale-105 transition-transform"
+            />
           </router-link>
-          <span class="text-white/30 hidden sm:inline">|</span>
-          <div class="flex items-center gap-1.5 bg-[#253858] px-2.5 py-1 rounded text-xs font-semibold text-blue-200">
-            <Layers class="w-3.5 h-3.5" />
+          <span class="text-gray-300 hidden sm:inline">|</span>
+          <div class="flex items-center gap-1.5 bg-[#fbf2fc] border border-[#ecdbe8] px-3 py-1 rounded-full text-xs font-bold text-[#7a3f80] shadow-2xs">
+            <Layers class="w-3.5 h-3.5 text-[#965e9b]" />
             <span>SISTEMA DE PEDIDOS</span>
           </div>
         </div>
 
         <!-- Quick Links & User Info -->
-        <div class="flex items-center gap-2 sm:gap-4">
+        <div class="flex items-center gap-2 sm:gap-3">
           <router-link
             to="/admin"
-            class="text-xs text-blue-200 hover:text-white bg-white/10 hover:bg-white/15 px-3 py-1.5 rounded transition-colors flex items-center gap-1.5"
+            class="text-xs text-[#7a3f80] hover:text-[#27172b] bg-[#faf5fb] hover:bg-[#f3e5f4] border border-[#eedee9] px-3 py-1.5 rounded-full font-semibold transition-all shadow-2xs flex items-center gap-1.5"
             title="Ir a gestión de catálogo y duplicador"
           >
-            <Package class="w-3.5 h-3.5" />
+            <Package class="w-3.5 h-3.5 text-[#965e9b]" />
             <span class="hidden md:inline">Gestión Catálogo</span>
           </router-link>
 
           <router-link
             to="/"
             target="_blank"
-            class="text-xs text-blue-200 hover:text-white bg-white/10 hover:bg-white/15 px-3 py-1.5 rounded transition-colors flex items-center gap-1.5"
+            class="text-xs text-gray-700 hover:text-[#7a3f80] bg-white hover:bg-[#faf5fb] border border-[#eedee9] px-3 py-1.5 rounded-full font-semibold transition-all shadow-2xs flex items-center gap-1.5"
             title="Ver tienda en vivo"
           >
-            <ExternalLink class="w-3.5 h-3.5" />
+            <ExternalLink class="w-3.5 h-3.5 text-[#caa35f]" />
             <span class="hidden md:inline">Ver Tienda</span>
           </router-link>
 
           <!-- User Badge -->
-          <div class="flex items-center gap-2 pl-2 border-l border-white/20">
-            <div class="w-8 h-8 rounded-full bg-amber-500 text-white font-bold flex items-center justify-center text-xs shadow-inner">
+          <div class="flex items-center gap-2 pl-2 sm:pl-3 border-l border-[#eedee9]">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#caa35f] to-[#b0873b] text-white font-bold flex items-center justify-center text-xs shadow-xs">
               J
             </div>
             <div class="hidden lg:block text-left text-xs leading-tight">
-              <div class="text-[10px] text-blue-200">Bienvenido,</div>
-              <div class="font-bold text-white tracking-wide">JUNIOR ADMIN</div>
+              <div class="text-[10px] text-gray-400">Bienvenido,</div>
+              <div class="font-bold text-[#27172b] tracking-wide">JUNIOR ADMIN</div>
             </div>
             <button
               v-if="isAuthenticated"
               @click="handleLogout"
-              class="text-white/60 hover:text-rose-300 p-1.5 rounded hover:bg-white/10 transition-colors"
+              class="text-gray-400 hover:text-rose-600 p-1.5 rounded-full hover:bg-rose-50 transition-colors cursor-pointer"
               title="Cerrar sesión"
             >
               <LogOut class="w-4 h-4" />
@@ -61,14 +69,14 @@
 
     <!-- 1. LOGIN GATE: Shown when not authenticated -->
     <div v-if="!isAuthenticated" class="max-w-md mx-auto px-4 py-16">
-      <div class="bg-white rounded-2xl p-8 border border-gray-200 text-center shadow-xl">
-        <div class="w-14 h-14 rounded-2xl bg-[#1b2b48] text-amber-400 flex items-center justify-center mx-auto mb-4 shadow-sm">
-          <Lock class="w-7 h-7" />
+      <div class="bg-white rounded-3xl p-8 border border-[#eedee9] text-center shadow-xl">
+        <div class="w-16 h-16 rounded-2xl bg-[#faf5fb] border border-[#eedee9] text-[#7a3f80] flex items-center justify-center mx-auto mb-4 shadow-xs">
+          <img src="/isotipo_lila.webp" alt="Venezzia" class="w-9 h-9 object-contain" />
         </div>
-        <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider block mb-1">
+        <span class="text-[10px] font-bold text-[#caa35f] uppercase tracking-wider block mb-1">
           Acceso Restringido • Solo Administradores
         </span>
-        <h2 class="text-2xl font-bold text-[#1b2b48] mb-2">
+        <h2 class="text-2xl font-serif font-bold text-[#27172b] mb-2">
           Gestión de Pedidos Venezzia
         </h2>
         <p class="text-xs text-gray-500 mb-6">
@@ -105,7 +113,7 @@
           <button
             type="submit"
             :disabled="isLoggingIn"
-            class="w-full py-3 bg-[#1b2b48] hover:bg-[#253858] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            class="w-full py-3 bg-gradient-to-r from-[#27172b] to-[#401f46] hover:from-[#7a3f80] hover:to-[#965e9b] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             <Loader2 v-if="isLoggingIn" class="w-4 h-4 animate-spin" />
             <span>{{ isLoggingIn ? 'Verificando...' : 'Ingresar al Sistema de Pedidos' }}</span>
@@ -119,9 +127,9 @@
       <!-- TITLE & TOP ACTIONS -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-gray-200 shadow-xs">
         <div>
-          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[#1b2b48] flex items-center gap-2">
+          <h1 class="text-xl sm:text-2xl font-serif font-bold tracking-tight text-[#27172b] flex items-center gap-2">
             <span>LISTA DE PEDIDOS</span>
-            <span class="text-xs bg-gray-100 text-gray-600 font-semibold px-2.5 py-0.5 rounded-full border border-gray-200">
+            <span class="text-xs bg-[#fbf2fc] text-[#7a3f80] font-semibold px-2.5 py-0.5 rounded-full border border-[#eedee9]">
               {{ stats.total_active }} activos / {{ stats.total_all }} registros
             </span>
           </h1>
@@ -131,23 +139,23 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
-          <!-- Botón Generar Ruta Delivery (Google Maps) -->
+          <!-- Botón Generar Ruta Delivery (Google Maps & Waze) -->
           <button
             type="button"
             @click="openRouteModal"
             :class="[
               'px-3.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer',
               selectedOrderIds.length > 0
-                ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-300 animate-pulse'
-                : 'bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200'
+                ? 'bg-gradient-to-r from-[#7a3f80] to-[#965e9b] hover:from-[#68336d] hover:to-[#824c87] text-white ring-2 ring-purple-300 animate-pulse'
+                : 'bg-[#faf5fb] hover:bg-[#f3e5f4] text-[#7a3f80] border border-[#eedee9]'
             ]"
-            title="Generar la mejor ruta en Google Maps para el motorizado con los pedidos seleccionados"
+            title="Generar la mejor ruta en Google Maps y Waze para el motorizado con los pedidos seleccionados"
           >
-            <Route class="w-3.5 h-3.5 text-blue-600" />
+            <Route class="w-3.5 h-3.5" :class="selectedOrderIds.length > 0 ? 'text-white' : 'text-[#965e9b]'" />
             <span>Ruta Delivery</span>
             <span
               v-if="selectedOrderIds.length > 0"
-              class="bg-white text-blue-800 px-1.5 py-0.2 rounded-full text-[10px] font-extrabold"
+              class="bg-white text-[#7a3f80] px-1.5 py-0.2 rounded-full text-[10px] font-extrabold"
             >
               {{ selectedOrderIds.length }}
             </span>
@@ -370,18 +378,18 @@
       <!-- BANNER DE RUTA RÁPIDA CUANDO HAY PEDIDOS SELECCIONADOS -->
       <div
         v-if="selectedOrderIds.length > 0"
-        class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-3 px-4 rounded-xl shadow-md flex items-center justify-between gap-3 flex-wrap animate-in fade-in duration-200"
+        class="bg-gradient-to-r from-[#27172b] via-[#4a1e4e] to-[#7a3f80] text-white p-3 px-4 rounded-2xl shadow-md border border-[#eedee9]/20 flex items-center justify-between gap-3 flex-wrap animate-in fade-in duration-200"
       >
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-full bg-blue-500/30 text-blue-300 flex items-center justify-center shrink-0">
-            <Route class="w-4 h-4 text-blue-300" />
+          <div class="w-8 h-8 rounded-full bg-white/15 text-purple-200 flex items-center justify-center shrink-0">
+            <Route class="w-4 h-4 text-purple-200" />
           </div>
           <div>
             <div class="font-bold text-xs">
               {{ selectedOrderIds.length }} {{ selectedOrderIds.length === 1 ? 'pedido seleccionado' : 'pedidos seleccionados' }} para reparto
             </div>
-            <div class="text-[10px] text-blue-200">
-              Listos para armar la ruta en Google Maps
+            <div class="text-[10px] text-purple-200">
+              Listos para armar la ruta en Google Maps & Waze
             </div>
           </div>
         </div>
@@ -588,7 +596,7 @@
 
                   <!-- COD (ID) -->
                   <td class="py-2.5 px-3 font-mono font-bold text-gray-700">
-                    <span class="text-[#1b2b48]">VZ-{{ order.id.substring(0, 6).toUpperCase() }}</span>
+                    <span class="text-[#27172b]">VZ-{{ order.id.substring(0, 6).toUpperCase() }}</span>
                   </td>
 
                   <!-- FECHA -->
@@ -1695,14 +1703,14 @@
     >
       <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
         <!-- Header -->
-        <div class="px-5 py-3.5 bg-gradient-to-r from-[#1e293b] to-[#2563eb] text-white flex items-center justify-between shrink-0">
+        <div class="px-5 py-3.5 bg-gradient-to-r from-[#27172b] via-[#4a1e4e] to-[#7a3f80] text-white flex items-center justify-between shrink-0">
           <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shadow-xs">
               <Route class="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 class="font-bold text-sm">Ruta de Despacho en Google Maps</h3>
-              <p class="text-[11px] text-blue-100">
+              <h3 class="font-bold text-sm font-serif tracking-wide">Ruta de Despacho • Google Maps & Waze</h3>
+              <p class="text-[11px] text-purple-200">
                 {{ routeOrdersList.length }} {{ routeOrdersList.length === 1 ? 'parada de entrega' : 'paradas de entrega' }}
               </p>
             </div>
@@ -1719,9 +1727,9 @@
         <!-- Body -->
         <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs">
           <!-- Punto de partida (Origen) -->
-          <div class="p-3.5 bg-blue-50/70 rounded-2xl border border-blue-200/90 shadow-2xs space-y-2">
+          <div class="p-3.5 bg-[#fbf7fd] rounded-2xl border border-[#ecdbe8] shadow-2xs space-y-2">
             <div class="flex items-center justify-between gap-2 flex-wrap">
-              <label class="font-bold text-blue-900 flex items-center gap-1.5 text-xs">
+              <label class="font-bold text-[#27172b] flex items-center gap-1.5 text-xs font-serif">
                 <MapPin class="w-3.5 h-3.5 text-rose-500" />
                 <span>Punto de Partida (Taller / Tienda):</span>
               </label>
@@ -1731,7 +1739,7 @@
                 <button
                   type="button"
                   @click="openOriginMapModal"
-                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-[11px] shadow-xs hover:shadow transition-all cursor-pointer active:scale-95"
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-[#7a3f80] to-[#965e9b] hover:from-[#68336d] hover:to-[#824c87] text-white font-bold text-[11px] shadow-xs hover:shadow transition-all cursor-pointer active:scale-95"
                   title="Fijar ubicación exacta del taller en el mapa interactivo con GPS o buscador"
                 >
                   <MapPin class="w-3 h-3 text-white" />
@@ -1742,7 +1750,7 @@
                   v-if="!isEditingOrigin"
                   type="button"
                   @click="isEditingOrigin = true; tempOriginInput = deliveryOrigin"
-                  class="text-blue-700 hover:text-blue-900 font-bold text-[11px] underline cursor-pointer"
+                  class="text-[#7a3f80] hover:text-[#27172b] font-bold text-[11px] underline cursor-pointer"
                 >
                   Editar texto
                 </button>
@@ -1762,14 +1770,14 @@
                 </span>
               </div>
 
-              <div class="flex items-center gap-3 text-[10px] text-blue-600 flex-wrap">
+              <div class="flex items-center gap-3 text-[10px] text-[#7a3f80] flex-wrap">
                 <span>Desde aquí iniciará la navegación el motorizado.</span>
                 <a
                   v-if="deliveryOriginMapUrl"
                   :href="deliveryOriginMapUrl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="inline-flex items-center gap-1 text-blue-700 hover:text-blue-900 font-semibold underline"
+                  class="inline-flex items-center gap-1 text-[#7a3f80] hover:text-[#27172b] font-semibold underline"
                 >
                   <ExternalLink class="w-2.5 h-2.5" />
                   Ver punto en Google Maps
@@ -1798,7 +1806,7 @@
                 <button
                   type="button"
                   @click="saveDeliveryOrigin"
-                  class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs cursor-pointer shadow-2xs"
+                  class="px-3 py-1.5 bg-[#7a3f80] hover:bg-[#68336d] text-white rounded-lg font-bold text-xs cursor-pointer shadow-2xs"
                 >
                   Guardar
                 </button>
@@ -1818,7 +1826,7 @@
                   Cancelar
                 </button>
               </div>
-              <p class="text-[10px] text-blue-600">
+              <p class="text-[10px] text-[#7a3f80]">
                 Puedes escribir la dirección o hacer clic en <strong>Fijar en Mapa</strong> para ubicarlo con GPS o el mapa interactivo.
               </p>
             </div>
@@ -1877,7 +1885,7 @@
                 class="p-3 bg-gray-50 hover:bg-white rounded-xl border border-gray-200 shadow-2xs flex items-center gap-3 transition-colors"
               >
                 <!-- Stop Number Badge -->
-                <div class="w-7 h-7 rounded-full bg-blue-600 text-white font-extrabold flex items-center justify-center shrink-0 text-xs shadow-xs">
+                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-[#7a3f80] to-[#965e9b] text-white font-extrabold flex items-center justify-center shrink-0 text-xs shadow-xs">
                   {{ idx + 1 }}
                 </div>
 
@@ -2024,7 +2032,7 @@
             <a
               :href="getGoogleMapsRouteUrl()"
               target="_blank"
-              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm transition-all hover:scale-102 cursor-pointer"
+              class="px-4 py-2 bg-gradient-to-r from-[#27172b] to-[#401f46] hover:from-[#7a3f80] hover:to-[#965e9b] text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm transition-all hover:scale-102 cursor-pointer"
               title="Abrir la ruta secuencial completa en Google Maps"
             >
               <Navigation class="w-3.5 h-3.5" />
