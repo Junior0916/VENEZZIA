@@ -129,6 +129,18 @@
               <span>+ Nuevo Producto</span>
             </button>
 
+            <!-- WhatsApp Support Config Button -->
+            <button
+              @click="openWhatsAppConfigModal"
+              type="button"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-800 text-xs font-bold transition-all shadow-2xs shrink-0 cursor-pointer"
+              title="Configurar número oficial de WhatsApp para atención y pedidos"
+            >
+              <IconWhatsApp class="w-4 h-4 text-[#25D366] shrink-0" />
+              <span>WhatsApp: <strong class="font-mono text-emerald-900">{{ siteSettingsStore.formattedPhone || '+51 935 817 179' }}</strong></span>
+              <Edit3 class="w-3.5 h-3.5 text-emerald-600/70 ml-0.5" />
+            </button>
+
             <!-- Environment selector -->
             <div class="p-2 bg-[#faf5fb] rounded-2xl border border-[#eedee9] text-left shrink-0">
               <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Servidor</span>
@@ -245,6 +257,17 @@
             >
               {{ siteSettingsStore.formattedLiveTimeLeft }}
             </span>
+          </button>
+
+          <!-- TAB 6: WHATSAPP CONFIG -->
+          <button
+            @click="openWhatsAppConfigModal"
+            type="button"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs bg-[#faf7fb] border border-[#eedee9] text-gray-700 hover:bg-[#f3edf5] hover:text-emerald-700 hover:border-emerald-200"
+            title="Configurar número oficial de WhatsApp para clientes"
+          >
+            <IconWhatsApp class="w-4 h-4 text-[#25D366]" />
+            <span>Configurar WhatsApp</span>
           </button>
         </div>
       </div>
@@ -2625,6 +2648,147 @@
           </div>
         </div>
       </div>
+      <!-- WHATSAPP SUPPORT NUMBER CONFIG MODAL -->
+      <div
+        v-if="showWhatsAppModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        @click.self="closeWhatsAppConfigModal"
+      >
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[#eedee9] text-left relative overflow-hidden space-y-5 animate-in fade-in zoom-in-95 duration-150">
+          <!-- Glow top background -->
+          <div class="absolute -top-16 -right-16 w-44 h-44 bg-emerald-100/60 rounded-full blur-2xl pointer-events-none"></div>
+
+          <!-- Header -->
+          <div class="flex items-start justify-between gap-4 relative z-10">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] flex items-center justify-center shrink-0 shadow-xs">
+                <IconWhatsApp class="w-6 h-6 text-[#25D366]" />
+              </div>
+              <div>
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 uppercase tracking-wider mb-1">
+                  <Sparkles class="w-3 h-3 text-emerald-600" />
+                  <span>Atención y Pedidos Web</span>
+                </div>
+                <h3 class="text-lg sm:text-xl font-serif font-bold text-[#27172b]">
+                  Número de WhatsApp de la Tienda
+                </h3>
+              </div>
+            </div>
+            <button
+              @click="closeWhatsAppConfigModal"
+              class="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
+              title="Cerrar ventana"
+            >
+              <X class="w-5 h-5" />
+            </button>
+          </div>
+
+          <p class="text-xs text-gray-500 leading-relaxed relative z-10">
+            Este es el número oficial al que serán dirigidos tus clientes cuando den clic en cualquier botón de WhatsApp en <strong class="text-[#27172b]">venezzia.shop</strong> (Navbar, Botón Flotante, Carrito de Compras, Catálogo y Footer).
+          </p>
+
+          <!-- Current Active Number Banner -->
+          <div class="p-3.5 rounded-2xl bg-[#faf5fb] border border-[#eedee9] flex items-center justify-between gap-3 relative z-10">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <div>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Número Actual Activo</span>
+                <span class="text-sm font-mono font-bold text-[#27172b]">{{ siteSettingsStore.formattedPhone || '+51 935 817 179' }}</span>
+              </div>
+            </div>
+            <span class="text-[10px] text-gray-500 bg-white px-2.5 py-1 rounded-xl border border-gray-200 font-medium">
+              Sincronizado en vivo
+            </span>
+          </div>
+
+          <!-- Phone Input Section -->
+          <div class="space-y-2 relative z-10">
+            <label class="block text-xs font-bold text-gray-700">
+              Nuevo Número de WhatsApp:
+            </label>
+            <div class="relative flex items-center">
+              <div class="absolute left-3.5 flex items-center gap-1.5 pointer-events-none text-gray-600 text-xs font-bold">
+                <span>🇵🇪</span>
+                <span class="text-gray-400 font-mono">+51</span>
+              </div>
+              <input
+                v-model="whatsappInput"
+                type="tel"
+                placeholder="932 449 996"
+                class="w-full pl-18 pr-4 py-3 rounded-2xl border-2 border-gray-200 text-sm font-mono font-bold text-[#27172b] focus:border-[#25D366] focus:ring-4 focus:ring-emerald-50 focus:outline-none transition-all shadow-inner"
+                @keyup.enter="saveWhatsAppConfig"
+              />
+            </div>
+            <p class="text-[11px] text-gray-400">
+              Escribe el número de 9 dígitos de Perú (ej: <strong>932449996</strong>) o con prefijo (<strong>51932449996</strong>). Se formateará automáticamente.
+            </p>
+          </div>
+
+          <!-- Live Formatting & Test Link Preview -->
+          <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100 space-y-2.5 relative z-10">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-500 font-medium">Formato visible en tienda:</span>
+              <span class="font-mono font-bold text-emerald-800">{{ previewWhatsAppFormatted }}</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-500 font-medium">Enlace directo a generar:</span>
+              <span class="font-mono text-[11px] text-emerald-700 truncate max-w-[200px] sm:max-w-[260px]">wa.me/{{ normalizedWhatsAppNumber || '...' }}</span>
+            </div>
+
+            <!-- Test Chat Button -->
+            <div class="pt-2 border-t border-emerald-200/60 flex items-center justify-between">
+              <span class="text-[11px] text-emerald-700 font-medium">¿Deseas verificar tu chat antes de guardar?</span>
+              <a
+                :href="previewWhatsAppTestUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition-all shadow-2xs border border-emerald-200 cursor-pointer"
+              >
+                <ExternalLink class="w-3.5 h-3.5 text-emerald-600" />
+                <span>Probar en WhatsApp</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Feedback Alert: Success or Error -->
+          <div
+            v-if="whatsappSaveSuccess"
+            class="p-3.5 rounded-2xl bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2.5 relative z-10"
+          >
+            <CheckCircle2 class="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>¡Número de WhatsApp actualizado exitosamente! Todos los botones de la tienda ahora redirigen a este nuevo número.</span>
+          </div>
+
+          <div
+            v-if="whatsappSaveError"
+            class="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2.5 relative z-10"
+          >
+            <AlertCircle class="w-4 h-4 text-red-600 shrink-0" />
+            <span>{{ whatsappSaveError }}</span>
+          </div>
+
+          <!-- Footer Actions -->
+          <div class="pt-2 flex items-center justify-end gap-2.5 relative z-10">
+            <button
+              type="button"
+              @click="closeWhatsAppConfigModal"
+              class="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              @click="saveWhatsAppConfig"
+              :disabled="isSavingWhatsApp || !normalizedWhatsAppNumber"
+              class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
+            >
+              <RefreshCw v-if="isSavingWhatsApp" class="w-4 h-4 animate-spin text-white" />
+              <Save v-else class="w-4 h-4 text-white" />
+              <span>{{ isSavingWhatsApp ? 'Guardando en PocketBase...' : 'Guardar Nuevo Número' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -2643,6 +2807,7 @@ import {
   Link as LinkIcon
 } from 'lucide-vue-next'
 import { useSiteSettingsStore } from '../stores/siteSettings'
+import IconWhatsApp from '../components/icons/IconWhatsApp.vue'
 import { getProductSlug, getProductUrl, generateSlug } from '../utils/productUrl'
 
 const siteSettingsStore = useSiteSettingsStore()
@@ -3848,6 +4013,125 @@ function copyBookmarkletCode() {
     setTimeout(() => {
       copiedBookmarklet.value = false
     }, 2500)
+  }
+}
+
+
+// ==========================================
+// WHATSAPP STORE CONFIGURATION STATE & LOGIC
+// ==========================================
+const showWhatsAppModal = ref(false)
+const whatsappInput = ref('')
+const isSavingWhatsApp = ref(false)
+const whatsappSaveSuccess = ref(false)
+const whatsappSaveError = ref('')
+
+const cleanWhatsAppDigits = computed(() => {
+  return String(whatsappInput.value || '').replace(/\D/g, '')
+})
+
+const normalizedWhatsAppNumber = computed(() => {
+  const digits = cleanWhatsAppDigits.value
+  if (!digits) return ''
+  if (digits.length === 9) {
+    return '51' + digits
+  }
+  if (digits.length === 11 && digits.startsWith('51')) {
+    return digits
+  }
+  return digits
+})
+
+const previewWhatsAppFormatted = computed(() => {
+  const num = normalizedWhatsAppNumber.value
+  if (!num) return 'Por ingresar...'
+  if (num.startsWith('51') && num.length === 11) {
+    return '+51 ' + num.slice(2, 5) + ' ' + num.slice(5, 8) + ' ' + num.slice(8)
+  }
+  if (num.length === 9) {
+    return '+51 ' + num.slice(0, 3) + ' ' + num.slice(3, 6) + ' ' + num.slice(6)
+  }
+  return '+' + num
+})
+
+const previewWhatsAppTestUrl = computed(() => {
+  const num = normalizedWhatsAppNumber.value
+  if (!num) return '#'
+  const testMsg = encodeURIComponent('ASESORIA ONLINE VENEZZIA\n\n¡Hola! Mensaje de prueba de configuración de WhatsApp.')
+  return 'https://wa.me/' + num + '?text=' + testMsg
+})
+
+function openWhatsAppConfigModal() {
+  const current = siteSettingsStore.whatsappNumber || '51935817179'
+  whatsappInput.value = current
+  whatsappSaveSuccess.value = false
+  whatsappSaveError.value = ''
+  showWhatsAppModal.value = true
+}
+
+function closeWhatsAppConfigModal() {
+  showWhatsAppModal.value = false
+  whatsappSaveSuccess.value = false
+  whatsappSaveError.value = ''
+}
+
+async function saveWhatsAppConfig() {
+  const normalized = normalizedWhatsAppNumber.value
+  if (!normalized || normalized.length < 8) {
+    whatsappSaveError.value = 'Por favor ingresa un número de teléfono válido (por ejemplo, 9 dígitos: 932 449 996).'
+    return
+  }
+
+  isSavingWhatsApp.value = true
+  whatsappSaveError.value = ''
+  whatsappSaveSuccess.value = false
+
+  try {
+    if (!currentPbClient.value) {
+      const url = getTargetBaseUrl()
+      currentPbClient.value = new PocketBase(url)
+    }
+
+    let targetId = 'settgeneral0001'
+    try {
+      const settingsList = await currentPbClient.value.collection('site_settings').getFullList()
+      if (settingsList && settingsList.length > 0) {
+        targetId = settingsList[0].id
+      }
+    } catch (_) {}
+
+    const payload = {
+      whatsapp_number: normalized
+    }
+
+    await currentPbClient.value.collection('site_settings').update(targetId, payload)
+    siteSettingsStore.applySettings(payload)
+
+    // Also sync to remote if current PB is local
+    if (targetServer.value === 'local') {
+      try {
+        const remotePb = new PocketBase('https://admin.venezzia.shop')
+        const remoteSaved = localStorage.getItem(AUTH_STORAGE_KEY)
+        if (remoteSaved) {
+          const parsed = JSON.parse(remoteSaved)
+          if (parsed && parsed.token) {
+            remotePb.authStore.save(parsed.token, parsed.record || parsed.admin)
+            if (remotePb.authStore.isValid) {
+              const remoteList = await remotePb.collection('site_settings').getFullList()
+              const rId = remoteList.length > 0 ? remoteList[0].id : 'settgeneral0001'
+              await remotePb.collection('site_settings').update(rId, payload)
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    whatsappSaveSuccess.value = true
+  } catch (err) {
+    console.error('Error saving WhatsApp settings:', err)
+    whatsappSaveError.value = 'Error al guardar en PocketBase: ' + (err.message || 'Verifica permisos de administrador')
+  } finally {
+    isSavingWhatsApp.value = false
   }
 }
 
