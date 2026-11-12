@@ -1825,16 +1825,51 @@
           </div>
 
           <!-- Secuencia de paradas -->
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="font-bold text-gray-700 uppercase tracking-wider text-[11px]">
-                Secuencia de Entregas (Paradas)
-              </span>
-              <span class="text-gray-400 text-[10px]">
-                Usa ▲ ▼ para ordenar las paradas
-              </span>
+          <div class="space-y-2">
+            <!-- Header con botón Ordenar por Distancia -->
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-gray-700 uppercase tracking-wider text-[11px]">
+                  Secuencia de Entregas (Paradas)
+                </span>
+                <span
+                  v-if="routeTotalKmText"
+                  class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 text-[10px] font-mono font-bold flex items-center gap-1"
+                >
+                  <Zap class="w-2.5 h-2.5 text-purple-600" />
+                  <span>~${routeTotalKmText} total</span>
+                </span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  @click="optimizeRouteByDistance"
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-[11px] shadow-xs hover:shadow transition-all cursor-pointer active:scale-95"
+                  title="Ordenar automáticamente las paradas por distancia más cercana desde el taller (ruta óptima)"
+                >
+                  <Zap class="w-3 h-3 text-amber-300" />
+                  <span>Ordenar por Distancia</span>
+                </button>
+                <span class="text-gray-400 text-[10px] hidden sm:inline">
+                  Usa ▲ ▼ para ordenar
+                </span>
+              </div>
             </div>
 
+            <!-- Toast de confirmación de ruta optimizada -->
+            <div
+              v-if="routeOptimizedToast"
+              class="p-2.5 bg-purple-50 border border-purple-200 text-purple-900 rounded-xl text-xs font-semibold flex items-center justify-between animate-in fade-in"
+            >
+              <div class="flex items-center gap-2">
+                <Zap class="w-4 h-4 text-purple-600 shrink-0" />
+                <span>¡Ruta ordenada por distancia desde el punto de inicio!</span>
+              </div>
+              <span class="text-[11px] font-mono text-purple-700 font-bold">~${routeTotalKmText} total</span>
+            </div>
+
+            <!-- Lista de paradas -->
             <div class="space-y-2">
               <div
                 v-for="(order, idx) in routeOrdersList"
@@ -1863,8 +1898,18 @@
                     <span class="truncate">{{ order.customer_address || 'Dirección a coordinar' }}</span>
                   </div>
 
-                  <!-- Badge GPS vs Texto -->
-                  <div class="flex items-center gap-2 flex-wrap text-[10px]">
+                  <!-- Badge GPS vs Texto + Distancia + Botón Waze -->
+                  <div class="flex items-center gap-2 flex-wrap text-[10px] pt-0.5">
+                    <!-- Distancia calculada -->
+                    <span
+                      v-if="getStopDistanceInfo(idx)"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 font-bold"
+                    >
+                      <Zap class="w-2.5 h-2.5 text-purple-600" />
+                      <span>~{{ getStopDistanceInfo(idx).legKm }} km desde {{ getStopDistanceInfo(idx).from }}</span>
+                    </span>
+
+                    <!-- Badge GPS vs Texto -->
                     <span
                       v-if="order.location_url"
                       class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold"
@@ -1872,18 +1917,35 @@
                       <Navigation class="w-2.5 h-2.5" />
                       <span>GPS Exacto</span>
                     </span>
-                    <span
+                    <button
                       v-else
-                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold"
+                      type="button"
+                      @click="openStopMapModal(order)"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 hover:bg-amber-200 text-amber-900 font-semibold transition-colors cursor-pointer"
+                      title="Fijar ubicación exacta de esta entrega en el mapa"
                     >
-                      <span>🏠 Dirección en texto</span>
-                    </span>
+                      <MapPin class="w-2.5 h-2.5 text-amber-700" />
+                      <span>🏠 Texto (Fijar GPS)</span>
+                    </button>
 
+                    <!-- Botón Waze -->
+                    <a
+                      :href="getWazeUrlForOrder(order)"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#e8f7fd] hover:bg-[#d0f0fa] text-[#006080] border border-[#a6e2f5] font-bold transition-all cursor-pointer active:scale-95"
+                      title="Navegar a esta parada en Waze con tráfico en tiempo real"
+                    >
+                      <Car class="w-2.5 h-2.5 text-[#0080aa]" />
+                      <span>Abrir en Waze ↗</span>
+                    </a>
+
+                    <!-- Saldo -->
                     <span
                       v-if="order.balance > 0"
                       class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200"
                     >
-                      Cobrar saldo: S/ {{ order.balance.toFixed(2) }}
+                      Cobrar: S/ {{ order.balance.toFixed(2) }}
                     </span>
                     <span
                       v-else
@@ -1958,14 +2020,27 @@
         <!-- Footer -->
         <div class="px-5 py-3.5 bg-gray-50 border-t border-gray-200 flex items-center justify-between gap-2 flex-wrap shrink-0">
           <div class="flex items-center gap-2 flex-wrap">
-            <!-- Botón 1: Abrir en Google Maps -->
+            <!-- Botón 1: Abrir en Google Maps (Ruta completa) -->
             <a
               :href="getGoogleMapsRouteUrl()"
               target="_blank"
               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm transition-all hover:scale-102 cursor-pointer"
+              title="Abrir la ruta secuencial completa en Google Maps"
             >
               <Navigation class="w-3.5 h-3.5" />
               <span>Abrir Ruta en Google Maps ↗</span>
+            </a>
+
+            <!-- Botón 2: Iniciar en Waze (1ra Parada) -->
+            <a
+              :href="firstStopWazeUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-3.5 py-2 bg-[#33ccff] hover:bg-[#20b8eb] text-[#00384d] rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all hover:scale-102 cursor-pointer"
+              title="Abrir la primera parada en Waze con alertas de tráfico"
+            >
+              <Car class="w-3.5 h-3.5 text-[#00384d]" />
+              <span>Iniciar en Waze (1ra Parada) ↗</span>
             </a>
 
             <!-- Botón 2: Copiar Hoja de Ruta -->
@@ -1999,6 +2074,16 @@
       subtitle="Mueve el mapa o usa el buscador/GPS para ubicar el punto donde iniciará el delivery"
       @close="showOriginMapModal = false"
       @select="handleOriginSelectedFromMap"
+    />
+
+    <!-- Modal para fijar ubicación de una parada específica -->
+    <LocationPickerModal
+      :is-open="showStopMapModal"
+      :initial-coords="activeMapStopOrder ? extractOrderCoordinates(activeMapStopOrder) : null"
+      :title="'Fijar Ubicación de Parada • ' + (activeMapStopOrder?.customer_name || '')"
+      subtitle="Mueve el mapa o usa el buscador/GPS para ubicar el destino exacto de entrega"
+      @close="showStopMapModal = false; activeMapStopOrder = null"
+      @select="handleStopLocationSelected"
     />
   </div>
 </template>
@@ -2037,6 +2122,8 @@ import {
   Smartphone,
   Route,
   Copy,
+  Zap,
+  Car,
   ArrowUp,
   ArrowDown,
   Check
@@ -2202,6 +2289,9 @@ const isEditingOrigin = ref(false)
 const tempOriginInput = ref('')
 const routeOrdersList = ref([])
 const copiedRouteToast = ref(false)
+const routeOptimizedToast = ref(false)
+const activeMapStopOrder = ref(null)
+const showStopMapModal = ref(false)
 
 // Inline GPS editor per order
 const activeGpsEditingOrderId = ref(null)
@@ -2268,6 +2358,229 @@ function removeStopFromRoute(orderId) {
   if (idx > -1) selectedOrderIds.value.splice(idx, 1)
   if (routeOrdersList.value.length === 0) {
     showRouteModal.value = false
+  }
+}
+
+// =========================================================
+// DISTANCIA HAVERSINE, OPTIMIZACIÓN DE RUTA Y SOPORTE WAZE
+// =========================================================
+function getHaversineDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371 // Radio de la Tierra en km
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLon = (lon2 - lon1) * Math.PI / 180
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
+
+function extractOrderCoordinates(order) {
+  if (!order) return null
+  if (order.location_url) {
+    const match = order.location_url.match(/([-+]?\d{1,2}\.\d+)[,\s]+([-+]?\d{1,3}\.\d+)/)
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) }
+    }
+  }
+  if (order.customer_address) {
+    const match = order.customer_address.match(/([-+]?\d{1,2}\.\d+)[,\s]+([-+]?\d{1,3}\.\d+)/)
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) }
+    }
+  }
+  return null
+}
+
+function getEffectiveOriginCoords() {
+  if (deliveryOriginCoords.value && deliveryOriginCoords.value.lat && deliveryOriginCoords.value.lng) {
+    return deliveryOriginCoords.value
+  }
+  const match = (deliveryOrigin.value || '').match(/([-+]?\d{1,2}\.\d+)[,\s]+([-+]?\d{1,3}\.\d+)/)
+  if (match) {
+    return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) }
+  }
+  return null
+}
+
+function optimizeRouteByDistance() {
+  if (!routeOrdersList.value || routeOrdersList.value.length <= 1) {
+    alert('Se necesitan al menos 2 paradas para ordenar la ruta.')
+    return
+  }
+
+  const originCoords = getEffectiveOriginCoords()
+  if (!originCoords) {
+    const shouldPick = confirm(
+      'Para ordenar las paradas por distancia con respecto al punto de inicio, primero fija el Punto de Partida (Taller) en el mapa.\n\n¿Deseas abrir el mapa para fijarlo ahora?'
+    )
+    if (shouldPick) {
+      openOriginMapModal()
+    }
+    return
+  }
+
+  // Separar pedidos con GPS de los que sólo tienen texto
+  const withCoords = []
+  const withoutCoords = []
+
+  routeOrdersList.value.forEach(order => {
+    const coords = extractOrderCoordinates(order)
+    if (coords) {
+      withCoords.push({ order, coords })
+    } else {
+      withoutCoords.push(order)
+    }
+  })
+
+  if (withCoords.length === 0) {
+    alert('Ninguna de las paradas tiene ubicación GPS fijada aún. Fija la ubicación de los pedidos para calcular las distancias.')
+    return
+  }
+
+  // Algoritmo Heurístico de Reparto (Sequential Nearest-Neighbor TSP):
+  // Comienza en el punto de partida (Taller) y visita en cada paso la parada no visitada más cercana.
+  const orderedStops = []
+  let currentPos = originCoords
+  const unvisited = [...withCoords]
+
+  while (unvisited.length > 0) {
+    let nearestIdx = 0
+    let minDistance = Infinity
+
+    for (let i = 0; i < unvisited.length; i++) {
+      const dist = getHaversineDistanceKm(
+        currentPos.lat,
+        currentPos.lng,
+        unvisited[i].coords.lat,
+        unvisited[i].coords.lng
+      )
+      if (dist < minDistance) {
+        minDistance = dist
+        nearestIdx = i
+      }
+    }
+
+    const nextStop = unvisited.splice(nearestIdx, 1)[0]
+    orderedStops.push(nextStop.order)
+    currentPos = nextStop.coords
+  }
+
+  // Agregar paradas sin coordenadas al final
+  routeOrdersList.value = [...orderedStops, ...withoutCoords]
+
+  routeOptimizedToast.value = true
+  setTimeout(() => {
+    routeOptimizedToast.value = false
+  }, 4000)
+}
+
+function getStopDistanceInfo(idx) {
+  if (!routeOrdersList.value || idx < 0 || idx >= routeOrdersList.value.length) return null
+  const order = routeOrdersList.value[idx]
+  const coords = extractOrderCoordinates(order)
+  if (!coords) return null
+
+  const originCoords = getEffectiveOriginCoords()
+  if (!originCoords) return null
+
+  if (idx === 0) {
+    const dist = getHaversineDistanceKm(originCoords.lat, originCoords.lng, coords.lat, coords.lng)
+    return {
+      legKm: dist.toFixed(1),
+      from: 'Taller',
+      isOrigin: true
+    }
+  }
+
+  let prevCoords = originCoords
+  let prevLabel = 'Taller'
+  for (let i = idx - 1; i >= 0; i--) {
+    const pCoords = extractOrderCoordinates(routeOrdersList.value[i])
+    if (pCoords) {
+      prevCoords = pCoords
+      prevLabel = `Parada ${i + 1}`
+      break
+    }
+  }
+
+  const dist = getHaversineDistanceKm(prevCoords.lat, prevCoords.lng, coords.lat, coords.lng)
+  return {
+    legKm: dist.toFixed(1),
+    from: prevLabel,
+    isOrigin: false
+  }
+}
+
+const routeTotalKmText = computed(() => {
+  if (!routeOrdersList.value || routeOrdersList.value.length === 0) return ''
+  const originCoords = getEffectiveOriginCoords()
+  if (!originCoords) return ''
+
+  let total = 0
+  let current = originCoords
+  let countWithCoords = 0
+
+  routeOrdersList.value.forEach(order => {
+    const coords = extractOrderCoordinates(order)
+    if (coords) {
+      total += getHaversineDistanceKm(current.lat, current.lng, coords.lat, coords.lng)
+      current = coords
+      countWithCoords++
+    }
+  })
+
+  if (countWithCoords === 0) return ''
+  return `${total.toFixed(1)} km`
+})
+
+function getWazeUrlForOrder(order) {
+  if (!order) return '#'
+  const coords = extractOrderCoordinates(order)
+  if (coords) {
+    return `https://waze.com/ul?ll=${coords.lat},${coords.lng}&navigate=yes`
+  }
+  const clean = (order.customer_address || '')
+    .replace(/\|\s*GPS:[^|]+/g, '')
+    .replace(/\|\s*Dedicatoria:[^|]+/g, '')
+    .trim()
+  const fullAddress = clean.toLowerCase().includes('lima') || clean.toLowerCase().includes('peru')
+    ? clean
+    : `${clean}, Lima, Peru`
+  return `https://waze.com/ul?q=${encodeURIComponent(fullAddress)}&navigate=yes`
+}
+
+const firstStopWazeUrl = computed(() => {
+  if (!routeOrdersList.value || routeOrdersList.value.length === 0) return '#'
+  return getWazeUrlForOrder(routeOrdersList.value[0])
+})
+
+function openStopMapModal(order) {
+  activeMapStopOrder.value = order
+  showStopMapModal.value = true
+}
+
+async function handleStopLocationSelected({ lat, lng, mapUrl, addressText }) {
+  if (!activeMapStopOrder.value) return
+  const order = activeMapStopOrder.value
+  const targetId = order.id
+
+  order.location_url = mapUrl
+  if (addressText && (!order.customer_address || !order.customer_address.trim())) {
+    order.customer_address = addressText
+  }
+
+  showStopMapModal.value = false
+  activeMapStopOrder.value = null
+
+  try {
+    await updateOrder(targetId, {
+      location_url: mapUrl,
+      customer_address: order.customer_address
+    })
+  } catch (err) {
+    console.error('Error al guardar GPS de la orden:', err)
   }
 }
 
@@ -2381,6 +2694,9 @@ function buildRouteWhatsAppSheet() {
     ? `${deliveryOrigin.value || DEFAULT_DELIVERY_ORIGIN} (📍 GPS: ${deliveryOriginCoords.value.lat.toFixed(5)}, ${deliveryOriginCoords.value.lng.toFixed(5)})`
     : (deliveryOrigin.value || DEFAULT_DELIVERY_ORIGIN)
   lines.push(`🌸 *Punto de Salida:* ${originWhatsAppText}`)
+  if (routeTotalKmText.value) {
+    lines.push(`📏 *Distancia Total Estimada:* ~${routeTotalKmText.value}`)
+  }
   lines.push(`═══════════════════════════`)
   lines.push(``)
 
@@ -2393,40 +2709,37 @@ function buildRouteWhatsAppSheet() {
       .replace(/\|\s*Dedicatoria:[^|]+/g, '')
       .trim()
 
-    lines.push(`📍 *PARADA ${stopNum}: Pedido ${cod}*`)
-    lines.push(`👤 *Cliente:* ${order.customer_name}`)
-    if (phone) lines.push(`📞 *Teléfono:* ${phone}`)
+    const coords = extractOrderCoordinates(order)
+    const gmapsUrl = coords
+      ? `https://maps.google.com/?q=${coords.lat},${coords.lng}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanAddr + ', Lima, Peru')}`
+    const wazeUrl = getWazeUrlForOrder(order)
+    const distInfo = getStopDistanceInfo(idx)
+
+    lines.push(`📦 *PARADA #${stopNum}:* ${order.customer_name} (${cod})`)
+    if (distInfo) {
+      lines.push(`⚡ *Tramo:* ~${distInfo.legKm} km desde ${distInfo.from}`)
+    }
+    if (phone) lines.push(`📞 *Teléfono:* +51 ${phone}`)
     lines.push(`🏠 *Dirección:* ${cleanAddr}`)
 
-    if (order.location_url) {
-      lines.push(`🗺️ *GPS Exacto:* ${order.location_url}`)
-    } else {
-      lines.push(`🗺️ *Maps:* https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanAddr)}`)
-    }
-
-    if (Array.isArray(order.items) && order.items.length > 0) {
-      const itemsText = order.items.map(it => `${getItemQty(it)}x ${it.name || it.producto || 'Detalle'}`).join(', ')
-      lines.push(`🎁 *Productos:* ${itemsText}`)
-    }
-
-    if (order.notes) {
-      lines.push(`💌 *Dedicatoria:* "${order.notes}"`)
-    }
-
     if (order.balance > 0) {
-      lines.push(`💰 *COBRAR SALDO AL ENTREGAR:* S/ ${order.balance.toFixed(2)}`)
+      lines.push(`💵 *Cobrar Saldo:* S/ ${Number(order.balance).toFixed(2)}`)
     } else {
-      lines.push(`✅ *PAGADO 100% (No cobrar)*`)
+      lines.push(`✅ *Estado de Pago:* PAGADO 100%`)
     }
 
-    lines.push(``)
+    lines.push(`🗺️ *Google Maps:* ${gmapsUrl}`)
+    lines.push(`🚗 *Waze:* ${wazeUrl}`)
+    lines.push(`───────────────────────────`)
   })
 
-  lines.push(`═══════════════════════════`)
-  lines.push(`🗺️ *RUTA COMPLETA MULTI-PARADA EN GOOGLE MAPS:*`)
-  lines.push(getGoogleMapsRouteUrl())
-  lines.push(`═══════════════════════════`)
-  lines.push(`¡Buen viaje y entregas con cuidado! ✨🌸`)
+  const fullRouteUrl = getGoogleMapsRouteUrl()
+  if (fullRouteUrl && fullRouteUrl !== '#') {
+    lines.push(``)
+    lines.push(`🗺️ *Ruta Completa en Google Maps (todas las paradas):*`)
+    lines.push(fullRouteUrl)
+  }
 
   return lines.join('\n')
 }
