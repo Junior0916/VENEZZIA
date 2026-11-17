@@ -835,6 +835,8 @@ export const MOCK_PRODUCTS = [
   // ==========================================
   {
     id: 'advi2026calend',
+    featured: true,
+    slug: 'CalendarioAdviento',
     campaign: 'navidad',
     name: 'Calendario de Adviento 2026 • 12 Días 14 Sorpresas',
     description: 'Edición limitada 2026: Caja interactiva de doble puerta con 12 compartimentos y 14 sorpresas exclusivas. Cada día descubre un detalle mágico para llenar tu Navidad de ilusión y alegría.',
@@ -1148,6 +1150,8 @@ export async function fetchProducts() {
       in_stock: record.in_stock !== false,
       is_active: record.is_active !== false,
       items_included: parseItemsIncluded(record.items_included),
+      featured: record.featured === true,
+      slug: record.slug || '',
       live_discount: record.live_discount !== undefined && record.live_discount !== null && record.live_discount !== '' ? Number(record.live_discount) : null,
       order: record.order !== undefined && record.order !== null ? Number(record.order) : 0,
       created: record.created || ''

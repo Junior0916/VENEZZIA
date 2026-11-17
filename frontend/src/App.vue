@@ -25,6 +25,14 @@
       @close="closeProductModal"
     />
 
+    <!-- Promotional Entry & Live Flash Popup Modal (Ripley-style high converting poster) -->
+    <PromoPopupModal
+      v-if="showPromoPopup && activePopupProduct"
+      :product="activePopupProduct"
+      @close="closePromoPopup"
+      @select-product="handlePopupProductSelect"
+    />
+
     <!-- Floating Official WhatsApp Widget (Oculto en /pedidos para no tapar los datos de la tabla) -->
     <FloatingChat v-if="!isOrdersRoute" />
 
@@ -41,6 +49,7 @@ import Footer from './components/Footer.vue'
 import CartDrawer from './components/CartDrawer.vue'
 import FloatingChat from './components/FloatingChat.vue'
 import ProductDetailModal from './components/ProductDetailModal.vue'
+import PromoPopupModal from './components/PromoPopupModal.vue'
 import { fetchProducts, subscribeToRealtime, MOCK_PRODUCTS } from './services/pocketbase'
 import { useCampaignStore } from './stores/campaign'
 import { useSiteSettingsStore } from './stores/siteSettings'
@@ -199,6 +208,157 @@ watch(
   }
 )
 
+
+// ==========================================
+// PROMOTIONAL & LIVE FLASH ENTRY POPUP LOGIC
+// ==========================================
+const showPromoPopup = ref(false)
+const PROMO_POPUP_SESSION_KEY = 'venezzia_promo_popup_dismissed_v1'
+
+const activePopupProduct = computed(() => {
+  if (!allProducts.value || allProducts.value.length === 0) return null
+
+  // Custom map if admin explicitly assigned products in panel
+  let customMap = {}
+  try {
+    const saved = localStorage.getItem('venezzia_popup_products_map')
+    if (saved) customMap = JSON.parse(saved)
+  } catch (_) {}
+
+  // 1. If Live Flash dynamic is active
+  if (siteSettingsStore.isLiveOfferActive) {
+    const liveCamp = (siteSettingsStore.liveCampaign || 'navidad').toLowerCase()
+
+    // 1a. If custom mapping exists for this campaign
+    if (customMap[liveCamp]) {
+      const matchCustom = allProducts.value.find(p => p.id === customMap[liveCamp] && p.is_active !== false)
+      if (matchCustom) return matchCustom
+    }
+
+    // 1b. Check product with featured === true in live campaign
+    const featuredInLive = allProducts.value.find(p => (p.campaign || '').toLowerCase() === liveCamp && p.featured === true && p.is_active !== false)
+    if (featuredInLive) return featuredInLive
+
+    // 1c. Product with live_discount > 0 in live campaign
+    const discountInLive = allProducts.value.find(p => (p.campaign || '').toLowerCase() === liveCamp && p.live_discount > 0 && p.is_active !== false)
+    if (discountInLive) return discountInLive
+
+    // 1d. Special case: navidad default to Calendario de Adviento
+    if (liveCamp === 'navidad') {
+      const adviento = allProducts.value.find(p => p.id === 'advi2026calend' || (p.name || '').toLowerCase().includes('adviento'))
+      if (adviento) return adviento
+    }
+
+    // 1e. First product in live campaign
+    const firstInLive = allProducts.value.find(p => (p.campaign || '').toLowerCase() === liveCamp && p.is_active !== false)
+    if (firstInLive) return firstInLive
+  }
+
+  // 2. If Live Flash is not active, resolve for active campaign
+  const activeCamp = (campaignStore.activeCampaignId || 'navidad').toLowerCase()
+
+  if (customMap[activeCamp]) {
+    const matchCustom = allProducts.value.find(p => p.id === customMap[activeCamp] && p.is_active !== false)
+    if (matchCustom) return matchCustom
+  }
+
+  const featuredInActive = allProducts.value.find(p => (p.campaign || '').toLowerCase() === activeCamp && p.featured === true && p.is_active !== false)
+  if (featuredInActive) return featuredInActive
+
+  if (activeCamp === 'navidad') {
+    const adviento = allProducts.value.find(p => p.id === 'advi2026calend' || (p.name || '').toLowerCase().includes('adviento'))
+    if (adviento) return adviento
+  }
+
+  return allProducts.value.find(p => (p.campaign || '').toLowerCase() === activeCamp && p.is_active !== false) || allProducts.value[0] || null
+})
+
+function shouldShowPromoPopup() {
+  if (typeof window === 'undefined') return false
+
+  // Never show on admin or internal operational routes
+  const p = route?.path || window.location.pathname || ''
+  if (
+    p.startsWith('/admin') ||
+    p.startsWith('/pedidos') ||
+    p.startsWith('/optimizador') ||
+    p.startsWith('/duplicar') ||
+    p.startsWith('/libro-de-reclamaciones')
+  ) {
+    return false
+  }
+
+  // Don't show if user came directly to a specific product (deep link)
+  if (selectedProductModal.value) {
+    return false
+  }
+
+  const rawPath = p.replace(/^\/+|\/+$/g, '')
+  if (rawPath && !isReservedRoute(rawPath) && findProductBySlugOrId(rawPath, allProducts.value)) {
+    return false
+  }
+
+  // Check sessionStorage dismissal
+  try {
+    const dismissed = sessionStorage.getItem(PROMO_POPUP_SESSION_KEY)
+    if (dismissed) {
+      if (siteSettingsStore.isLiveOfferActive && siteSettingsStore.liveEndsAt) {
+        if (dismissed === siteSettingsStore.liveEndsAt) {
+          return false
+        }
+      } else {
+        return false
+      }
+    }
+  } catch (_) {}
+
+  return true
+}
+
+function tryTriggerPromoPopup() {
+  if (!shouldShowPromoPopup()) return
+
+  setTimeout(() => {
+    if (shouldShowPromoPopup() && activePopupProduct.value) {
+      showPromoPopup.value = true
+    }
+  }, 900)
+}
+
+function closePromoPopup() {
+  showPromoPopup.value = false
+  try {
+    const mark = (siteSettingsStore.isLiveOfferActive && siteSettingsStore.liveEndsAt)
+      ? siteSettingsStore.liveEndsAt
+      : 'dismissed'
+    sessionStorage.setItem(PROMO_POPUP_SESSION_KEY, mark)
+  } catch (_) {}
+}
+
+function handlePopupProductSelect(product) {
+  closePromoPopup()
+  if (!product) return
+
+  // 1. Activate product campaign if different
+  if (product.campaign && product.campaign !== campaignStore.activeCampaignId) {
+    campaignStore.setCampaign(product.campaign)
+  }
+
+  // 2. Open product modal
+  openProductModal(product)
+
+  // 3. Ensure route is cleanly set to /slug (e.g. /CalendarioAdviento)
+  const slug = getProductSlug(product)
+  if (slug) {
+    const targetUrl = '/' + slug
+    if (window.location.pathname !== targetUrl) {
+      try {
+        window.history.replaceState(null, '', targetUrl)
+      } catch (_) {}
+    }
+  }
+}
+
 onMounted(() => {
   // Sync initial products immediately to campaignStore (0ms instant render)
   if (allProducts.value && allProducts.value.length > 0) {
@@ -212,6 +372,7 @@ onMounted(() => {
     reloadCatalog()
   ]).then(() => {
     checkDeepLink()
+    tryTriggerPromoPopup()
   })
 
   // Conectar suscripción SSE en tiempo real a PocketBase

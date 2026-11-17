@@ -259,6 +259,21 @@
             </span>
           </button>
 
+          <!-- TAB: POPUP PROMOCIONAL -->
+          <button
+            @click="activeToolTab = 'popup'"
+            :class="[
+              'flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
+              activeToolTab === 'popup'
+                ? 'bg-[#27172b] text-white ring-2 ring-[#caa35f]/50 shadow-md'
+                : 'bg-[#faf7fb] border border-[#eedee9] text-gray-700 hover:bg-[#f3edf5] hover:text-[#965e9b]'
+            ]"
+            title="Elegir producto que saldrá en el popup de entrada por campaña"
+          >
+            <Sparkles class="w-4 h-4 text-[#caa35f]" />
+            <span>Popup Promocional</span>
+          </button>
+
           <!-- TAB 6: WHATSAPP CONFIG -->
           <button
             @click="openWhatsAppConfigModal"
@@ -1124,6 +1139,182 @@
                     <span>{{ savingProductDiscountId === prod.id ? 'Guardando...' : 'Guardar Descuento' }}</span>
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB: POPUP PROMOCIONAL (CONFIGURAR PRODUCTO POR MENÚ / CAMPAÑA) -->
+        <!-- ========================================== -->
+        <div v-else-if="activeToolTab === 'popup'" class="space-y-6">
+          <!-- Top Header Info Card -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-[#eedee9] shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#f4eaf6]">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#caa35f]/20 to-[#caa35f]/40 text-[#caa35f] flex items-center justify-center shrink-0 shadow-sm border border-[#caa35f]/30">
+                  <Sparkles class="w-6 h-6 text-[#965e9b]" />
+                </div>
+                <div>
+                  <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f6eef8] border border-[#e8d5ec] text-xs font-semibold text-[#753d77] mb-2">
+                    <Sparkles class="w-3.5 h-3.5 text-[#caa35f]" />
+                    <span>Experiencia de Bienvenida • Póster Ripley Style</span>
+                  </div>
+                  <h2 class="text-xl sm:text-2xl font-serif font-bold text-[#27172b]">
+                    Producto Destacado en el Popup de Entrada
+                  </h2>
+                  <p class="text-xs text-gray-500 mt-1 max-w-2xl leading-relaxed">
+                    Cuando un cliente ingresa a <strong>venezzia.shop</strong>, se le muestra un póster vertical promocional con el producto estrella, su precio con descuento y temporizador (si hay Live Flash activo). Aquí puedes elegir qué producto de cada menú/campaña saldrá en ese popup.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Quick Global Preview Button -->
+              <div class="shrink-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  @click="openAdminPopupPreview(currentActivePopupProduct)"
+                  class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#27172b] to-[#451f4c] text-white text-xs font-bold hover:brightness-110 transition-all shadow-sm flex items-center gap-2 cursor-pointer"
+                >
+                  <Eye class="w-4 h-4 text-[#caa35f]" />
+                  <span>Ver Popup en Vivo</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Current Active Status in Store Banner -->
+            <div class="mt-5 p-4 rounded-2xl bg-gradient-to-r from-[#faf5fb] to-[#f4e8f6] border border-[#eedee9] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white border border-[#eedee9] flex items-center justify-center shrink-0 shadow-2xs">
+                  <span class="w-3 h-3 rounded-full" :class="siteSettingsStore.isLiveOfferActive ? 'bg-[#ff0050] animate-pulse' : 'bg-emerald-500'"></span>
+                </div>
+                <div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                    {{ siteSettingsStore.isLiveOfferActive ? '🔥 Dinámica TikTok Live Activa' : '✨ Campaña Normal Activa' }}
+                  </div>
+                  <div class="text-xs sm:text-sm font-bold text-[#27172b] flex items-center gap-2">
+                    <span>Producto actual en el popup:</span>
+                    <strong class="text-[#753d77] font-serif">{{ currentActivePopupProduct?.name || 'Calendario de Adviento 2026' }}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-gray-500">
+                  Ruta directa al dar clic: <code class="px-2 py-0.5 rounded bg-white font-mono text-[11px] text-[#965e9b] border border-gray-200">/{{ getProductSlug(currentActivePopupProduct) || 'CalendarioAdviento' }}</code>
+                </span>
+                <button
+                  type="button"
+                  @click="openAdminPopupPreview(currentActivePopupProduct)"
+                  class="px-3 py-1.5 rounded-xl bg-[#caa35f] text-[#27172b] text-xs font-bold hover:bg-[#d8b475] transition-all cursor-pointer"
+                >
+                  👁️ Probar
+                </button>
+              </div>
+            </div>
+
+            <!-- Success notification toast if just saved -->
+            <div
+              v-if="popupProductSaveSuccess"
+              class="mt-4 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-in fade-in"
+            >
+              <CheckCircle2 class="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{{ popupProductSaveSuccess }}</span>
+            </div>
+          </div>
+
+          <!-- Cards Grid: 1 Card per Campaign Menu -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div
+              v-for="camp in campaignsReorderList"
+              :key="camp.id"
+              class="bg-white rounded-3xl p-5 sm:p-6 border border-[#eedee9] shadow-xs flex flex-col justify-between hover:border-[#caa35f]/60 transition-all"
+            >
+              <div>
+                <!-- Campaign Header Badge -->
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg">
+                      {{ camp.id === 'navidad' ? '🎄' : camp.id === 'hotwheels' ? '🏎️' : camp.id === 'maquillaje' ? '💄' : camp.id === 'graduacion' ? '🎓' : '🎂' }}
+                    </span>
+                    <h3 class="text-sm font-bold text-[#27172b] uppercase tracking-wider">
+                      {{ camp.name }}
+                    </h3>
+                  </div>
+                  <span
+                    v-if="(siteSettingsStore.liveCampaign || '').toLowerCase() === camp.id.toLowerCase() && siteSettingsStore.isLiveOfferActive"
+                    class="px-2 py-0.5 rounded-full bg-[#ff0050] text-white text-[9px] font-black uppercase tracking-wider animate-pulse"
+                  >
+                    Live Activo
+                  </span>
+                </div>
+
+                <!-- Current Selected Product Preview Card -->
+                <div class="p-3 rounded-2xl bg-[#faf7fb] border border-[#eedee9] mb-4 flex items-center gap-3">
+                  <img
+                    :src="getCampaignSelectedProduct(camp.id)?.displayImage || '/products/calendario-de-adviento-2026.webp'"
+                    :alt="getCampaignSelectedProduct(camp.id)?.name"
+                    class="w-14 h-16 rounded-xl object-cover border border-[#eedee9] shrink-0 bg-white"
+                  />
+                  <div class="min-w-0 flex-1">
+                    <span class="text-[9px] font-bold text-[#caa35f] uppercase tracking-wider block">Producto en Popup</span>
+                    <h4 class="text-xs font-bold text-[#27172b] truncate" :title="getCampaignSelectedProduct(camp.id)?.name">
+                      {{ getCampaignSelectedProduct(camp.id)?.name || 'Sin seleccionar' }}
+                    </h4>
+                    <div class="flex items-center gap-2 mt-0.5">
+                      <span class="text-xs font-bold text-[#caa35f]">
+                        S/ {{ Number(getCampaignSelectedProduct(camp.id)?.price || 0).toFixed(2) }}
+                      </span>
+                      <span v-if="getCampaignSelectedProduct(camp.id)?.live_discount" class="text-[10px] text-rose-600 font-bold bg-rose-50 px-1.5 py-0.5 rounded">
+                        -S/ {{ getCampaignSelectedProduct(camp.id)?.live_discount }} Live
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Product Selector Dropdown -->
+                <div class="space-y-1.5 mb-4">
+                  <label class="block text-[11px] font-bold text-gray-600">
+                    Cambiar producto de este menú:
+                  </label>
+                  <select
+                    :value="campaignPopupMap[camp.id] || getCampaignSelectedProduct(camp.id)?.id"
+                    @change="onSelectCampaignPopupProduct(camp.id, $event.target.value)"
+                    class="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-[#eedee9] bg-white focus:outline-none focus:ring-2 focus:ring-[#caa35f]/40 cursor-pointer"
+                  >
+                    <option
+                      v-for="p in getProductsForCampaign(camp.id)"
+                      :key="p.id"
+                      :value="p.id"
+                    >
+                      {{ p.name }} (S/ {{ Number(p.price).toFixed(2) }})
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="pt-3 border-t border-[#f4eaf6] flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  @click="openAdminPopupPreview(getCampaignSelectedProduct(camp.id))"
+                  class="flex-1 py-2 px-3 rounded-xl border border-gray-200 text-gray-700 text-xs font-bold hover:bg-gray-50 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                  title="Ver vista previa del póster que verán los clientes"
+                >
+                  <Eye class="w-3.5 h-3.5 text-gray-400" />
+                  <span>Vista Previa</span>
+                </button>
+
+                <button
+                  type="button"
+                  @click="saveCampaignPopupProduct(camp.id, campaignPopupMap[camp.id] || getCampaignSelectedProduct(camp.id)?.id)"
+                  :disabled="isSavingPopupProduct"
+                  class="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-[#27172b] to-[#451f4c] text-white text-xs font-bold hover:brightness-110 transition-all flex items-center justify-center gap-1 cursor-pointer shadow-xs disabled:opacity-50"
+                  title="Guardar como el producto oficial del popup para este menú"
+                >
+                  <Save class="w-3.5 h-3.5 text-[#caa35f]" />
+                  <span>Asignar</span>
+                </button>
               </div>
             </div>
           </div>
@@ -2648,6 +2839,14 @@
           </div>
         </div>
       </div>
+      <!-- PREVIEW MODAL FOR PROMO POPUP -->
+      <PromoPopupModal
+        v-if="previewingPopupProduct"
+        :product="previewingPopupProduct"
+        @close="closeAdminPopupPreview"
+        @select-product="closeAdminPopupPreview"
+      />
+
       <!-- WHATSAPP SUPPORT NUMBER CONFIG MODAL -->
       <div
         v-if="showWhatsAppModal"
@@ -2808,6 +3007,7 @@ import {
 } from 'lucide-vue-next'
 import { useSiteSettingsStore } from '../stores/siteSettings'
 import IconWhatsApp from '../components/icons/IconWhatsApp.vue'
+import PromoPopupModal from '../components/PromoPopupModal.vue'
 import { getProductSlug, getProductUrl, generateSlug } from '../utils/productUrl'
 
 const siteSettingsStore = useSiteSettingsStore()
@@ -3527,6 +3727,7 @@ async function loadProducts() {
 
     loadCampaignsAdmin()
     syncReorderList()
+    initCampaignPopupMap()
   } catch (err) {
     console.error('Error loading products:', err)
     if (err?.status === 401 || err?.status === 403) {
@@ -4016,6 +4217,132 @@ function copyBookmarkletCode() {
   }
 }
 
+
+
+// ==========================================
+// PROMOTIONAL POPUP PER CAMPAIGN STATE & LOGIC
+// ==========================================
+const previewingPopupProduct = ref(null)
+const isSavingPopupProduct = ref(false)
+const popupProductSaveSuccess = ref('')
+const campaignPopupMap = ref({
+  navidad: 'advi2026calend',
+  hotwheels: 'k6pb4b7yr7wtvyf',
+  maquillaje: 'cw4r0vwwapz9bwy',
+  graduacion: 'grad001peluche0',
+  cumpleanos: 'bday001globos00'
+})
+
+function initCampaignPopupMap() {
+  try {
+    const saved = localStorage.getItem('venezzia_popup_products_map')
+    if (saved) {
+      campaignPopupMap.value = { ...campaignPopupMap.value, ...JSON.parse(saved) }
+    }
+  } catch (_) {}
+
+  if (products.value && products.value.length > 0) {
+    const campaigns = ['navidad', 'hotwheels', 'maquillaje', 'graduacion', 'cumpleanos']
+    campaigns.forEach(cId => {
+      const feat = products.value.find(p => (p.campaign || '').toLowerCase() === cId && p.featured === true)
+      if (feat) {
+        campaignPopupMap.value[cId] = feat.id
+      }
+    })
+  }
+}
+
+function getProductsForCampaign(campaignId) {
+  return products.value.filter(p => (p.campaign || '').toLowerCase() === campaignId.toLowerCase() && p.is_active !== false)
+}
+
+function getCampaignSelectedProduct(campaignId) {
+  const chosenId = campaignPopupMap.value[campaignId]
+  if (chosenId) {
+    const match = products.value.find(p => p.id === chosenId)
+    if (match) return match
+  }
+  const feat = products.value.find(p => (p.campaign || '').toLowerCase() === campaignId.toLowerCase() && p.featured === true)
+  if (feat) return feat
+
+  if (campaignId === 'navidad') {
+    const adv = products.value.find(p => p.id === 'advi2026calend' || (p.name || '').toLowerCase().includes('adviento'))
+    if (adv) return adv
+  }
+
+  const first = products.value.find(p => (p.campaign || '').toLowerCase() === campaignId.toLowerCase() && p.is_active !== false)
+  return first || null
+}
+
+const currentActivePopupProduct = computed(() => {
+  if (siteSettingsStore.isLiveOfferActive) {
+    const liveCamp = (siteSettingsStore.liveCampaign || 'navidad').toLowerCase()
+    return getCampaignSelectedProduct(liveCamp)
+  }
+  return getCampaignSelectedProduct('navidad')
+})
+
+function onSelectCampaignPopupProduct(campaignId, productId) {
+  campaignPopupMap.value[campaignId] = productId
+}
+
+async function saveCampaignPopupProduct(campaignId, productId) {
+  if (!productId || isSavingPopupProduct.value) return
+  isSavingPopupProduct.value = true
+  popupProductSaveSuccess.value = ''
+
+  try {
+    if (!currentPbClient.value) {
+      const url = getTargetBaseUrl()
+      currentPbClient.value = new PocketBase(url)
+    }
+
+    // 1. Mark selected product as featured: true
+    await currentPbClient.value.collection('products').update(productId, {
+      featured: true
+    })
+
+    // 2. Mark other products of this campaign as featured: false
+    const otherProds = products.value.filter(p => (p.campaign || '').toLowerCase() === campaignId.toLowerCase() && p.id !== productId && p.featured === true)
+    for (const other of otherProds) {
+      try {
+        await currentPbClient.value.collection('products').update(other.id, {
+          featured: false
+        })
+        other.featured = false
+      } catch (_) {}
+    }
+
+    // 3. Update local state
+    campaignPopupMap.value[campaignId] = productId
+    const chosen = products.value.find(p => p.id === productId)
+    if (chosen) chosen.featured = true
+
+    // 4. Save to localStorage map
+    try {
+      localStorage.setItem('venezzia_popup_products_map', JSON.stringify(campaignPopupMap.value))
+    } catch (_) {}
+
+    popupProductSaveSuccess.value = '¡Producto de popup para ' + campaignId.toUpperCase() + ' guardado con éxito: ' + (chosen?.name || productId) + '!'
+    setTimeout(() => {
+      popupProductSaveSuccess.value = ''
+    }, 4000)
+  } catch (err) {
+    console.error('Error saving campaign popup product:', err)
+    alert('Error al guardar producto para el popup: ' + (err.message || 'Error'))
+  } finally {
+    isSavingPopupProduct.value = false
+  }
+}
+
+function openAdminPopupPreview(product) {
+  if (!product) return
+  previewingPopupProduct.value = product
+}
+
+function closeAdminPopupPreview() {
+  previewingPopupProduct.value = null
+}
 
 // ==========================================
 // WHATSAPP STORE CONFIGURATION STATE & LOGIC
