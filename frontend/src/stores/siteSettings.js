@@ -116,7 +116,7 @@ export const useSiteSettingsStore = defineStore('siteSettings', () => {
     return `+${raw}`
   })
 
-  const DEFAULT_CONTACT_MESSAGE = 'ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?'
+  const DEFAULT_CONTACT_MESSAGE = '¡Hola! Deseo información de disponibilidad y personalización de un producto.'
 
   function whatsappLink(message = '') {
     const num = String(whatsappNumber.value).replace(/\D/g, '')

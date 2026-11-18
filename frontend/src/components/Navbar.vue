@@ -92,7 +92,7 @@
           <div class="flex items-center gap-3 text-gray-400">
             <!-- Official WhatsApp Logo -->
             <a
-              :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
+              :href="siteSettingsStore.whatsappLink()"
               target="_blank"
               rel="noopener noreferrer"
               class="text-[#25D366] hover:scale-115 transition-transform flex items-center"
@@ -138,7 +138,7 @@
 
           <!-- Direct WhatsApp Hotline -->
           <a
-            :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
+            :href="siteSettingsStore.whatsappLink()"
             target="_blank"
             rel="noopener noreferrer"
             class="hidden sm:inline-flex items-center gap-1.5 text-gray-600 hover:text-emerald-700 font-medium group transition-colors"
@@ -279,7 +279,7 @@
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
           <!-- WhatsApp Contact Button -->
           <a
-            :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
+            :href="siteSettingsStore.whatsappLink()"
             target="_blank"
             rel="noopener noreferrer"
             class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-emerald-800 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/80 text-xs font-semibold transition-all hover:scale-102 cursor-pointer shadow-2xs"
@@ -291,7 +291,7 @@
 
           <!-- Mobile WhatsApp Icon Only -->
           <a
-            :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
+            :href="siteSettingsStore.whatsappLink()"
             target="_blank"
             rel="noopener noreferrer"
             class="sm:hidden p-2 text-[#25D366] hover:bg-emerald-50 rounded-full transition-all border border-emerald-100 shadow-2xs"
@@ -619,7 +619,7 @@
           <!-- Footer del Drawer -->
           <div class="p-5 border-t border-[#f4eaf6] bg-[#faf7fb] space-y-3">
             <a
-              :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
+              :href="siteSettingsStore.whatsappLink()"
               target="_blank"
               rel="noopener noreferrer"
               class="w-full py-3 px-4 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
@@ -631,7 +631,7 @@
 
             <div class="flex items-center justify-center gap-4 text-gray-400 pt-1">
               <a
-                :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
+                :href="siteSettingsStore.whatsappLink()"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="text-[#25D366] hover:scale-115 transition-transform"

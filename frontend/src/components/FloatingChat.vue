@@ -21,7 +21,7 @@
             ASESORIA ONLINE VENEZZIA
           </span>
           <p class="leading-relaxed text-gray-600 font-medium">
-            ¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?
+            ¡Hola! ¿En qué podemos ayudarte hoy? Escríbenos para consultar disponibilidad o personalizar tu detalle.
           </p>
         </div>
         <button
@@ -64,6 +64,6 @@ const siteSettingsStore = useSiteSettingsStore()
 const showTooltip = ref(true)
 
 const whatsappUrl = computed(() => {
-  return siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')
+  return siteSettingsStore.whatsappLink()
 })
 </script>

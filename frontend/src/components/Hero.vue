@@ -221,6 +221,6 @@ function getHeroSwitcherClasses(campId) {
 
 const whatsappCtaUrl = computed(() => {
 
-  return siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')
+  return siteSettingsStore.whatsappLink()
 })
 </script>

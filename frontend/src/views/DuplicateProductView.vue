@@ -4384,7 +4384,7 @@ const previewWhatsAppFormatted = computed(() => {
 const previewWhatsAppTestUrl = computed(() => {
   const num = normalizedWhatsAppNumber.value
   if (!num) return '#'
-  const testMsg = encodeURIComponent('ASESORIA ONLINE VENEZZIA\n\n¡Hola! Mensaje de prueba de configuración de WhatsApp.')
+  const testMsg = encodeURIComponent('¡Hola! Deseo información de disponibilidad y personalización de un producto.')
   return 'https://wa.me/' + num + '?text=' + testMsg
 })
 

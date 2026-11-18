@@ -25,7 +25,7 @@
           <div class="flex items-center gap-3">
             <!-- Official WhatsApp -->
             <a
-              :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
+              :href="siteSettingsStore.whatsappLink()"
               target="_blank"
               rel="noopener noreferrer"
               class="w-9 h-9 rounded-full bg-white shadow-xs border border-[#eedee9] flex items-center justify-center text-[#25D366] hover:bg-emerald-50 hover:scale-110 transition-all duration-300"
@@ -143,7 +143,7 @@
             <li class="flex items-center gap-1.5"><MapPin class="w-3.5 h-3.5 text-[#caa35f] shrink-0" /> Lima, Perú</li>
             <li>
               <a
-                :href="siteSettingsStore.whatsappLink('ASESORIA ONLINE VENEZZIA\n\n¡Hola! ¿Deseas consultar disponibilidad o personalizar tu detalle especial?')"
+                :href="siteSettingsStore.whatsappLink()"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="inline-flex items-center gap-1.5 text-emerald-700 font-bold hover:underline"
