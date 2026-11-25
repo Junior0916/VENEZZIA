@@ -354,6 +354,24 @@
           >
             Tarifas de Envíos
           </button>
+
+          <span class="text-[#e2cee0] mx-0.5">|</span>
+
+          <!-- Special Dates Button (Rosatel Style) -->
+          <button
+            @click="openSpecialDates"
+            class="px-3.5 py-1.5 rounded-full text-xs font-bold text-[#7a3f80] bg-[#faf5fb] hover:bg-[#f3e5f4] border border-[#eedee9] hover:border-[#965e9b] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs group active:scale-95"
+            title="Guardar tus fechas especiales y recibir recordatorios por WhatsApp"
+          >
+            <CalendarHeart class="w-3.5 h-3.5 text-[#caa35f] group-hover:scale-110 transition-transform" />
+            <span>Fechas Especiales</span>
+            <span
+              v-if="specialDatesStore.totalDates > 0"
+              class="w-4 h-4 rounded-full bg-[#965e9b] text-white text-[9px] font-black flex items-center justify-center ml-0.5 shadow-2xs"
+            >
+              {{ specialDatesStore.totalDates }}
+            </span>
+          </button>
         </nav>
 
         <!-- Right: Dispatch Guarantee Badge -->
@@ -447,6 +465,21 @@
             class="px-3 py-1.5 rounded-full text-xs font-medium text-gray-600 bg-white border border-[#eedee9] shrink-0 hover:text-[#965e9b] transition-colors cursor-pointer"
           >
             Envíos
+          </button>
+
+          <button
+            @click="openSpecialDates"
+            class="px-3 py-1.5 rounded-full text-xs font-bold text-[#7a3f80] bg-[#faf5fb] border border-[#eedee9] shrink-0 hover:border-[#965e9b] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-95"
+            title="Fechas Especiales"
+          >
+            <CalendarHeart class="w-3.5 h-3.5 text-[#caa35f]" />
+            <span>Fechas</span>
+            <span
+              v-if="specialDatesStore.totalDates > 0"
+              class="w-3.5 h-3.5 rounded-full bg-[#965e9b] text-white text-[8px] font-black flex items-center justify-center"
+            >
+              {{ specialDatesStore.totalDates }}
+            </span>
           </button>
         </div>
       </div>
@@ -592,6 +625,23 @@
               </span>
               <div class="space-y-1.5">
                 <button
+                  @click="openSpecialDatesFromDrawer"
+                  class="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-[#faf4f9] text-xs font-semibold text-gray-700 hover:text-[#965e9b] flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <div class="flex items-center gap-2.5">
+                    <CalendarHeart class="w-4 h-4 text-[#caa35f]" />
+                    <span>Mis Fechas Especiales</span>
+                  </div>
+                  <span
+                    v-if="specialDatesStore.totalDates > 0"
+                    class="px-2 py-0.5 rounded-full bg-[#965e9b] text-white text-[10px] font-bold"
+                  >
+                    {{ specialDatesStore.totalDates }}
+                  </span>
+                  <span v-else class="text-gray-300 text-xs">→</span>
+                </button>
+
+                <button
                   @click="handleDrawerNavigate('envios')"
                   class="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-[#faf4f9] text-xs font-semibold text-gray-700 hover:text-[#965e9b] flex items-center justify-between transition-colors cursor-pointer"
                 >
@@ -667,7 +717,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { ChevronDown, Search, ShoppingBag, X, Truck, Clock, Menu, Check, Home } from 'lucide-vue-next'
+import { ChevronDown, Search, ShoppingBag, X, Truck, Clock, Menu, Check, Home, CalendarHeart } from 'lucide-vue-next'
 import IconWhatsApp from './icons/IconWhatsApp.vue'
 import IconInstagram from './icons/IconInstagram.vue'
 import IconTikTok from './icons/IconTikTok.vue'
@@ -675,6 +725,7 @@ import { useCartStore } from '../stores/cart'
 import { useCampaignStore } from '../stores/campaign'
 import { useSearchStore } from '../stores/search'
 import { useSiteSettingsStore } from '../stores/siteSettings'
+import { useSpecialDatesStore } from '../stores/specialDates'
 import { useRouter, useRoute } from 'vue-router'
 import { scrollToSection, scrollToSectionDeferred } from '../utils/scroll'
 
@@ -691,6 +742,16 @@ const cartStore = useCartStore()
 const campaignStore = useCampaignStore()
 const searchStore = useSearchStore()
 const siteSettingsStore = useSiteSettingsStore()
+const specialDatesStore = useSpecialDatesStore()
+
+function openSpecialDates() {
+  specialDatesStore.openModal(specialDatesStore.totalDates > 0 ? 'list' : 'add')
+}
+
+function openSpecialDatesFromDrawer() {
+  closeDrawer()
+  specialDatesStore.openModal(specialDatesStore.totalDates > 0 ? 'list' : 'add')
+}
 
 const desktopSearchContainer = ref(null)
 const mobileSearchContainer = ref(null)

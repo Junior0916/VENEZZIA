@@ -33,6 +33,12 @@
       @select-product="handlePopupProductSelect"
     />
 
+    <!-- Special Dates Entrance Popup Card (Rosatel-style, visible when TikTok live is not active) -->
+    <SpecialDatesPopupModal v-if="!isOrdersRoute" />
+
+    <!-- Special Dates Management & Registration Modal (Rosatel-style) -->
+    <SpecialDatesFormModal v-if="!isOrdersRoute" />
+
     <!-- Floating Official WhatsApp Widget (Oculto en /pedidos para no tapar los datos de la tabla) -->
     <FloatingChat v-if="!isOrdersRoute" />
 
@@ -50,9 +56,12 @@ import CartDrawer from './components/CartDrawer.vue'
 import FloatingChat from './components/FloatingChat.vue'
 import ProductDetailModal from './components/ProductDetailModal.vue'
 import PromoPopupModal from './components/PromoPopupModal.vue'
+import SpecialDatesPopupModal from './components/SpecialDatesPopupModal.vue'
+import SpecialDatesFormModal from './components/SpecialDatesFormModal.vue'
 import { fetchProducts, subscribeToRealtime, MOCK_PRODUCTS } from './services/pocketbase'
 import { useCampaignStore } from './stores/campaign'
 import { useSiteSettingsStore } from './stores/siteSettings'
+import { useSpecialDatesStore } from './stores/specialDates'
 import { getProductSlug, findProductBySlugOrId, isReservedRoute } from './utils/productUrl'
 
 const route = useRoute()
@@ -65,6 +74,7 @@ const isOrdersRoute = computed(() => {
 
 const campaignStore = useCampaignStore()
 const siteSettingsStore = useSiteSettingsStore()
+const specialDatesStore = useSpecialDatesStore()
 
 const CATALOG_CACHE_KEY = 'venezzia_catalog_cache_v2'
 
@@ -315,14 +325,51 @@ function shouldShowPromoPopup() {
   return true
 }
 
-function tryTriggerPromoPopup() {
-  if (!shouldShowPromoPopup()) return
+function shouldShowSpecialDatesPopup() {
+  if (typeof window === 'undefined') return false
+  if (isOrdersRoute.value) return false
 
-  setTimeout(() => {
-    if (shouldShowPromoPopup() && activePopupProduct.value) {
-      showPromoPopup.value = true
+  const p = route?.path || window.location.pathname || ''
+  if (
+    p.startsWith('/admin') ||
+    p.startsWith('/pedidos') ||
+    p.startsWith('/optimizador') ||
+    p.startsWith('/duplicar') ||
+    p.startsWith('/libro-de-reclamaciones')
+  ) {
+    return false
+  }
+
+  // Si ya hay un producto abierto en pantalla o modal de fechas activo
+  if (selectedProductModal.value || showPromoPopup.value || specialDatesStore.isModalOpen) {
+    return false
+  }
+
+  return !specialDatesStore.isPopupDismissed()
+}
+
+function tryTriggerEntryPopups() {
+  if (isOrdersRoute.value) return
+
+  // 1. Si la Oferta Flash de TikTok Live está ACTIVA -> Prioridad: Popup Promocional
+  if (siteSettingsStore.isLiveOfferActive) {
+    if (shouldShowPromoPopup()) {
+      setTimeout(() => {
+        if (shouldShowPromoPopup() && activePopupProduct.value) {
+          showPromoPopup.value = true
+        }
+      }, 900)
     }
-  }, 900)
+  } else {
+    // 2. Si TikTok Live NO está activo -> Popup de Fechas Especiales (Estilo Rosatel)
+    if (shouldShowSpecialDatesPopup()) {
+      setTimeout(() => {
+        if (shouldShowSpecialDatesPopup()) {
+          specialDatesStore.openPopup()
+        }
+      }, 1200)
+    }
+  }
 }
 
 function closePromoPopup() {
@@ -372,7 +419,7 @@ onMounted(() => {
     reloadCatalog()
   ]).then(() => {
     checkDeepLink()
-    tryTriggerPromoPopup()
+    tryTriggerEntryPopups()
   })
 
   // Conectar suscripción SSE en tiempo real a PocketBase

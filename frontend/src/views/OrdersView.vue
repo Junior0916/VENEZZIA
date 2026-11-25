@@ -36,6 +36,15 @@
           </router-link>
 
           <router-link
+            to="/admin?tab=fechas"
+            class="text-xs text-[#7a3f80] hover:text-[#27172b] bg-[#faf5fb] hover:bg-[#f3e5f4] border border-[#eedee9] px-3 py-1.5 rounded-full font-semibold transition-all shadow-2xs flex items-center gap-1.5"
+            title="Ir a la agenda de fechas especiales de clientes"
+          >
+            <CalendarHeart class="w-3.5 h-3.5 text-[#caa35f]" />
+            <span class="hidden md:inline">Fechas Especiales</span>
+          </router-link>
+
+          <router-link
             to="/"
             target="_blank"
             class="text-xs text-gray-700 hover:text-[#7a3f80] bg-white hover:bg-[#faf5fb] border border-[#eedee9] px-3 py-1.5 rounded-full font-semibold transition-all shadow-2xs flex items-center gap-1.5"
@@ -2134,7 +2143,8 @@ import {
   Car,
   ArrowUp,
   ArrowDown,
-  Check
+  Check,
+  CalendarHeart
 } from 'lucide-vue-next'
 import IconWhatsApp from '../components/icons/IconWhatsApp.vue'
 import LocationPickerModal from '../components/LocationPickerModal.vue'

@@ -274,6 +274,27 @@
             <span>Popup Promocional</span>
           </button>
 
+          <!-- TAB: AGENDA FECHAS ESPECIALES -->
+          <button
+            @click="activeToolTab = 'fechas'"
+            :class="[
+              'flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-xs',
+              activeToolTab === 'fechas'
+                ? 'bg-[#27172b] text-white ring-2 ring-[#caa35f]/50 shadow-md'
+                : 'bg-[#faf7fb] border border-[#eedee9] text-gray-700 hover:bg-[#f3edf5] hover:text-[#965e9b]'
+            ]"
+            title="Agenda de fechas especiales y recordatorios de clientes"
+          >
+            <CalendarHeart class="w-4 h-4 text-[#caa35f]" />
+            <span>Fechas Especiales</span>
+            <span
+              v-if="specialDatesStore.totalDates > 0"
+              class="px-2 py-0.5 rounded-full bg-[#965e9b] text-white font-mono text-[10px] ml-1"
+            >
+              {{ specialDatesStore.totalDates }}
+            </span>
+          </button>
+
           <!-- TAB 6: WHATSAPP CONFIG -->
           <button
             @click="openWhatsAppConfigModal"
@@ -1314,6 +1335,215 @@
                 >
                   <Save class="w-3.5 h-3.5 text-[#caa35f]" />
                   <span>Asignar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB: AGENDA DE FECHAS ESPECIALES (ROSATEL) -->
+        <!-- ========================================== -->
+        <div v-else-if="activeToolTab === 'fechas'" class="space-y-6">
+          <!-- Top Header Info Card -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-[#eedee9] shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#f4eaf6]">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#965e9b] to-[#7a3f80] text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <CalendarHeart class="w-6 h-6 text-[#caa35f]" />
+                </div>
+                <div>
+                  <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f6eef8] border border-[#e8d5ec] text-xs font-semibold text-[#753d77] mb-2">
+                    <Sparkles class="w-3.5 h-3.5 text-[#caa35f]" />
+                    <span>CRM & FIDELIZACIÓN • RECORDATORIOS AUTOMÁTICOS</span>
+                  </div>
+                  <h2 class="text-xl sm:text-2xl font-serif font-bold text-[#27172b]">
+                    Agenda de Fechas Especiales y Cumpleaños
+                  </h2>
+                  <p class="text-xs sm:text-sm text-gray-500 mt-1 max-w-2xl leading-relaxed">
+                    Visualiza las fechas importantes de tus clientes. Con 1 solo clic puedes enviarles un WhatsApp personalizado recordándoles con anticipación y ofreciéndoles opciones de detalles florales y regalos.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Quick action button: Add Manual Date -->
+              <button
+                @click="openManualAddDateModal"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#27172b] to-[#4b2053] hover:from-[#7a3f80] hover:to-[#965e9b] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all cursor-pointer shrink-0"
+              >
+                <Plus class="w-4 h-4 text-[#caa35f]" />
+                <span>+ Registrar Nueva Fecha</span>
+              </button>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-6">
+              <div class="p-4 rounded-2xl bg-[#faf5fb] border border-[#eedee9]">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Total Registradas</span>
+                <span class="text-2xl font-bold font-serif text-[#27172b] mt-0.5 block">
+                  {{ specialDatesStore.totalDates }}
+                </span>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-rose-600 block">Próximos 7 días</span>
+                <span class="text-2xl font-bold font-serif text-rose-700 mt-0.5 block">
+                  {{ upcomingSevenDaysCount }}
+                </span>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">Próximos 15 días</span>
+                <span class="text-2xl font-bold font-serif text-amber-800 mt-0.5 block">
+                  {{ upcomingFifteenDaysCount }}
+                </span>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Recordatorios Activos</span>
+                <span class="text-2xl font-bold font-serif text-emerald-800 mt-0.5 block">
+                  {{ activeRemindersCount }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters & Search Bar -->
+          <div class="bg-white rounded-3xl p-5 border border-[#eedee9] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="flex items-center gap-2 flex-1 flex-wrap">
+              <div class="relative flex-1 min-w-[200px] max-w-md">
+                <input
+                  type="text"
+                  v-model="datesSearchQuery"
+                  placeholder="Buscar por agasajado, cliente o teléfono..."
+                  class="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 text-xs focus:border-[#965e9b] outline-none"
+                />
+                <Search class="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+
+              <select
+                v-model="datesOccasionFilter"
+                class="px-3 py-2 rounded-xl border border-gray-200 text-xs bg-[#faf7fb] text-gray-700 outline-none cursor-pointer"
+              >
+                <option value="all">Todas las ocasiones</option>
+                <option v-for="occ in adminOccasions" :key="occ.id" :value="occ.id">
+                  {{ occ.icon }} {{ occ.label }}
+                </option>
+              </select>
+
+              <select
+                v-model="datesDaysFilter"
+                class="px-3 py-2 rounded-xl border border-gray-200 text-xs bg-[#faf7fb] text-gray-700 outline-none cursor-pointer"
+              >
+                <option value="all">Cualquier fecha</option>
+                <option value="7">Próximos 7 días</option>
+                <option value="15">Próximos 15 días</option>
+                <option value="30">Este mes (30 días)</option>
+              </select>
+            </div>
+
+            <span class="text-xs text-gray-400 font-medium whitespace-nowrap">
+              Mostrando {{ filteredAdminDates.length }} de {{ specialDatesStore.totalDates }} fechas
+            </span>
+          </div>
+
+          <!-- Dates Cards / Table Grid -->
+          <div v-if="filteredAdminDates.length === 0" class="bg-white rounded-3xl p-12 text-center border border-[#eedee9]">
+            <CalendarHeart class="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <h3 class="text-base font-bold text-gray-700 mb-1">No hay fechas especiales que coincidan con los filtros</h3>
+            <p class="text-xs text-gray-400 max-w-sm mx-auto mb-4">
+              Puedes registrar manualmente una fecha de cliente o invitar a tus clientes a guardarlas en venezzia.shop.
+            </p>
+            <button
+              @click="openManualAddDateModal"
+              class="px-4 py-2 rounded-xl bg-[#27172b] text-white text-xs font-bold hover:bg-[#3d2444] cursor-pointer"
+            >
+              + Registrar Fecha Manualmente
+            </button>
+          </div>
+
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div
+              v-for="item in filteredAdminDates"
+              :key="item.id"
+              class="bg-white rounded-2xl p-5 border border-[#eedee9] shadow-xs hover:shadow-md hover:border-[#965e9b]/40 transition-all flex flex-col justify-between"
+            >
+              <div>
+                <!-- Top Row: Occasion badge & countdown -->
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <span
+                    class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
+                    :style="{ backgroundColor: getOccasionColor(item.occasion) + '18', color: getOccasionColor(item.occasion) }"
+                  >
+                    <span>{{ getOccasionIcon(item.occasion) }}</span>
+                    <span>{{ getOccasionLabel(item.occasion) }}</span>
+                  </span>
+
+                  <span
+                    class="px-2 py-0.5 rounded-full text-[10px] font-extrabold"
+                    :class="item.daysUntil <= 7 ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-purple-50 text-purple-800 border border-purple-200'"
+                  >
+                    {{ item.daysUntil === 0 ? '🎉 ¡Hoy!' : `Faltan ${item.daysUntil} días` }}
+                  </span>
+                </div>
+
+                <!-- Title & Date -->
+                <h3 class="text-base font-bold text-[#27172b] leading-snug">
+                  {{ item.title }}
+                </h3>
+
+                <div class="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mt-1">
+                  <Calendar class="w-3.5 h-3.5 text-[#caa35f]" />
+                  <span>{{ item.formattedNextDate }}</span>
+                </div>
+
+                <!-- Customer Info -->
+                <div class="mt-3 pt-3 border-t border-gray-100 space-y-1.5 text-xs">
+                  <div class="flex items-center justify-between text-gray-600">
+                    <span class="text-gray-400">Cliente:</span>
+                    <span class="font-bold text-[#27172b]">{{ item.customerName || 'No especificado' }}</span>
+                  </div>
+
+                  <div class="flex items-center justify-between text-gray-600">
+                    <span class="text-gray-400">WhatsApp:</span>
+                    <span class="font-mono font-semibold text-emerald-700">{{ item.customerPhone || 'Sin número' }}</span>
+                  </div>
+
+                  <div class="flex items-center justify-between text-gray-600">
+                    <span class="text-gray-400">Anticipación:</span>
+                    <span class="text-[#965e9b] font-semibold">{{ item.anticipationDays }} días antes</span>
+                  </div>
+
+                  <p v-if="item.notes" class="text-[11px] text-gray-500 italic pt-1 truncate">
+                    "{{ item.notes }}"
+                  </p>
+                </div>
+              </div>
+
+              <!-- Bottom Actions -->
+              <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+                <a
+                  :href="specialDatesStore.generateAdminReminderLink(item)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  :class="[
+                    'flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs',
+                    item.customerPhone
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                      : 'bg-gray-100 text-gray-400 pointer-events-none'
+                  ]"
+                  :title="item.customerPhone ? 'Enviar recordatorio por WhatsApp' : 'El cliente no dejó número de teléfono'"
+                >
+                  <IconWhatsApp customClass="w-3.5 h-3.5 text-white" />
+                  <span>Recordar por WhatsApp</span>
+                </a>
+
+                <button
+                  @click="handleAdminDeleteDate(item.id)"
+                  class="p-2 rounded-xl text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                  title="Eliminar registro"
+                >
+                  <Trash2 class="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -2847,6 +3077,126 @@
         @select-product="closeAdminPopupPreview"
       />
 
+      <!-- MODAL REGISTRO MANUAL DE FECHA ESPECIAL (ADMIN) -->
+      <teleport to="body">
+        <div
+          v-if="showManualAddDateModal"
+          class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          @click.self="showManualAddDateModal = false"
+        >
+          <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#eedee9] space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-[#faf5fb] text-[#965e9b] flex items-center justify-center">
+                  <CalendarHeart class="w-5 h-5 text-[#caa35f]" />
+                </div>
+                <h3 class="text-base font-serif font-bold text-[#27172b]">Registrar Fecha Especial Manual</h3>
+              </div>
+              <button @click="showManualAddDateModal = false" class="p-1 rounded-full hover:bg-gray-100 text-gray-400 cursor-pointer">
+                <X class="w-5 h-5" />
+              </button>
+            </div>
+
+            <form @submit.prevent="handleSaveManualDate" class="space-y-4">
+              <div>
+                <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Nombre del Evento / Agasajado *</label>
+                <input
+                  type="text"
+                  v-model="manualDateForm.title"
+                  required
+                  placeholder="Ej: Cumpleaños de Sofía"
+                  class="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-xs focus:border-[#965e9b] outline-none"
+                />
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Ocasión *</label>
+                  <select
+                    v-model="manualDateForm.occasion"
+                    class="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs bg-[#faf7fb] outline-none"
+                  >
+                    <option v-for="occ in adminOccasions" :key="occ.id" :value="occ.id">
+                      {{ occ.icon }} {{ occ.label }}
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Fecha *</label>
+                  <input
+                    type="date"
+                    v-model="manualDateForm.date"
+                    required
+                    class="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs outline-none"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Nombre del Cliente</label>
+                  <input
+                    type="text"
+                    v-model="manualDateForm.customerName"
+                    placeholder="Ej: David Pérez"
+                    class="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-xs outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">WhatsApp (+51)</label>
+                  <input
+                    type="tel"
+                    v-model="manualDateForm.customerPhone"
+                    placeholder="987654321"
+                    class="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-xs outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Anticipación de Aviso</label>
+                <select
+                  v-model="manualDateForm.anticipationDays"
+                  class="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs bg-[#faf7fb] outline-none"
+                >
+                  <option v-for="opt in adminAnticipation" :key="opt.value" :value="opt.value">
+                    {{ opt.label }}
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Notas / Preferencias</label>
+                <input
+                  type="text"
+                  v-model="manualDateForm.notes"
+                  placeholder="Ej: Rosas rojas, chocolates, peluche..."
+                  class="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-xs outline-none"
+                />
+              </div>
+
+              <div class="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  @click="showManualAddDateModal = false"
+                  class="flex-1 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  class="flex-1 py-2.5 rounded-xl bg-[#27172b] hover:bg-[#3d2444] text-white text-xs font-bold shadow-md cursor-pointer"
+                >
+                  Guardar en Agenda
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </teleport>
+
       <!-- WHATSAPP SUPPORT NUMBER CONFIG MODAL -->
       <div
         v-if="showWhatsAppModal"
@@ -3003,14 +3353,116 @@ import {
   Flame, Clock, Play, Square, Plus, Eye, EyeOff,
   Edit3, Trash2, UploadCloud, X, Star, Car, LayoutGrid, List,
   FileText, Image as ImageIcon, ShoppingBag, Info, CheckSquare,
-  Link as LinkIcon
+  Link as LinkIcon, CalendarHeart, Bell, Calendar
 } from 'lucide-vue-next'
+import { useSpecialDatesStore, OCCASIONS_LIST, ANTICIPATION_OPTIONS } from '../stores/specialDates'
 import { useSiteSettingsStore } from '../stores/siteSettings'
 import IconWhatsApp from '../components/icons/IconWhatsApp.vue'
 import PromoPopupModal from '../components/PromoPopupModal.vue'
 import { getProductSlug, getProductUrl, generateSlug } from '../utils/productUrl'
 
 const siteSettingsStore = useSiteSettingsStore()
+const specialDatesStore = useSpecialDatesStore()
+
+// Special Dates Admin State
+const datesSearchQuery = ref('')
+const datesOccasionFilter = ref('all')
+const datesDaysFilter = ref('all')
+const showManualAddDateModal = ref(false)
+const adminOccasions = OCCASIONS_LIST
+const adminAnticipation = ANTICIPATION_OPTIONS
+
+const manualDateForm = ref({
+  title: '',
+  occasion: 'cumpleanos',
+  date: '',
+  hasReminder: true,
+  anticipationDays: 5,
+  customerName: '',
+  customerPhone: '',
+  notes: ''
+})
+
+const upcomingSevenDaysCount = computed(() => {
+  return specialDatesStore.sortedUpcomingDates.filter(d => d.daysUntil <= 7).length
+})
+
+const upcomingFifteenDaysCount = computed(() => {
+  return specialDatesStore.sortedUpcomingDates.filter(d => d.daysUntil <= 15).length
+})
+
+const activeRemindersCount = computed(() => {
+  return specialDatesStore.dates.filter(d => d.hasReminder !== false).length
+})
+
+const filteredAdminDates = computed(() => {
+  let list = specialDatesStore.sortedUpcomingDates
+
+  if (datesSearchQuery.value.trim()) {
+    const q = datesSearchQuery.value.trim().toLowerCase()
+    list = list.filter(d =>
+      (d.title || '').toLowerCase().includes(q) ||
+      (d.customerName || '').toLowerCase().includes(q) ||
+      (d.customerPhone || '').includes(q)
+    )
+  }
+
+  if (datesOccasionFilter.value !== 'all') {
+    list = list.filter(d => d.occasion === datesOccasionFilter.value)
+  }
+
+  if (datesDaysFilter.value !== 'all') {
+    const maxDays = Number(datesDaysFilter.value)
+    list = list.filter(d => d.daysUntil <= maxDays)
+  }
+
+  return list
+})
+
+function getOccasionIcon(occId) {
+  const occ = adminOccasions.find(o => o.id === occId)
+  return occ ? occ.icon : '🌸'
+}
+
+function getOccasionLabel(occId) {
+  const occ = adminOccasions.find(o => o.id === occId)
+  return occ ? occ.label : occId
+}
+
+function getOccasionColor(occId) {
+  const occ = adminOccasions.find(o => o.id === occId)
+  return occ ? occ.color : '#965e9b'
+}
+
+function openManualAddDateModal() {
+  manualDateForm.value = {
+    title: '',
+    occasion: 'cumpleanos',
+    date: '',
+    hasReminder: true,
+    anticipationDays: 5,
+    customerName: '',
+    customerPhone: '',
+    notes: ''
+  }
+  showManualAddDateModal.value = true
+}
+
+function handleSaveManualDate() {
+  if (!manualDateForm.value.title || !manualDateForm.value.date) {
+    alert('Por favor completa el nombre del evento y la fecha.')
+    return
+  }
+
+  specialDatesStore.addDate(manualDateForm.value)
+  showManualAddDateModal.value = false
+}
+
+function handleAdminDeleteDate(id) {
+  if (confirm('¿Eliminar esta fecha especial de la agenda?')) {
+    specialDatesStore.removeDate(id)
+  }
+}
 
 const AUTH_STORAGE_KEY = 'venezzia_admin_auth'
 
@@ -4464,5 +4916,14 @@ async function saveWhatsAppConfig() {
 
 onMounted(() => {
   initPbClient()
+
+  // Soporte para abrir pestaña directamente desde URL (ej: /admin?tab=fechas)
+  try {
+    const urlParams = new URLSearchParams(window.location.search)
+    const tabParam = urlParams.get('tab')
+    if (tabParam && ['catalogo', 'reorder', 'visibility', 'duplicate', 'live', 'popup', 'fechas'].includes(tabParam)) {
+      activeToolTab.value = tabParam
+    }
+  } catch (_) {}
 })
 </script>

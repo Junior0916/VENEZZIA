@@ -29,6 +29,8 @@ export const RESERVED_ROUTES = new Set([
   'optimizador-imagenes',
   'optimizador',
   'recortador',
+  'fechas-especiales',
+  'mis-fechas-especiales',
   'api',
   '_',
   'assets',
